@@ -1,15 +1,16 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Dtos;
 using News.Core.Entities;
-using News.Service.Services;
 using System.Security.Claims;
 
 namespace News.API.Controllers
 {
-	[Route("api/[controller]")]
+    [Authorize]
+    [Route("api/[controller]")]
 	[ApiController]
-	public class CommentController(ICommentService _commentService ,INewsService _newsService, IUserService _userService) : ControllerBase
+	public class CommentController(ICommentService _commentService , IUserService _userService) : ControllerBase
 	{
         // GET: api/comment
 
@@ -42,6 +43,7 @@ namespace News.API.Controllers
             if (user == null)
                 return BadRequest("User not found.");
 
+            //AUTOMAPPER
             var comment = new Comment
             {
                 Content = model.Content,
@@ -73,7 +75,8 @@ namespace News.API.Controllers
                 if (comment.UserId != user.Id)
                     return Forbid("You are not authorized to edit this comment.");
 
-                comment.Content = model.Content;
+            //AUTOMAPPER
+               comment.Content = model.Content;
                 comment.CreatedAt = DateTime.UtcNow;
 
                 await _commentService.Update(comment);

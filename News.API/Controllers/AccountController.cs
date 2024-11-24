@@ -68,6 +68,7 @@ namespace News.API.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
+            //AUTOMAPPER
             var (isSuccess, message) = await _accountService.RegisterUser(new RegisterModel
             {
                 Email = model.Email,
@@ -78,7 +79,6 @@ namespace News.API.Controllers
                 ProfilePicUrl = model.profilePicUrl
                 //ConfirmPassword = model.ConfirmPassword
             });
-
             if (!isSuccess)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = message });
 
@@ -89,6 +89,7 @@ namespace News.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
+            //AUTOMAPPER
             var (isSuccess, token, message) = await _accountService.LoginUser(new LoginModel
             {
                 UserName = model.Username,
@@ -97,7 +98,6 @@ namespace News.API.Controllers
 
             if (!isSuccess)
                 return Unauthorized(new { Message = message });
-
             return Ok(new { Token = token });
         }
 
@@ -116,7 +116,6 @@ namespace News.API.Controllers
             var result = await _accountService.ForgotPassword(model.Email);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
-
             return Ok(new { Status = "Success", Message = result.Message });
         }
 
@@ -127,7 +126,6 @@ namespace News.API.Controllers
             var result = await _accountService.ResetPassword(model.Email, model.Token, model.NewPassword);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
-
             return Ok(new { Status = "Success", Message = result.Message });
         }
     }
