@@ -9,7 +9,7 @@ namespace News.API.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class CommentController(/*IMapper _mapper,*/ICommentService _commentService, IUserService _userService) : ControllerBase
+    public class CommentController(ICommentService _commentService, IUserService _userService) : ControllerBase
     {
         // GET: api/comment
         [HttpGet]

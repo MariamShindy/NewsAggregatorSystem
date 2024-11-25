@@ -3,7 +3,6 @@ using System.Net.Http.Headers;
 using News.Core.Contracts;
 using News.Core.Entities;
 using Newtonsoft.Json;
-using News.Core.Contracts.UnitOfWork;
 
 namespace News.Service.Services
 {
@@ -19,12 +18,11 @@ namespace News.Service.Services
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
         }
         //Using newsAPI
-        public async Task<string> GetAllNews()
+        public async Task<string> GetAllNews(int? page = null , int? pageSize = null)
         {
-            var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey={_apiKey}"; //filter by source
+            var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&page={page}&pageSize={pageSize}&apiKey={_apiKey}"; // 
             //var url = $" https://newsapi.org/v2/everything?q=bitcoin&apiKey={_apiKey}"; //not including the categories //total response 10330
             //var url = $" https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}"; //include categories //include all sources
-
 
             Console.WriteLine($"Requesting URL: {url}");
             var response = await _httpClient.GetAsync(url);
@@ -35,6 +33,7 @@ namespace News.Service.Services
             }
             return await response.Content.ReadAsStringAsync();
         }
+        
         ////Using newsdata.io
         //public async Task<string> GetAllNews()
         //{
