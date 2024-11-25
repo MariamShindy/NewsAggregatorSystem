@@ -3,47 +3,36 @@ using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Dtos;
 using News.Core.Entities;
-using System.Security.Claims;
 
 namespace News.API.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
-	[ApiController]
-	public class CommentController(ICommentService _commentService , IUserService _userService) : ControllerBase
-	{
+    [ApiController]
+    public class CommentController(ICommentService _commentService, IUserService _userService) : ControllerBase
+    {
         // GET: api/comment
-
         [HttpGet]
-		public async Task<IActionResult> GetAllComments()
-		{
-			var comments =await _commentService.GetAll();
-			return Ok(comments);
-		}
+        public async Task<IActionResult> GetAllComments()
+        {
+            var comments = await _commentService.GetAll();
+            return Ok(comments);
+        }
+
         // GET: api/comment/{id}
-
         [HttpGet("{id}")]
-		public async Task<IActionResult> GetCommentById(int id)
-		{
-			var comment = await _commentService.GetById(id);
-			if (comment == null) return NotFound();
+        public async Task<IActionResult> GetCommentById(int id)
+        {
+            var comment = await _commentService.GetById(id);
+            if (comment == null) return NotFound();
+            return Ok(comment);
+        }
 
-			return Ok(comment);
-		}
         // POST: api/comment/{newsId}/comments
-
         [HttpPost("{newsId}/comments")]
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)
         {
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-
-            var user = await _userService.GetCurrentUser(userId);
-            if (user == null)
-                return BadRequest("User not found.");
-
-            //AUTOMAPPER
+            var user = await _userService.GetCurrentUser();
             var comment = new Comment
             {
                 Content = model.Content,
@@ -52,39 +41,28 @@ namespace News.API.Controllers
                 ArticleId = newsId,
                 CreatedAt = DateTime.UtcNow
             };
-
             await _commentService.Add(comment);
-
             return Ok(new { result = "Comment added" });
         }
         // PUT: api/comment/comments/{id}
         [HttpPut("comments/{id}")]
         public async Task<IActionResult> EditComment(int id, [FromBody] UpdateCommentDto model)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var user = await _userService.GetCurrentUser();
+            var comment = await _commentService.GetById(id);
+            if (comment == null)
+                return NotFound("Comment not found.");
+            if (comment.UserId != user.Id)
+                return Forbid("You are not authorized to edit this comment.");
 
-            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-            if (string.IsNullOrEmpty(userId))
-                return Unauthorized();
-            var user = await _userService.GetCurrentUser(userId);
-                var comment = await _commentService.GetById(id);
-                if (comment == null)
-                    return NotFound("Comment not found.");
-             
-                if (comment.UserId != user.Id)
-                    return Forbid("You are not authorized to edit this comment.");
-
-            //AUTOMAPPER
-               comment.Content = model.Content;
-                comment.CreatedAt = DateTime.UtcNow;
-
-                await _commentService.Update(comment);
-                return Ok(new { message = "Comment updated successfully." });
+            ////AUTOMAPPER
+            comment.Content = model.Content;
+            comment.CreatedAt = DateTime.UtcNow;
+            await _commentService.Update(comment);
+            return Ok(new { message = "Comment updated successfully." });
         }
 
         // DELETE: api/comment/{id}
-
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {

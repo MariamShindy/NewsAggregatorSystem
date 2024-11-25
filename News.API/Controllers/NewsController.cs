@@ -11,16 +11,20 @@ namespace News.API.Controllers
     {
         //GET: api/news/all
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllNews()
+        public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 10)
         {
-            var newsResult = await _newsService.GetAllNews();
+            if (page <= 0 || pageSize <= 0)
+                return BadRequest("Page and pageSize must be positive integers.");
+
+            var newsResult = await _newsService.GetAllNews(page, pageSize);
             if (newsResult.StartsWith("Error fetching news"))
                 return StatusCode(500, newsResult);
+
             return Ok(newsResult);
         }
+     
         // GET: api/news/{id}
         [HttpGet("{id}")]
-
         public async Task<IActionResult> GetNewsById(string id)
         {
             var articleResult = await _newsService.GetArticleById(id);
@@ -30,6 +34,5 @@ namespace News.API.Controllers
                 return StatusCode(500, articleResult);
             return Ok(articleResult);
         }
-      
     }
 }
