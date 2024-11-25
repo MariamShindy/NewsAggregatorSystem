@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using News.Core.Contracts;
 using News.Core.Entities;
@@ -15,13 +16,18 @@ using System.Text;
 
 namespace News.Service.Services
 {
-    public class AccountService(UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
+    public class AccountService(ILogger<AccountService> _logger , UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
     {
         public async Task<(bool isSuccess, string message)> RegisterUser(RegisterModel model)
         {
+            _logger.LogInformation("AccountService --> RegisterUser called");
+
             var userExists = await _userManager.FindByNameAsync(model.UserName);
             if (userExists != null)
+            {
+                _logger.LogWarning("AccountService --> RegisterUser --> User already exists! ");
                 return (false, "User already exists!");
+            }
 
             var user = new ApplicationUser
             {
@@ -38,29 +44,35 @@ namespace News.Service.Services
 
             var role = !_userManager.Users.Any() ? "Admin" : "User";
             await _userManager.AddToRoleAsync(user, role);
-
+            _logger.LogInformation("AccountService --> RegisterUser succeeded");
             return (true, "User created successfully!");
         }
         public async Task<(bool isSuccess, string token, string message)> LoginUser(LoginModel model)
         {
+            _logger.LogInformation("AccountService --> LoginUser called");
+
             var user = await _userManager.FindByNameAsync(model.UserName);
 
             if (user == null || await _userManager.IsLockedOutAsync(user))
             {
+                _logger.LogWarning("AccountService --> LoginUser --> Account is locked or does not exist");
                 return (false, null, "Account is locked or does not exist.");
             }
 
             if (await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var token = GenerateJwtToken(user);
+                _logger.LogInformation("AccountService --> LoginUser succeeded");
                 return (true, token, "Login successful");
             }
-
+            _logger.LogWarning("AccountService --> LoginUser --> Invalid credentials");
             return (false, null, "Invalid credentials");
         }
 
         private string GenerateJwtToken(ApplicationUser user)
         {
+            _logger.LogInformation("AccountService --> GenerateJwtToken called");
+
             var authClaims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
@@ -76,14 +88,20 @@ namespace News.Service.Services
                 claims: authClaims,
                 signingCredentials: new SigningCredentials(authSigningKey, SecurityAlgorithms.HmacSha256)
             );
+            _logger.LogInformation("AccountService --> GenerateJwtToken succeeded");
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
         public async Task<(bool Success, string Message)> ForgotPassword(string email)
         {
+            _logger.LogInformation("AccountService --> ForgotPassword called");
+
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
+            {
+                _logger.LogInformation("AccountService --> ForgotPassword --> user not found");
                 return (false, "User not found.");
+            }
 
             var token = await _userManager.GeneratePasswordResetTokenAsync(user);
 
@@ -101,23 +119,31 @@ namespace News.Service.Services
             };
 
             await _mailSettings.SendEmail(emailToSend);
+            _logger.LogInformation("AccountService --> ForgotPassword --> Password reset link has been sent to user email");
+
             return (true, "Password reset link has been sent to your email.");
         }
 
         //Should decode the token before use
         public async Task<(bool Success, string Message)> ResetPassword(string email, string token, string newPassword)
         {
+            _logger.LogInformation("AccountService --> ResetPassword called");
+
             var user = await _userManager.FindByEmailAsync(email);
             if (user == null)
-                return (false, "User not found.");
+            {
+                _logger.LogInformation("AccountService --> ResetPassword --> user not found");
 
+                return (false, "User not found.");
+            }
             var resetPassResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
             if (!resetPassResult.Succeeded)
             {
                 var errors = string.Join(", ", resetPassResult.Errors.Select(e => e.Description));
+                _logger.LogWarning("AccountService --> ResetPassword failed");
                 return (false, "Password reset failed.");
             }
-
+            _logger.LogInformation("AccountService --> ResetPassword succeeded");
             return (true, "Password reset successful.");
         }
     }

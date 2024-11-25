@@ -3,31 +3,39 @@ using System.Net.Http.Headers;
 using News.Core.Contracts;
 using News.Core.Entities;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace News.Service.Services
 {
     public class NewsService : INewsService
     {
         private readonly HttpClient _httpClient;
+        private readonly ILogger<NewsService> _logger;
         private readonly string _apiKey;
 
-        public NewsService(HttpClient httpClient, IConfiguration configuration)
+        public NewsService(HttpClient httpClient, IConfiguration configuration , ILogger<NewsService> logger)
         {
             _httpClient = httpClient;
+            _logger = logger;
             _apiKey = configuration["NewsAPI:ApiKey"];
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
         }
         //Using newsAPI
         public async Task<string> GetAllNews(int? page = null , int? pageSize = null)
         {
+            _logger.LogInformation($"NewsService --> GetAllNews called with page: {page} and pageSize: {pageSize}");
+
             var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&page={page}&pageSize={pageSize}&apiKey={_apiKey}"; // 
             //var url = $" https://newsapi.org/v2/everything?q=bitcoin&apiKey={_apiKey}"; //not including the categories //total response 10330
             //var url = $" https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}"; //include categories //include all sources
 
-            Console.WriteLine($"Requesting URL: {url}");
+            _logger.LogInformation($"NewsService --> Requesting URL: {url}");
+
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
+                _logger.LogError($"NewsService --> GetAllNews failed , Error fetching news");
+
                 var errorContent = await response.Content.ReadAsStringAsync();
                 return $"Error fetching news: {errorContent}";
             }
@@ -63,11 +71,15 @@ namespace News.Service.Services
         //}
         public async Task<string> GetArticleById(string id)
         {
+            _logger.LogInformation($"NewsService --> GetArticleById called with id : {id}");
+
             var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey={_apiKey}";
             var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
             {
+                _logger.LogError($"NewsService --> GetArticleById failed with id : {id} , Error fetching news");
+
                 var errorContent = await response.Content.ReadAsStringAsync();
                 return $"Error fetching news: {errorContent}";
             }
@@ -79,6 +91,7 @@ namespace News.Service.Services
         }
         public async Task<bool> CheckArticleExists(string newsId)
         {
+            _logger.LogInformation($"NewsService --> CheckArticleExists called with newsId : {newsId}");
             var jsonResponse = await GetAllNews();
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
             return newsData?.Articles?.Any(a => a.Url.Contains(newsId, StringComparison.OrdinalIgnoreCase)) ?? false;
