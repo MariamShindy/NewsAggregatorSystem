@@ -4,24 +4,28 @@ using News.Core.Contracts;
 using News.Core.Entities;
 using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
+using News.Core.Contracts.UnitOfWork;
+using News.Core.Dtos;
 
 namespace News.Service.Services
 {
     public class NewsService : INewsService
     {
         private readonly HttpClient _httpClient;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<NewsService> _logger;
         private readonly string _apiKey;
 
-        public NewsService(HttpClient httpClient, IConfiguration configuration , ILogger<NewsService> logger)
+        public NewsService(HttpClient httpClient,IUnitOfWork unitOfWork,IConfiguration configuration , ILogger<NewsService> logger)
         {
             _httpClient = httpClient;
+            _unitOfWork = unitOfWork;
             _logger = logger;
             _apiKey = configuration["NewsAPI:ApiKey"];
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
         }
         //Using newsAPI
-        public async Task<string> GetAllNews(int? page = null , int? pageSize = null)
+        public async Task<string> GetAllNews(int? page = 1 , int? pageSize = 10)
         {
             _logger.LogInformation($"NewsService --> GetAllNews called with page: {page} and pageSize: {pageSize}");
 
@@ -96,5 +100,54 @@ namespace News.Service.Services
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
             return newsData?.Articles?.Any(a => a.Url.Contains(newsId, StringComparison.OrdinalIgnoreCase)) ?? false;
         }
+
+        public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
+        {
+            _logger.LogInformation($"NewsService --> GetAllCategoriesAsync called");
+            return await _unitOfWork.Repository<Category>().GetAllAsync();
+        }
+        public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
+        {
+            _logger.LogInformation($"NewsService --> AddCategoryAsync called");
+
+            if (string.IsNullOrWhiteSpace(categoryDto.Name))
+                throw new ArgumentException("Category name cannot be null or empty.");
+
+            var category = new Category
+            {
+                Name = categoryDto.Name
+            };
+
+            _unitOfWork.Repository<Category>().Add(category);
+            return await _unitOfWork.CompleteAsync() > 0;
+        }
+        public async Task<bool> DeleteCategoryAsync(int id)
+        {
+            _logger.LogInformation($"NewsService --> DeleteCategoryAsync called with id : {id}");
+
+            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
+            if (category == null)
+                return false;
+
+            _unitOfWork.Repository<Category>().Delete(category);
+            return await _unitOfWork.CompleteAsync() > 0;
+        }
+        public async Task<bool> UpdateCategoryAsync(int id, AddOrUpdateCategoryDto categoryDto)
+        {
+            _logger.LogInformation($"NewsService --> UpdateCategoryAsync called with id : {id}");
+
+            if (string.IsNullOrWhiteSpace(categoryDto.Name))
+                throw new ArgumentException("Category name cannot be null or empty.");
+
+            var category = await _unitOfWork.Repository<Category>().GetByIdAsync(id);
+            if (category == null)
+                return false;
+
+            category.Name = categoryDto.Name;
+
+            _unitOfWork.Repository<Category>().Update(category);
+            return await _unitOfWork.CompleteAsync() > 0;
+        }
+
     }
 }

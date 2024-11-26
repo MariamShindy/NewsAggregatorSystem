@@ -22,6 +22,21 @@ namespace News.Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ApplicationUserCategory", b =>
+                {
+                    b.Property<string>("ApplicationUsersId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("CategoriesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ApplicationUsersId", "CategoriesId");
+
+                    b.HasIndex("CategoriesId");
+
+                    b.ToTable("ApplicationUserCategory");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -51,13 +66,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c1b1d8e3-14b2-44db-87a3-b70209d7628d",
+                            Id = "c38c6db2-d049-4861-a378-e9d8da07424f",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "62100918-545d-49ed-8b99-7b17a84e9ddd",
+                            Id = "306b9ef8-a057-4d28-92f4-6cd5a2ce84da",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -297,7 +312,7 @@ namespace News.Infrastructure.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Articles");
+                    b.ToTable("Article");
                 });
 
             modelBuilder.Entity("News.Core.Entities.Category", b =>
@@ -314,7 +329,7 @@ namespace News.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Category");
+                    b.ToTable("Categories");
                 });
 
             modelBuilder.Entity("News.Core.Entities.Comment", b =>
@@ -373,6 +388,21 @@ namespace News.Infrastructure.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("UserFavoriteArticles");
+                });
+
+            modelBuilder.Entity("ApplicationUserCategory", b =>
+                {
+                    b.HasOne("News.Core.Entities.ApplicationUser", null)
+                        .WithMany()
+                        .HasForeignKey("ApplicationUsersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("News.Core.Entities.Category", null)
+                        .WithMany()
+                        .HasForeignKey("CategoriesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -439,7 +469,7 @@ namespace News.Infrastructure.Migrations
 
             modelBuilder.Entity("News.Core.Entities.Comment", b =>
                 {
-                    b.HasOne("News.Core.Entities.Article", "Article")
+                    b.HasOne("News.Core.Entities.Article", null)
                         .WithMany("Comments")
                         .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -450,8 +480,6 @@ namespace News.Infrastructure.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Article");
 
                     b.Navigation("User");
                 });

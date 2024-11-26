@@ -9,6 +9,7 @@ namespace News.Core.Contracts
         Task<ApplicationUser> GetCurrentUser();
         Task<bool> SendFeedback(FeedbackDto feedbackModel);
         Task<IdentityResult> UpdateUser(EditUserDto model);
+        Task SetUserPreferredCategories(ApplicationUser user, List<string> categoryNames);
+        Task<IEnumerable<CategoryDto>> GetUserPreferredCategories();
     }
-
 }
