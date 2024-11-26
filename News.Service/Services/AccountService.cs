@@ -146,6 +146,15 @@ namespace News.Service.Services
             _logger.LogInformation("AccountService --> ResetPassword succeeded");
             return (true, "Password reset successful.");
         }
+        public async Task<bool> CheckAdminRole(ApplicationUser currentUser)
+        {
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            if (roles.Contains("Admin"))
+                return true;
+            else
+                return false;
+        }
+
     }
 }
 

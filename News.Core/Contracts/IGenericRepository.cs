@@ -10,6 +10,6 @@ namespace News.Core.Contracts
         void Update(T entity);
         void Delete(T entity);
         Task<bool> AnyAsync(Expression<Func<T, bool>> predicate);
-
+        Task<IEnumerable<T>> Find(Func<T, bool> predicate);
     }
 }

@@ -17,7 +17,10 @@ namespace News.Infrastructure.Repositories
         {
             return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
         }
-
+        public async Task<IEnumerable<T>> Find(Func<T, bool> predicate)
+        {
+            return  _dbContext.Set<T>().Where(predicate).AsEnumerable();
+        }
         public async Task<T?> GetByIdAsync(int id)
         {
             return await _dbContext.Set<T>().FindAsync(id);

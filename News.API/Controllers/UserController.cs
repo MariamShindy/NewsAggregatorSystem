@@ -7,7 +7,6 @@ using News.Core.Entities;
 
 namespace News.API.Controllers
 {
-    //Choose categories end point 
 
     [Authorize]
 	[Route("api/[controller]")]
@@ -107,6 +106,38 @@ namespace News.API.Controllers
             var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
             var favoriteDtos = _mapper.Map<List<FavoriteArticleDto>>(favorites);
             return Ok(favoriteDtos);
+        }
+
+        // GET : api/user/set-preferred-categories
+        [HttpPost("set-preferred-categories")]
+        public async Task<IActionResult> SetPreferredCategories(SetPreferredCategoriesDto model)
+        {
+            var user = await _userService.GetCurrentUser();
+            if (user is null)
+                return Unauthorized();
+            try
+            {
+                await _userService.SetUserPreferredCategories(user, model.CategoryNames);
+                return Ok("Preferred categories updated successfully.");
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(ex.Message);  
+            }
+        }
+        // GET : api/user/referred-categories
+        [HttpGet("preferred-categories")]
+        public async Task<IActionResult> GetUserPreferredCategories()
+        {
+            try
+            {
+                var categories = await _userService.GetUserPreferredCategories();
+                return Ok(categories);  
+            }
+            catch (ArgumentException ex)
+            {
+                return NotFound(ex.Message);  
+            }
         }
     }
 }

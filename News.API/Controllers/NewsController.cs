@@ -34,5 +34,13 @@ namespace News.API.Controllers
                 return StatusCode(500, articleResult);
             return Ok(articleResult);
         }
+
+        //GET : api/news/all-categories
+        [HttpGet("all-categories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var categories = await _newsService.GetAllCategoriesAsync();
+            return Ok(categories); 
+        }
     }
 }

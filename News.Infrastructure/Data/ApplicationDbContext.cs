@@ -51,8 +51,9 @@ namespace News.Infrastructure.Data
         }
 
 		public DbSet<Comment> Comments { get; set; }
-		public DbSet<Article> Articles { get; set; }
+		//public DbSet<Article> Articles { get; set; }
 		public DbSet<UserFavoriteArticle> UserFavoriteArticles { get; set; }
+        public DbSet<Category> Categories { get; set; }
 
 	}
 }
