@@ -82,11 +82,45 @@ namespace News.Service.Services
         {
             _logger.LogInformation("UserService --> UpdateUser called");
             var user = await GetCurrentUser();
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
+            if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != user.UserName)
+            {
+                var existingUserWithUsername = await _userManager.FindByNameAsync(model.Username);
+                if (existingUserWithUsername != null)
+                {
+                    _logger.LogWarning("Username already exists.");
+                    return IdentityResult.Failed(new IdentityError { Description = "Username already exists." });
+                }
+                user.UserName = model.Username;
+            }
+            if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != user.Email)
+            {
+                var existingUserWithEmail = await _userManager.FindByEmailAsync(model.Email);
+                if (existingUserWithEmail != null)
+                {
+                    _logger.LogWarning("Email already exists.");
+                    return IdentityResult.Failed(new IdentityError { Description = "Email already exists." });
+                }
+                user.Email = model.Email;
+            }
+            if (!string.IsNullOrWhiteSpace(model.Password))
+            {
+                var passwordValidator = new PasswordValidator<ApplicationUser>();
+                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, model.Password);
+                if (!passwordValidationResult.Succeeded)
+                {
+                    _logger.LogWarning("Password validation failed.");
+                    return passwordValidationResult;
+                }
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, model.Password);
+            }
+            user.FirstName = model.FirstName??user.FirstName;
+            user.LastName = model.LastName??user.LastName;
             user.ProfilePicUrl = model?.ProfilePicUrl??user.ProfilePicUrl;
             var result = await _userManager.UpdateAsync(user);
-            _logger.LogInformation("UserService --> UpdateUser succeeded");
+            if (result.Succeeded)
+                _logger.LogInformation("UserService --> UpdateUser succeeded");
+            else
+                _logger.LogWarning("UserService --> UpdateUser failed");
             return result;
         }
         public async Task SetUserPreferredCategories(ApplicationUser user, List<string> categoryNames)

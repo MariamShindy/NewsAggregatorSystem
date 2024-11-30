@@ -22,17 +22,30 @@ namespace News.API.Controllers
 
             return Ok(newsResult);
         }
-     
+
+        //BEFORE CACHING
+        //// GET: api/news/{id}
+        //[HttpGet("{id}")]
+        //public async Task<IActionResult> GetNewsById(string id)
+        //{
+        //    var articleResult = await _newsService.GetArticleById(id);
+        //    if (articleResult.Contains("Article not found"))
+        //        return NotFound(new { message = "Article not found" });
+        //    if (articleResult.StartsWith("Error fetching news"))
+        //        return StatusCode(500, articleResult);
+        //    return Ok(articleResult);
+        //}
+
         // GET: api/news/{id}
         [HttpGet("{id}")]
         public async Task<IActionResult> GetNewsById(string id)
         {
-            var articleResult = await _newsService.GetArticleById(id);
-            if (articleResult.Contains("Article not found"))
+            var article = await _newsService.GetArticleById(id);
+
+            if (article == null)
                 return NotFound(new { message = "Article not found" });
-            if (articleResult.StartsWith("Error fetching news"))
-                return StatusCode(500, articleResult);
-            return Ok(articleResult);
+
+            return Ok(article);  
         }
 
         //GET : api/news/all-categories

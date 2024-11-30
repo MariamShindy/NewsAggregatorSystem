@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using News.API.Profilers;
 using News.Core.Contracts;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Entities;
@@ -60,11 +59,11 @@ builder.Services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
 builder.Services.AddTransient<IMailSettings, EmailSettings>();
 builder.Services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
 builder.Services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
-
+builder.Services.AddMemoryCache();
 builder.Services.Configure<MailSettings>(builder.Configuration.GetSection("MailSettings"));
 builder.Services.AddSingleton(new MapperConfiguration(cfg =>
 {
-    cfg.AddProfile(new MappingProfile());
+    cfg.AddProfile(new News.Core.Profilers.MappingProfile());
 }).CreateMapper());
 
 builder.Services.AddEndpointsApiExplorer();

@@ -3,17 +3,14 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Dtos;
-using News.Core.Entities;
 
 namespace News.API.Controllers
 {
-
     [Authorize]
 	[Route("api/[controller]")]
 	[ApiController]
 	public class UserController(IMapper _mapper, IUserService _userService,IFavoriteService _favoriteService , INewsService _newsService) : ControllerBase
 	{
-
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
@@ -58,43 +55,93 @@ namespace News.API.Controllers
             }
         }
 
+        #region Favorite before caching
+        //// POST: api/user/favorites/{newsId}
+        //[HttpPost("favorites/{newsId}")]
+        //public async Task<IActionResult> AddToFavorites(string newsId)
+        //{
+
+        //    var user = await _userService.GetCurrentUser();
+        //    var articleExists = await _newsService.CheckArticleExists(newsId);
+        //    if (!articleExists)
+        //        return NotFound(new { message = "Article not found" });
+
+        //    var alreadyFavorited = await _favoriteService.IsArticleFavorited(user.Id, newsId);
+        //    if (alreadyFavorited)
+        //        return BadRequest(new { message = "Article already in favorites" });
+
+        //    var favorite = new UserFavoriteArticle
+        //    {
+        //        UserId = user.Id,
+        //        ArticleId = newsId,
+        //        AddedAt = DateTime.UtcNow
+        //    };
+
+        //    await _favoriteService.Add(favorite);
+        //    return Ok(new { result = "Article added to favorites" });
+        //}
+
+        //// DELETE: api/user/favorites/{favoriteId}
+        //[HttpDelete("favorites/{favoriteId}")]
+        //public async Task<IActionResult> RemoveFromFavorites(int favoriteId)
+        //{
+        //    var user = await _userService.GetCurrentUser();
+        //    var favorite = await _favoriteService.GetFavoriteById(favoriteId);
+        //    if (favorite == null)
+        //        return NotFound(new { message = "Favorite not found" });
+        //    if (favorite.UserId != user.Id)
+        //        return Forbid();
+        //    await _favoriteService.Remove(favoriteId);
+        //    return Ok(new { result = "Article removed from favorites" });
+        //}
+
+        //// GET : api/user/favorites
+        //[HttpGet("favorites")]
+        //public async Task<IActionResult> GetUserFavorites()
+        //{
+        //    var user = await _userService.GetCurrentUser();
+        //    var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
+        //    var favoriteDtos = _mapper.Map<List<FavoriteArticleDto>>(favorites);
+        //    return Ok(favoriteDtos);
+        //} 
+        #endregion
+
         // POST: api/user/favorites/{newsId}
         [HttpPost("favorites/{newsId}")]
         public async Task<IActionResult> AddToFavorites(string newsId)
         {
-
             var user = await _userService.GetCurrentUser();
+
+            // Check if the article exists
             var articleExists = await _newsService.CheckArticleExists(newsId);
             if (!articleExists)
                 return NotFound(new { message = "Article not found" });
 
+            // Check if the article is already favorited
             var alreadyFavorited = await _favoriteService.IsArticleFavorited(user.Id, newsId);
             if (alreadyFavorited)
                 return BadRequest(new { message = "Article already in favorites" });
 
-            var favorite = new UserFavoriteArticle
-            {
-                UserId = user.Id,
-                ArticleId = newsId,
-                AddedAt = DateTime.UtcNow
-            };
-
-            await _favoriteService.Add(favorite);
-
+            // Add to favorites
+            await _favoriteService.AddToFavorites(user.Id, newsId);
             return Ok(new { result = "Article added to favorites" });
         }
-        
-        // DELETE: api/user/favorites/{favoriteId}
-        [HttpDelete("favorites/{favoriteId}")]
-        public async Task<IActionResult> RemoveFromFavorites(int favoriteId)
+
+        // DELETE: api/user/favorites/{newsId}
+        [HttpDelete("favorites/{newsId}")]
+        public async Task<IActionResult> RemoveFromFavorites(string newsId)
         {
             var user = await _userService.GetCurrentUser();
-            var favorite = await _favoriteService.GetFavoriteById(favoriteId);
-            if (favorite == null)
-                return NotFound(new { message = "Favorite not found" });
-            if (favorite.UserId != user.Id)
-                return Forbid();
-            await _favoriteService.Remove(favoriteId);
+
+            // Retrieve favorite to confirm its existence
+            //var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
+            //var favoriteToRemove = favorites.FirstOrDefault(f => f.ArticleId == newsId);
+
+            //if (favoriteToRemove == null)
+            //    return NotFound(new { message = "Favorite not found" });
+
+            // Remove the favorite
+            await _favoriteService.RemoveFromFavorites(user.Id, newsId);
             return Ok(new { result = "Article removed from favorites" });
         }
 
@@ -103,10 +150,12 @@ namespace News.API.Controllers
         public async Task<IActionResult> GetUserFavorites()
         {
             var user = await _userService.GetCurrentUser();
-            var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
-            var favoriteDtos = _mapper.Map<List<FavoriteArticleDto>>(favorites);
-            return Ok(favoriteDtos);
+
+            // Get all favorite articles
+            var favoriteArticles = await _favoriteService.GetFavoritesByUser(user.Id);
+            return Ok(favoriteArticles); // Returning cached articles directly
         }
+
 
         // GET : api/user/set-preferred-categories
         [HttpPost("set-preferred-categories")]
@@ -139,5 +188,6 @@ namespace News.API.Controllers
                 return NotFound(ex.Message);  
             }
         }
+
     }
 }
