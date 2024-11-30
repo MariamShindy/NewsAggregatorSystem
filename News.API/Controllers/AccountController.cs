@@ -13,10 +13,10 @@ namespace News.API.Controllers
 	{
         // POST : api/account/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register([FromBody] RegisterDto model)
+        public async Task<IActionResult> Register(/*[FromBody]*/ [FromForm] RegisterDto model)
         {
             var registerModel = _mapper.Map<RegisterModel>(model);
-            var (isSuccess, message) = await _accountService.RegisterUser(registerModel);
+            var (isSuccess, message) = await _accountService.RegisterUserAsync(registerModel);
             if (!isSuccess)
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = message });
             return Ok(new { Status = "Success", Message = message });
@@ -27,7 +27,7 @@ namespace News.API.Controllers
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var loginModel = _mapper.Map<LoginModel>(model);
-            var (isSuccess, token,message) = await _accountService.LoginUser(loginModel);
+            var (isSuccess, token,message) = await _accountService.LoginUserAsync(loginModel);
             if (!isSuccess)
                 return Unauthorized(new { Message = message });
             return Ok(new { Token = token });
@@ -45,7 +45,7 @@ namespace News.API.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
         {
-            var result = await _accountService.ForgotPassword(model.Email);
+            var result = await _accountService.ForgotPasswordAsync(model.Email);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
             return Ok(new { Status = "Success", Message = result.Message });
@@ -55,7 +55,7 @@ namespace News.API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
         {
-            var result = await _accountService.ResetPassword(model.Email, model.Token, model.NewPassword);
+            var result = await _accountService.ResetPasswordAsync(model.Email, model.Token, model.NewPassword);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
             return Ok(new { Status = "Success", Message = result.Message });

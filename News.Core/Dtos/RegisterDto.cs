@@ -1,4 +1,6 @@
-﻿namespace News.Core.Dtos
+﻿using Microsoft.AspNetCore.Http;
+
+namespace News.Core.Dtos
 {
     public class RegisterDto
     {
@@ -7,7 +9,7 @@
         public string Username { get; set; } = string.Empty;
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
-        public string? profilePicUrl {  get; set; } = string.Empty;
+        public IFormFile? ProfilePicUrl {  get; set; }
         //public string ConfirmPassword { get; set; }  = String.Empty;
     }
 }

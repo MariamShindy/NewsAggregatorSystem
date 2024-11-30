@@ -17,7 +17,7 @@ namespace News.Infrastructure.Repositories
         {
             return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
         }
-        public async Task<IEnumerable<T>> Find(Func<T, bool> predicate)
+        public async Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate)
         {
             return  _dbContext.Set<T>().Where(predicate).AsEnumerable();
         }
@@ -26,13 +26,13 @@ namespace News.Infrastructure.Repositories
             return await _dbContext.Set<T>().FindAsync(id);
         }
 
-        public void Add(T entity)
-        => _dbContext.Set<T>().Add(entity);
+        public async Task AddAsync(T entity)
+        =>  _dbContext.Set<T>().Add(entity);
 
-        public void Update(T entity)
+        public async Task UpdateAsync(T entity)
         => _dbContext.Set<T>().Update(entity);
 
-        public void Delete(T entity)
+        public async Task DeleteAsync(T entity)
         => _dbContext.Set<T>().Remove(entity);
 
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)

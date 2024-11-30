@@ -8,7 +8,7 @@ namespace News.Core.Entities
 		public string Email { get; set; }
 		public string FirstName { get; set; }
 		public string LastName { get; set; }
-		public IFormFile? ProfilePic { get; set; }
+		public IFormFile? ProfilePicUrl { get; set; }
 		public string Password { get; set; }
 	}
 }

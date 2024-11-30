@@ -75,18 +75,18 @@ namespace News.Service.Services
         //        }
         //    }
         //}
-        public async Task AddToFavorites(string userId, string articleId)
+        public async Task AddToFavoritesAsync(string userId, string articleId)
         {
             _logger.LogInformation($"FavoriteService --> AddToFavorites called for userId: {userId} and articleId: {articleId}");
 
             var favorite = new UserFavoriteArticle { UserId = userId, ArticleId = articleId, AddedAt = DateTime.UtcNow };
-            _unitOfWork.Repository<UserFavoriteArticle>().Add(favorite);
+            await _unitOfWork.Repository<UserFavoriteArticle>().AddAsync(favorite);
             await _unitOfWork.CompleteAsync();
 
             var cacheKey = $"{CacheKeyPrefix}{articleId}";
             if (!_cache.TryGetValue(cacheKey, out _))
             {
-                var article = await _newsService.GetArticleById(articleId);
+                var article = await _newsService.GetArticleByIdAsync(articleId);
                 if (article is not null)
                 {
                     _cache.Set(cacheKey, article, TimeSpan.FromDays(1)); 
@@ -204,7 +204,7 @@ namespace News.Service.Services
 
         //    return favoriteArticles;
         //}
-        public async Task<IEnumerable<ArticleDto>> GetFavoritesByUser(string userId)
+        public async Task<IEnumerable<ArticleDto>> GetFavoritesByUserAsync(string userId)
         {
             _logger.LogInformation($"FavoriteService --> GetFavoritesByUser called for userId: {userId}");
             var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
@@ -216,7 +216,7 @@ namespace News.Service.Services
 
                 if (!_cache.TryGetValue(cacheKey, out ArticleDto article))
                 {
-                    article = await _newsService.GetArticleById(articleId);
+                    article = await _newsService.GetArticleByIdAsync(articleId);
 
                     if (article != null)
                     {
@@ -238,15 +238,15 @@ namespace News.Service.Services
             _logger.LogInformation($"Total favorite articles fetched for user {userId}: {favoriteArticles.Count}");
             return favoriteArticles;
         }
-        public async Task RemoveFromFavorites(string userId, string articleId)
+        public async Task RemoveFromFavoritesAsync(string userId, string articleId)
         {
             _logger.LogInformation($"FavoriteService --> RemoveFromFavorites called for userId: {userId} and articleId: {articleId}");
 
             var favorite = await _unitOfWork.Repository<UserFavoriteArticle>()
-                .Find(f => f.UserId == userId && f.ArticleId == articleId);
+                .FindAsync(f => f.UserId == userId && f.ArticleId == articleId);
             if (favorite != null)
             {
-                _unitOfWork.Repository<UserFavoriteArticle>().Delete(favorite.FirstOrDefault());
+                await _unitOfWork.Repository<UserFavoriteArticle>().DeleteAsync(favorite.FirstOrDefault());
                 await _unitOfWork.CompleteAsync();
 
                 // Remove from cache
@@ -256,7 +256,7 @@ namespace News.Service.Services
                 _logger.LogInformation($"Article {articleId} removed from favorites and cache for userId: {userId}");
             }
         }
-        public async Task<bool> IsArticleFavorited(string userId, string articleId)
+        public async Task<bool> IsArticleFavoritedAsync(string userId, string articleId)
         {
             _logger.LogInformation($"FavoriteService --> IsArticleFavorited called for userId: {userId} and articleId: {articleId}");
 
@@ -277,7 +277,7 @@ namespace News.Service.Services
                 _logger.LogInformation($"Article {articleId} found in database for userId: {userId}");
 
                 // Fetch the article from the API and cache it
-                var article = await _newsService.GetArticleById(articleId);
+                var article = await _newsService.GetArticleByIdAsync(articleId);
                 if (article is not null)
                 {
                     _cache.Set(cacheKey, article, TimeSpan.FromDays(2));
@@ -288,7 +288,7 @@ namespace News.Service.Services
             return isFavorited;
         }
   
-        public async Task<UserFavoriteArticle> GetFavoriteById(int favoriteId)
+        public async Task<UserFavoriteArticle> GetFavoriteByIdAsync(int favoriteId)
         {
             _logger.LogInformation($"FavoriteService --> GetFavoriteById with favoriteId : {favoriteId} called");
             return await _unitOfWork.Repository<UserFavoriteArticle>().GetByIdAsync(favoriteId);

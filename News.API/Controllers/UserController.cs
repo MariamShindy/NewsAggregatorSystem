@@ -14,7 +14,7 @@ namespace News.API.Controllers
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userService.GetCurrentUserAsync();
             var userInfo = _mapper.Map<UserDto>(user);
             return Ok(userInfo);
         }
@@ -23,7 +23,7 @@ namespace News.API.Controllers
         [HttpPut("me")]
         public async Task<IActionResult> EditUserInfo([FromBody] EditUserDto model)
         {
-            var result = await _userService.UpdateUser(model); 
+            var result = await _userService.UpdateUserAsync(model); 
             if (result.Succeeded)
                 return Ok(new { result = "User updated successfully" }); //not updated profile pic
 
@@ -33,7 +33,7 @@ namespace News.API.Controllers
         // POST: api/user/send-feedback
         [HttpPost("send-feedback")]
         [AllowAnonymous]
-        public async Task<IActionResult> SendFeedbackAsync([FromBody] FeedbackDto feedbackDto)
+        public async Task<IActionResult> SendFeedback([FromBody] FeedbackDto feedbackDto)
         {
             if (feedbackDto == null ||
                 string.IsNullOrWhiteSpace(feedbackDto.FullName) ||
@@ -45,13 +45,30 @@ namespace News.API.Controllers
             }
             try
             {
-                bool isSent = await _userService.SendFeedback(feedbackDto); 
+                bool isSent = await _userService.SendFeedbackAsync(feedbackDto); 
                 return Ok(new { Status = "Success", Message = "Feedback received." });
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"An error occurred while sending feedback. {ex}");
                 return StatusCode(500, new { Status = "Error", Message = "An error occurred while sending feedback. Please try again later." });
+            }
+        }
+        // POST: api/user/send-survey
+        [HttpPost("send-survey")]
+        public async Task<IActionResult> SendSurvey([FromBody] SurveyDto surveyDto)
+        {
+            if (surveyDto == null )
+                return BadRequest();
+            try
+            {
+                bool isSent = await _userService.SendSurveyAsync(surveyDto);
+                return Ok(new { Status = "Success", Message = "Survey received." });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred while sending survey. {ex}");
+                return StatusCode(500, new { Status = "Error", Message = "An error occurred while sending survey. Please try again later." });
             }
         }
 
@@ -110,20 +127,20 @@ namespace News.API.Controllers
         [HttpPost("favorites/{newsId}")]
         public async Task<IActionResult> AddToFavorites(string newsId)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userService.GetCurrentUserAsync();
 
             // Check if the article exists
-            var articleExists = await _newsService.CheckArticleExists(newsId);
+            var articleExists = await _newsService.CheckArticleExistsAsync(newsId);
             if (!articleExists)
                 return NotFound(new { message = "Article not found" });
 
             // Check if the article is already favorited
-            var alreadyFavorited = await _favoriteService.IsArticleFavorited(user.Id, newsId);
+            var alreadyFavorited = await _favoriteService.IsArticleFavoritedAsync(user.Id, newsId);
             if (alreadyFavorited)
                 return BadRequest(new { message = "Article already in favorites" });
 
             // Add to favorites
-            await _favoriteService.AddToFavorites(user.Id, newsId);
+            await _favoriteService.AddToFavoritesAsync(user.Id, newsId);
             return Ok(new { result = "Article added to favorites" });
         }
 
@@ -131,17 +148,8 @@ namespace News.API.Controllers
         [HttpDelete("favorites/{newsId}")]
         public async Task<IActionResult> RemoveFromFavorites(string newsId)
         {
-            var user = await _userService.GetCurrentUser();
-
-            // Retrieve favorite to confirm its existence
-            //var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
-            //var favoriteToRemove = favorites.FirstOrDefault(f => f.ArticleId == newsId);
-
-            //if (favoriteToRemove == null)
-            //    return NotFound(new { message = "Favorite not found" });
-
-            // Remove the favorite
-            await _favoriteService.RemoveFromFavorites(user.Id, newsId);
+            var user = await _userService.GetCurrentUserAsync();
+            await _favoriteService.RemoveFromFavoritesAsync(user.Id, newsId);
             return Ok(new { result = "Article removed from favorites" });
         }
 
@@ -149,11 +157,9 @@ namespace News.API.Controllers
         [HttpGet("favorites")]
         public async Task<IActionResult> GetUserFavorites()
         {
-            var user = await _userService.GetCurrentUser();
-
-            // Get all favorite articles
-            var favoriteArticles = await _favoriteService.GetFavoritesByUser(user.Id);
-            return Ok(favoriteArticles); // Returning cached articles directly
+            var user = await _userService.GetCurrentUserAsync();
+            var favoriteArticles = await _favoriteService.GetFavoritesByUserAsync(user.Id);
+            return Ok(favoriteArticles); 
         }
 
 
@@ -161,12 +167,12 @@ namespace News.API.Controllers
         [HttpPost("set-preferred-categories")]
         public async Task<IActionResult> SetPreferredCategories(SetPreferredCategoriesDto model)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userService.GetCurrentUserAsync();
             if (user is null)
                 return Unauthorized();
             try
             {
-                await _userService.SetUserPreferredCategories(user, model.CategoryNames);
+                await _userService.SetUserPreferredCategoriesAsync(user, model.CategoryNames);
                 return Ok("Preferred categories updated successfully.");
             }
             catch (ArgumentException ex)
@@ -180,7 +186,7 @@ namespace News.API.Controllers
         {
             try
             {
-                var categories = await _userService.GetUserPreferredCategories();
+                var categories = await _userService.GetUserPreferredCategoriesAsync();
                 return Ok(categories);  
             }
             catch (ArgumentException ex)

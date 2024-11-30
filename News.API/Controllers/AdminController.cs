@@ -18,8 +18,8 @@ namespace News.API.Controllers
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
-            var currentUser = await _userService.GetCurrentUser();
-            var isAdmin = _accountService.CheckAdminRole(currentUser);
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = _accountService.CheckAdminRoleAsync(currentUser);
             if (isAdmin.Result)
             {
                 user.LockoutEnd = DateTimeOffset.MaxValue;
@@ -35,8 +35,8 @@ namespace News.API.Controllers
         {
             var user = await _userManager.FindByIdAsync(id);
             if (user == null) return NotFound();
-            var currentUser = await _userService.GetCurrentUser();
-            var isAdmin = _accountService.CheckAdminRole(currentUser);
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = _accountService.CheckAdminRoleAsync(currentUser);
             if(isAdmin.Result)
             {
                 user.LockoutEnd = null;
@@ -53,8 +53,8 @@ namespace News.API.Controllers
         [HttpPost("add-category")]
         public async Task<IActionResult> AddCategory([FromBody] AddOrUpdateCategoryDto categoryDto)
         {
-            var currentUser = await _userService.GetCurrentUser();
-            var isAdmin = await _accountService.CheckAdminRole(currentUser);
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = await _accountService.CheckAdminRoleAsync(currentUser);
             if (isAdmin)
             {
                 try
@@ -81,8 +81,8 @@ namespace News.API.Controllers
         [HttpDelete("delete-category/{id}")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            var currentUser = await _userService.GetCurrentUser();
-            var isAdmin = await _accountService.CheckAdminRole(currentUser);
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = await _accountService.CheckAdminRoleAsync(currentUser);
             if (isAdmin)
             {
                 try
@@ -105,8 +105,8 @@ namespace News.API.Controllers
         [HttpPut("update-category/{id}")]
         public async Task<IActionResult> UpdateCategory(int id, [FromBody] AddOrUpdateCategoryDto categoryDto)
         {
-            var currentUser = await _userService.GetCurrentUser();
-            var isAdmin = await _accountService.CheckAdminRole(currentUser);
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = await _accountService.CheckAdminRoleAsync(currentUser);
             if (isAdmin)
             {
                 try
@@ -118,7 +118,7 @@ namespace News.API.Controllers
                     }
                     return Ok("Category updated successfully.");
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     return StatusCode(500, "Internal server error.");
                 }
