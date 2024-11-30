@@ -15,7 +15,7 @@ namespace News.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetAllComments()
         {
-            var comments = await _commentService.GetAll();
+            var comments = await _commentService.GetAllAsync();
             return Ok(comments);
         }
 
@@ -23,7 +23,7 @@ namespace News.API.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetCommentById(int id)
         {
-            var comment = await _commentService.GetById(id);
+            var comment = await _commentService.GetByIdAsync(id);
             if (comment == null) return NotFound();
             return Ok(comment);
         }
@@ -32,7 +32,7 @@ namespace News.API.Controllers
         [HttpPost("{newsId}/comments")]
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)
         {
-            var user = await _userService.GetCurrentUser();
+            var user = await _userService.GetCurrentUserAsync();
             var comment = new Comment
             {
                 Content = model.Content,
@@ -41,15 +41,15 @@ namespace News.API.Controllers
                 ArticleId = newsId,
                 CreatedAt = DateTime.UtcNow
             };
-            await _commentService.Add(comment);
+            await _commentService.AddAsync(comment);
             return Ok(new { result = "Comment added" });
         }
         // PUT: api/comment/comments/{id}
         [HttpPut("comments/{id}")]
         public async Task<IActionResult> EditComment(int id, [FromBody] UpdateCommentDto model)
         {
-            var user = await _userService.GetCurrentUser();
-            var comment = await _commentService.GetById(id);
+            var user = await _userService.GetCurrentUserAsync();
+            var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
                 return NotFound("Comment not found.");
             if (comment.UserId != user.Id)
@@ -58,7 +58,7 @@ namespace News.API.Controllers
             ////AUTOMAPPER
             comment.Content = model.Content;
             comment.CreatedAt = DateTime.UtcNow;
-            await _commentService.Update(comment);
+            await _commentService.UpdateAsync(comment);
             return Ok(new { message = "Comment updated successfully." });
         }
 
@@ -66,10 +66,10 @@ namespace News.API.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteComment(int id)
         {
-            var comment = await _commentService.GetById(id);
+            var comment = await _commentService.GetByIdAsync(id);
             if (comment == null) return NotFound();
 
-            await _commentService.Delete(id);
+            await _commentService.DeleteAsync(id);
             return Ok(new { result = "Comment deleted" });
         }
     }

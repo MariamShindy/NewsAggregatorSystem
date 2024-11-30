@@ -6,10 +6,12 @@ namespace News.Core.Contracts
 {
     public interface IUserService
     {
-        Task<ApplicationUser> GetCurrentUser();
-        Task<bool> SendFeedback(FeedbackDto feedbackModel);
-        Task<IdentityResult> UpdateUser(EditUserDto model);
-        Task SetUserPreferredCategories(ApplicationUser user, List<string> categoryNames);
-        Task<IEnumerable<CategoryDto>> GetUserPreferredCategories();
+        Task<ApplicationUser> GetCurrentUserAsync();
+        Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto);
+        public Task<bool> SendSurveyAsync(SurveyDto surveyDto);
+
+        Task<IdentityResult> UpdateUserAsync(EditUserDto editUserDto);
+        Task SetUserPreferredCategoriesAsync(ApplicationUser user, List<string> categoryNames);
+        Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync();
     }
 }

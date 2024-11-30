@@ -281,8 +281,8 @@ namespace News.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "306b9ef8-a057-4d28-92f4-6cd5a2ce84da", null, "User", "USER" },
-                    { "c38c6db2-d049-4861-a378-e9d8da07424f", null, "Admin", "ADMIN" }
+                    { "1cb9cc07-0a00-4024-97a1-0c7c9e48ae80", null, "User", "USER" },
+                    { "2fb4332f-318e-410b-9f80-6b15a542c5e4", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(

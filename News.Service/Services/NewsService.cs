@@ -28,7 +28,7 @@ namespace News.Service.Services
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
         }
         //Using newsAPI
-        public async Task<string> GetAllNews(int? page = 1 , int? pageSize = 10)
+        public async Task<string> GetAllNewsAsync(int? page = 1 , int? pageSize = 10)
         {
             _logger.LogInformation($"NewsService --> GetAllNews called with page: {page} and pageSize: {pageSize}");
 
@@ -99,7 +99,7 @@ namespace News.Service.Services
         //    return article != null ? JsonConvert.SerializeObject(article) : "Article not found";
         //}
 
-        public async Task<ArticleDto> GetArticleById(string id)
+        public async Task<ArticleDto> GetArticleByIdAsync(string id)
         {
             _logger.LogInformation($"NewsService --> GetArticleById called with id : {id}");
 
@@ -139,10 +139,10 @@ namespace News.Service.Services
             }
         }
 
-        public async Task<bool> CheckArticleExists(string newsId)
+        public async Task<bool> CheckArticleExistsAsync(string newsId)
         {
             _logger.LogInformation($"NewsService --> CheckArticleExists called with newsId : {newsId}");
-            var jsonResponse = await GetAllNews();
+            var jsonResponse = await GetAllNewsAsync();
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
             return newsData?.Articles?.Any(a => a.Url.Contains(newsId, StringComparison.OrdinalIgnoreCase)) ?? false;
         }
@@ -164,7 +164,7 @@ namespace News.Service.Services
                 Name = categoryDto.Name
             };
 
-            _unitOfWork.Repository<Category>().Add(category);
+            await _unitOfWork.Repository<Category>().AddAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
         }
         public async Task<bool> DeleteCategoryAsync(int id)
@@ -175,7 +175,7 @@ namespace News.Service.Services
             if (category == null)
                 return false;
 
-            _unitOfWork.Repository<Category>().Delete(category);
+            await _unitOfWork.Repository<Category>().DeleteAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
         }
         public async Task<bool> UpdateCategoryAsync(int id, AddOrUpdateCategoryDto categoryDto)
@@ -191,7 +191,7 @@ namespace News.Service.Services
 
             category.Name = categoryDto.Name;
 
-            _unitOfWork.Repository<Category>().Update(category);
+            await _unitOfWork.Repository<Category>().UpdateAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
         }
 

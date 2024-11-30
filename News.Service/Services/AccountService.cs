@@ -19,7 +19,7 @@ namespace News.Service.Services
 {
     public class AccountService(ILogger<AccountService> _logger ,ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
     {
-        public async Task<(bool isSuccess, string message)> RegisterUser(RegisterModel model)
+        public async Task<(bool isSuccess, string message)> RegisterUserAsync(RegisterModel model)
         {
             _logger.LogInformation("AccountService --> RegisterUser called");
 
@@ -31,9 +31,10 @@ namespace News.Service.Services
             }
 
             string profilePicUrl = null;
-            if (model.ProfilePic != null)
+            if (model.ProfilePicUrl != null)
             {
-                profilePicUrl = await _imageUploader.UploadProfileImageAsync(model.ProfilePic);
+                profilePicUrl = await _imageUploader.UploadProfileImageAsync(model.ProfilePicUrl);
+                _logger.LogInformation("AccountService --> ImageUploader succeeded");
             }
             var user = new ApplicationUser
             {
@@ -53,7 +54,7 @@ namespace News.Service.Services
             _logger.LogInformation("AccountService --> RegisterUser succeeded");
             return (true, "User created successfully!");
         }
-        public async Task<(bool isSuccess, string token, string message)> LoginUser(LoginModel model)
+        public async Task<(bool isSuccess, string token, string message)> LoginUserAsync(LoginModel model)
         {
             _logger.LogInformation("AccountService --> LoginUser called");
 
@@ -98,7 +99,7 @@ namespace News.Service.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        public async Task<(bool Success, string Message)> ForgotPassword(string email)
+        public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
         {
             _logger.LogInformation("AccountService --> ForgotPassword called");
 
@@ -131,7 +132,7 @@ namespace News.Service.Services
         }
 
         //Should decode the token before use
-        public async Task<(bool Success, string Message)> ResetPassword(string email, string token, string newPassword)
+        public async Task<(bool Success, string Message)> ResetPasswordAsync(string email, string token, string newPassword)
         {
             _logger.LogInformation("AccountService --> ResetPassword called");
 
@@ -152,7 +153,7 @@ namespace News.Service.Services
             _logger.LogInformation("AccountService --> ResetPassword succeeded");
             return (true, "Password reset successful.");
         }
-        public async Task<bool> CheckAdminRole(ApplicationUser currentUser)
+        public async Task<bool> CheckAdminRoleAsync(ApplicationUser currentUser)
         {
             var roles = await _userManager.GetRolesAsync(currentUser);
             if (roles.Contains("Admin"))
