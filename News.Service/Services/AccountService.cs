@@ -10,13 +10,14 @@ using Microsoft.IdentityModel.Tokens;
 using News.Core.Contracts;
 using News.Core.Entities;
 using News.Service.Helpers.EmailSettings;
+using News.Service.Helpers.ImageUploader;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
 namespace News.Service.Services
 {
-    public class AccountService(ILogger<AccountService> _logger , UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
+    public class AccountService(ILogger<AccountService> _logger ,ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
     {
         public async Task<(bool isSuccess, string message)> RegisterUser(RegisterModel model)
         {
@@ -29,13 +30,18 @@ namespace News.Service.Services
                 return (false, "User already exists!");
             }
 
+            string profilePicUrl = null;
+            if (model.ProfilePic != null)
+            {
+                profilePicUrl = await _imageUploader.UploadProfileImageAsync(model.ProfilePic);
+            }
             var user = new ApplicationUser
             {
                 Email = model.Email,
                 UserName = model.UserName,
                 FirstName = model.FirstName,
                 LastName = model.LastName,
-                ProfilePicUrl = model.ProfilePicUrl
+                ProfilePicUrl = profilePicUrl
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

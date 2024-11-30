@@ -2,7 +2,7 @@
 using News.Core.Dtos;
 using News.Core.Entities;
 
-namespace News.API.Profilers
+namespace News.Core.Profilers
 {
     public class MappingProfile : Profile
     {
@@ -12,6 +12,8 @@ namespace News.API.Profilers
             CreateMap<LoginModel, LoginDto>().ReverseMap();
             CreateMap<ApplicationUser,UserDto>().ReverseMap();
             CreateMap<FavoriteArticleDto,UserFavoriteArticle>().ReverseMap();
+            CreateMap<Article, ArticleDto>().ReverseMap();
+           
             //CreateMap<Comment,AddCommentDto>().ReverseMap();
             //CreateMap<UpdateCommentDto, Comment>()
             //    .ForMember(dest => dest.Content , opt => opt.MapFrom(src => src.Content))

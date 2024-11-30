@@ -6,19 +6,22 @@ using Newtonsoft.Json;
 using Microsoft.Extensions.Logging;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Dtos;
+using AutoMapper;
 
 namespace News.Service.Services
 {
     public class NewsService : INewsService
     {
         private readonly HttpClient _httpClient;
+        private readonly IMapper _mapper;
         private readonly IUnitOfWork _unitOfWork;
         private readonly ILogger<NewsService> _logger;
         private readonly string _apiKey;
 
-        public NewsService(HttpClient httpClient,IUnitOfWork unitOfWork,IConfiguration configuration , ILogger<NewsService> logger)
+        public NewsService(HttpClient httpClient,IMapper mapper,IUnitOfWork unitOfWork,IConfiguration configuration , ILogger<NewsService> logger)
         {
             _httpClient = httpClient;
+            _mapper = mapper;
             _unitOfWork = unitOfWork;
             _logger = logger;
             _apiKey = configuration["NewsAPI:ApiKey"];
@@ -45,7 +48,7 @@ namespace News.Service.Services
             }
             return await response.Content.ReadAsStringAsync();
         }
-        
+
         ////Using newsdata.io
         //public async Task<string> GetAllNews()
         //{
@@ -73,7 +76,30 @@ namespace News.Service.Services
         //    }
         //    return await response.Content.ReadAsStringAsync();
         //}
-        public async Task<string> GetArticleById(string id)
+
+        //BEFORE CACHING
+        //public async Task<string> GetArticleById(string id)
+        //{
+        //    _logger.LogInformation($"NewsService --> GetArticleById called with id : {id}");
+
+        //    var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey={_apiKey}";
+        //    var response = await _httpClient.GetAsync(url);
+
+        //    if (!response.IsSuccessStatusCode)
+        //    {
+        //        _logger.LogError($"NewsService --> GetArticleById failed with id : {id} , Error fetching news");
+
+        //        var errorContent = await response.Content.ReadAsStringAsync();
+        //        return $"Error fetching news: {errorContent}";
+        //    }
+
+        //    var jsonResponse = await response.Content.ReadAsStringAsync();
+        //    var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
+        //    var article = newsData?.Articles?.FirstOrDefault(a => a.Url.Contains(id, StringComparison.OrdinalIgnoreCase));
+        //    return article != null ? JsonConvert.SerializeObject(article) : "Article not found";
+        //}
+
+        public async Task<ArticleDto> GetArticleById(string id)
         {
             _logger.LogInformation($"NewsService --> GetArticleById called with id : {id}");
 
@@ -82,17 +108,37 @@ namespace News.Service.Services
 
             if (!response.IsSuccessStatusCode)
             {
-                _logger.LogError($"NewsService --> GetArticleById failed with id : {id} , Error fetching news");
-
+                _logger.LogError($"NewsService --> GetArticleById failed with id : {id}. Status Code: {response.StatusCode}");
                 var errorContent = await response.Content.ReadAsStringAsync();
-                return $"Error fetching news: {errorContent}";
+                throw new Exception($"Error fetching news: {errorContent}");
             }
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
-            var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
-            var article = newsData?.Articles?.FirstOrDefault(a => a.Url.Contains(id, StringComparison.OrdinalIgnoreCase));
-            return article != null ? JsonConvert.SerializeObject(article) : "Article not found";
+
+            try
+            {
+                var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
+
+                // Find the specific article by ID
+                var article = newsData?.Articles?.FirstOrDefault(a => a.Url.Contains(id, StringComparison.OrdinalIgnoreCase));
+
+                if (article == null)
+                {
+                    _logger.LogWarning($"NewsService --> Article with id : {id} not found in the response.");
+                    return null;
+                }
+
+                _logger.LogInformation($"NewsService --> Article with id : {id} successfully fetched.");
+
+                return _mapper.Map<ArticleDto>(article); ;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"NewsService --> Error deserializing article with id : {id}. Exception: {ex.Message}");
+                throw;
+            }
         }
+
         public async Task<bool> CheckArticleExists(string newsId)
         {
             _logger.LogInformation($"NewsService --> CheckArticleExists called with newsId : {newsId}");
