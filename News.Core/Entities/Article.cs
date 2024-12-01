@@ -1,9 +1,10 @@
-﻿namespace News.Core.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace News.Core.Entities
 {
+    [NotMapped]
     public class Article
 	{
-        //[Key]
-        //[DatabaseGenerated(DatabaseGeneratedOption.None)]
         public string Id { get; set; }
 		public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;

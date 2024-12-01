@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Entities;
@@ -18,8 +19,13 @@ namespace News.Service.Services
             _logger.LogInformation($"CommentService --> GetById with id : {id} called");
             return await _unitOfWork.Repository<Comment>().GetByIdAsync(id);
 		}
-
-		public async Task AddAsync(Comment comment)
+        public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string userId)
+        {
+            _logger.LogInformation($"CommentService --> GetCommentsByUserIdAsync with userId : {userId} called");
+            return await _unitOfWork.Repository<Comment>()
+                                 .FindAsync(c => c.UserId == userId);   
+        }
+        public async Task AddAsync(Comment comment)
 		{
             _logger.LogInformation("CommentService --> Add called");
             await _unitOfWork.Repository<Comment>().AddAsync(comment);
