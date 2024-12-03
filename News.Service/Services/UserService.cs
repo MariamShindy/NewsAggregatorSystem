@@ -1,4 +1,5 @@
-﻿using MailKit.Net.Smtp;
+﻿using AutoMapper;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
@@ -16,7 +17,7 @@ using System.Security.Claims;
 
 namespace News.Service.Services
 {
-    public class UserService(IHttpContextAccessor _httpContextAccessor ,ImageUploader _imageUploader,IUnitOfWork _unitOfWork, ILogger<UserService> _logger ,IConfiguration _configuration , UserManager<ApplicationUser> _userManager) : IUserService
+    public class UserService(IHttpContextAccessor _httpContextAccessor,IMapper _mapper ,ImageUploader _imageUploader,IUnitOfWork _unitOfWork, ILogger<UserService> _logger ,IConfiguration _configuration , UserManager<ApplicationUser> _userManager) : IUserService
     {
         public async Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto)
         {
@@ -126,48 +127,48 @@ namespace News.Service.Services
             _logger.LogInformation("UserService --> GetCurrentUser succeeded");
             return currentUser;
         }
-        public async Task<IdentityResult> UpdateUserAsync(EditUserDto model)
+        public async Task<IdentityResult> UpdateUserAsync(EditUserDto editUserDto)
         {
             _logger.LogInformation("UserService --> UpdateUser called");
             var user = await GetCurrentUserAsync();
-            if (!string.IsNullOrWhiteSpace(model.Username) && model.Username != user.UserName)
+            if (!string.IsNullOrWhiteSpace(editUserDto.Username) && editUserDto.Username != user.UserName)
             {
-                var existingUserWithUsername = await _userManager.FindByNameAsync(model.Username);
+                var existingUserWithUsername = await _userManager.FindByNameAsync(editUserDto.Username);
                 if (existingUserWithUsername != null)
                 {
                     _logger.LogWarning("Username already exists.");
                     return IdentityResult.Failed(new IdentityError { Description = "Username already exists." });
                 }
-                user.UserName = model.Username;
+                user.UserName = editUserDto.Username;
             }
-            if (!string.IsNullOrWhiteSpace(model.Email) && model.Email != user.Email)
+            if (!string.IsNullOrWhiteSpace(editUserDto.Email) && editUserDto.Email != user.Email)
             {
-                var existingUserWithEmail = await _userManager.FindByEmailAsync(model.Email);
+                var existingUserWithEmail = await _userManager.FindByEmailAsync(editUserDto.Email);
                 if (existingUserWithEmail != null)
                 {
                     _logger.LogWarning("Email already exists.");
                     return IdentityResult.Failed(new IdentityError { Description = "Email already exists." });
                 }
-                user.Email = model.Email;
+                user.Email = editUserDto.Email;
             }
-            if (!string.IsNullOrWhiteSpace(model.Password))
+            if (!string.IsNullOrWhiteSpace(editUserDto.Password))
             {
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
-                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, model.Password);
+                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.Password);
                 if (!passwordValidationResult.Succeeded)
                 {
                     _logger.LogWarning("Password validation failed.");
                     return passwordValidationResult;
                 }
-                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, model.Password);
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserDto.Password);
             }
-            if (model.ProfilePicUrl != null && model.ProfilePicUrl.Length > 0)
+            if (editUserDto.ProfilePicUrl != null && editUserDto.ProfilePicUrl.Length > 0)
             {
-                var imagePath = await _imageUploader.UploadProfileImageAsync(model.ProfilePicUrl);
+                var imagePath = await _imageUploader.UploadProfileImageAsync(editUserDto.ProfilePicUrl);
                 user.ProfilePicUrl = imagePath;
             }
-            user.FirstName = model.FirstName??user.FirstName;
-            user.LastName = model.LastName??user.LastName;
+            user.FirstName = editUserDto.FirstName??user.FirstName;
+            user.LastName = editUserDto.LastName??user.LastName;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
                 _logger.LogInformation("UserService --> UpdateUser succeeded");
@@ -177,6 +178,7 @@ namespace News.Service.Services
         }
         public async Task SetUserPreferredCategoriesAsync(ApplicationUser user, List<string> categoryNames)
         {
+            _logger.LogInformation("UserService --> SetUserPreferredCategoriesAsync called");
             var categories = await _unitOfWork.Repository<Category>()
                 .FindAsync(c => categoryNames.Contains(c.Name));
 
@@ -195,6 +197,8 @@ namespace News.Service.Services
         }
         public async Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync()
         {
+            _logger.LogInformation("UserService --> GetUserPreferredCategoriesAsync called");
+
             var user = await GetCurrentUserAsync();
             if (user == null)
                 throw new ArgumentException("User not found.");
@@ -206,6 +210,22 @@ namespace News.Service.Services
             });
         }
 
+        public async Task<List<UserDto>> GetAllUsersAsync()
+        {
+            _logger.LogInformation("UserService --> GetAllUsersAsync called");
+
+            try
+            {
+                var users = await _userManager.GetUsersInRoleAsync("User");
+                var userDtos = _mapper.Map<List<UserDto>>(users); 
+                return userDtos;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Error while getting users: {ex.Message}");
+                return new List<UserDto>();
+            }
+        }
     }
 }
 

@@ -66,13 +66,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "2fb4332f-318e-410b-9f80-6b15a542c5e4",
+                            Id = "d0c4f9cd-5eb0-4b52-9d3c-3b3e24bdddd7",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "1cb9cc07-0a00-4024-97a1-0c7c9e48ae80",
+                            Id = "3c4508d4-9466-49d7-b9e3-88184d3b21e8",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -260,61 +260,6 @@ namespace News.Infrastructure.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("News.Core.Entities.Article", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Author")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CategoryId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<bool>("IsTrending")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<DateTime>("PublishedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Sentiment")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("SourceName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Summary")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Title")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CategoryId");
-
-                    b.ToTable("Article");
-                });
-
             modelBuilder.Entity("News.Core.Entities.Category", b =>
                 {
                     b.Property<int>("Id")
@@ -342,7 +287,7 @@ namespace News.Infrastructure.Migrations
 
                     b.Property<string>("ArticleId")
                         .IsRequired()
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Content")
                         .IsRequired()
@@ -356,8 +301,6 @@ namespace News.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ArticleId");
 
                     b.HasIndex("UserId");
 
@@ -456,25 +399,8 @@ namespace News.Infrastructure.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("News.Core.Entities.Article", b =>
-                {
-                    b.HasOne("News.Core.Entities.Category", "Category")
-                        .WithMany("Articles")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Category");
-                });
-
             modelBuilder.Entity("News.Core.Entities.Comment", b =>
                 {
-                    b.HasOne("News.Core.Entities.Article", null)
-                        .WithMany("Comments")
-                        .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.HasOne("News.Core.Entities.ApplicationUser", "User")
                         .WithMany()
                         .HasForeignKey("UserId")
@@ -493,16 +419,6 @@ namespace News.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("News.Core.Entities.Article", b =>
-                {
-                    b.Navigation("Comments");
-                });
-
-            modelBuilder.Entity("News.Core.Entities.Category", b =>
-                {
-                    b.Navigation("Articles");
                 });
 #pragma warning restore 612, 618
         }

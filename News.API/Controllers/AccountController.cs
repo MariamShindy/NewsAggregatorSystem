@@ -13,7 +13,7 @@ namespace News.API.Controllers
 	{
         // POST : api/account/register
         [HttpPost("register")]
-        public async Task<IActionResult> Register(/*[FromBody]*/ [FromForm] RegisterDto model)
+        public async Task<IActionResult> Register([FromBody]/*[FromForm]*/ RegisterDto model)
         {
             var registerModel = _mapper.Map<RegisterModel>(model);
             var (isSuccess, message) = await _accountService.RegisterUserAsync(registerModel);

@@ -9,19 +9,19 @@ namespace News.API.Controllers
     [Authorize]
     public class NewsController (INewsService _newsService) : ControllerBase
     {
-        //GET: api/news/all
+        
         [HttpGet("all")]
         public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 10)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Page and pageSize must be positive integers.");
 
-            var newsResult = await _newsService.GetAllNewsAsync(page, pageSize);
-            if (newsResult.StartsWith("Error fetching news"))
-                return StatusCode(500, newsResult);
+            var newsResult = await _newsService.GetAllCategorizedArticlesAsync(page,pageSize);
+             if (newsResult.Count() == 0)
+                   return StatusCode(500, newsResult);
 
             return Ok(newsResult);
-        }    
+        }
 
         // GET: api/news/{id}
         [HttpGet("{id}")]
@@ -42,6 +42,23 @@ namespace News.API.Controllers
             var categories = await _newsService.GetAllCategoriesAsync();
             return Ok(categories); 
         }
+
+        ////GET: api/news/all
+        //[HttpGet("all")]
+        //public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 10)
+        //{
+        //    if (page <= 0 || pageSize <= 0)
+        //        return BadRequest("Page and pageSize must be positive integers.");
+
+        //    var newsResult = await _newsService.GetAllNewsAsync(page, pageSize);
+        //    if (newsResult.StartsWith("Error fetching news"))
+        //        return StatusCode(500, newsResult);
+
+        //    return Ok(newsResult);
+        //}
+
+
+        //GET: api/news/all
         //BEFORE CACHING
         //// GET: api/news/{id}
         //[HttpGet("{id}")]

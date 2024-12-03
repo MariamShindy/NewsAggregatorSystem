@@ -8,8 +8,8 @@ namespace News.Core.Contracts
     {
         Task<ApplicationUser> GetCurrentUserAsync();
         Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto);
-        public Task<bool> SendSurveyAsync(SurveyDto surveyDto);
-
+        Task<bool> SendSurveyAsync(SurveyDto surveyDto);
+        Task<List<UserDto>> GetAllUsersAsync();
         Task<IdentityResult> UpdateUserAsync(EditUserDto editUserDto);
         Task SetUserPreferredCategoriesAsync(ApplicationUser user, List<string> categoryNames);
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync();

@@ -27,7 +27,17 @@ namespace News.API.Controllers
             if (comment == null) return NotFound();
             return Ok(comment);
         }
-
+        // GET: api/comment/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetCommentsByUserId(string userId)
+        {
+            var comments = await _commentService.GetCommentsByUserIdAsync(userId);
+            if (comments == null || !comments.Any())
+            {
+                return NotFound("No comments found for this user.");
+            }
+            return Ok(comments);
+        }
         // POST: api/comment/{newsId}/comments
         [HttpPost("{newsId}/comments")]
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)

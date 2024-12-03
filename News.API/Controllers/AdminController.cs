@@ -10,7 +10,7 @@ namespace News.API.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class AdminController(UserManager<ApplicationUser> _userManager,IAccountService _accountService , INewsService _newsService ,IUserService _userService) : ControllerBase
+    public class AdminController(UserManager<ApplicationUser> _userManager, IAccountService _accountService, INewsService _newsService, IUserService _userService) : ControllerBase
     {
         // POST : api/admin/lock-user/{id}
         [HttpPost("lock-user/{id}")]
@@ -37,7 +37,7 @@ namespace News.API.Controllers
             if (user == null) return NotFound();
             var currentUser = await _userService.GetCurrentUserAsync();
             var isAdmin = _accountService.CheckAdminRoleAsync(currentUser);
-            if(isAdmin.Result)
+            if (isAdmin.Result)
             {
                 user.LockoutEnd = null;
                 var result = await _userManager.UpdateAsync(user);
@@ -121,6 +121,30 @@ namespace News.API.Controllers
                 catch (Exception)
                 {
                     return StatusCode(500, "Internal server error.");
+                }
+            }
+            else
+            {
+                return Unauthorized();
+            }
+        }
+        // GET : api/admin/all-users
+        // TEST
+        [HttpGet("all-users")]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var currentUser = await _userService.GetCurrentUserAsync();
+            var isAdmin = await _accountService.CheckAdminRoleAsync(currentUser);
+            if (isAdmin)
+            {
+                try
+                {
+                    var userDtos = await _userService.GetAllUsersAsync();
+                    return Ok(userDtos);
+                }
+                catch (Exception)
+                {
+                    return StatusCode(500, new { Status = "Error", Message = "An error occurred while fetching users." });
                 }
             }
             else
