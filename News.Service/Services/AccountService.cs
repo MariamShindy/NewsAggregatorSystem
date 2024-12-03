@@ -30,8 +30,8 @@ namespace News.Service.Services
                 return (false, "User already exists!");
             }
 
-            string profilePicUrl = null;
-            if (model.ProfilePicUrl != null)
+            string? profilePicUrl = null;
+            if (model.ProfilePicUrl is not null)
             {
                 profilePicUrl = await _imageUploader.UploadProfileImageAsync(model.ProfilePicUrl);
                 _logger.LogInformation("AccountService --> ImageUploader succeeded");

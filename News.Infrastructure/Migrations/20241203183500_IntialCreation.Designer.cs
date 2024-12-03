@@ -12,7 +12,7 @@ using News.Infrastructure.Data;
 namespace News.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241201185949_Intial Creation")]
+    [Migration("20241203183500_IntialCreation")]
     partial class IntialCreation
     {
         /// <inheritdoc />
@@ -69,13 +69,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "c8f37b43-567b-4b54-8b22-47f85afbe763",
+                            Id = "d0c4f9cd-5eb0-4b52-9d3c-3b3e24bdddd7",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "a3bed131-ff2c-4335-88c9-b2db8bd738a1",
+                            Id = "3c4508d4-9466-49d7-b9e3-88184d3b21e8",
                             Name = "User",
                             NormalizedName = "USER"
                         });
