@@ -111,7 +111,6 @@ namespace News.Service.Services
             }
         }
 
-
         public async Task<ApplicationUser> GetCurrentUserAsync()
         {
             _logger.LogInformation("UserService --> GetCurrentUser called");
@@ -183,15 +182,11 @@ namespace News.Service.Services
                 .FindAsync(c => categoryNames.Contains(c.Name));
 
             if (categories.Count() != categoryNames.Count)
-            {
                 throw new ArgumentException("One or more category names are invalid.");
-            }
 
             user.Categories.Clear();
             foreach (var category in categories)
-            {
                 user.Categories.Add(category);
-            }
 
             await _unitOfWork.CompleteAsync();
         }
