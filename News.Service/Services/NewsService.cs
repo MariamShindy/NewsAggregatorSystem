@@ -14,12 +14,26 @@ namespace News.Service.Services
     {
         private readonly string _apiKey = _configuration["NewsAPI:ApiKey"]!;
         private readonly string _baseUrl = _configuration["NewsAPI:BaseUrl"]!;
-        // Fetch sources and their categories
-        private async Task<Dictionary<string, string>> GetSourceCategoriesAsync()
+        private readonly string _sourceBaseUrl = _configuration["NewsAPI:SourcesBaseUrl"]!;
+
+        #region APIs URLs
+        //NEWS API
+        //var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&page={page}&pageSize={pageSize}&apiKey={_apiKey}"; 
+        //var url = $" https://newsapi.org/v2/everything?q=bitcoin&apiKey={_apiKey}"; //not including the categories //total response 10330
+        //var url = $" https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}"; //include categories //include all sources
+
+        //NEWS DATA
+        //var url = $"https://newsdata.io/api/1/latest?apikey=pub_6007775e8108a6bb924d771106d3d3a18e48a&q=social"; //include categories //total response 32031 
+
+        //MEDIA STACK
+        //var url = $"http://api.mediastack.com/v1/news?access_key=c3eca2376d67324d55ed5341e396a4fd"; //include categories //total response 10000 
+        #endregion
+
+        public async Task<Dictionary<string, string>> GetSourceCategoriesAsync()
         {
             _logger.LogInformation($"NewsService --> Fetching source categories from NewsAPI.");
 
-            var url = $"https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}";
+            var url = $"{_sourceBaseUrl}?apiKey={_apiKey}";
             _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
 
             var response = await _httpClient.GetAsync(url);
@@ -36,17 +50,27 @@ namespace News.Service.Services
             var sourceCategories = sourcesResponse?.Sources.ToDictionary(s => s.Id, s => s.Category) ?? new Dictionary<string, string>();
 
             _logger.LogInformation($"NewsService --> Fetched {sourceCategories.Count} source categories.");
+            
+            var existingCategories = await _unitOfWork.Repository<Category>().GetAllAsync();
 
+            if (!existingCategories.Any())
+            {
+                foreach (var category in sourceCategories.Values.Distinct())
+                {
+                    AddOrUpdateCategoryDto categoryDto = new AddOrUpdateCategoryDto() { Name = category };
+                    await AddCategoryAsync(categoryDto);
+                    _logger.LogInformation($"NewsService --> GetSourceCategoriesAsync --> Add {categoryDto.Name} category to database .");
+                }
+            }
             return sourceCategories;
         }
+
         public async Task<IEnumerable<ArticleDto>> GetAllCategorizedArticlesAsync(int? page = 1, int? pageSize = 10)
         {
             _logger.LogInformation($"NewsService --> GetAllCategorizedArticles called with page: {page} and pageSize: {pageSize}");
-
             var sourceCategories = await GetSourceCategoriesAsync();
             var url = $"{_baseUrl}?sortBy=popularity&q=tesla&apiKey={_apiKey}";
             _logger.LogInformation($"NewsService --> Requesting URL: {url}");
-
             var response = await _httpClient.GetAsync(url);
             if (!response.IsSuccessStatusCode)
             {
@@ -54,11 +78,9 @@ namespace News.Service.Services
                 var errorContent = await response.Content.ReadAsStringAsync();
                 return null;
             }
-
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
 
-            // Categorize and map articles
             var articles = newsData?.Articles.Select(article =>
             {
                 if (article.Source != null && !string.IsNullOrEmpty(article.Source.Id) && sourceCategories.ContainsKey(article.Source.Id))
@@ -68,10 +90,13 @@ namespace News.Service.Services
                 }
                 else
                 {
-                    article.Category = "Uncategorized"; //Handle Uncategorized Articles
+                    article.Category = "Uncategorized";
+                    article.Source.Category = "Uncategorized";
+
                 }
+                article.Id = article.Url;
                 return _mapper.Map<ArticleDto>(article);
-            });
+            });         
 
             return articles;
         }
@@ -100,42 +125,22 @@ namespace News.Service.Services
                 throw;
             }
         }
-        //After categories
+
         public async Task<bool> CheckArticleExistsAsync(string newsId)
         {
             _logger.LogInformation($"NewsService --> CheckArticleExists called with newsId : {newsId}");
             var articles = await GetAllCategorizedArticlesAsync(1, 10);
             return articles.Any(a => a.Url.Contains(newsId, StringComparison.OrdinalIgnoreCase));
         }
-       
-        public async Task<List<string>> GetAllCategoriesAsync()
+
+        public async Task<IEnumerable<string>> GetAllCategoriesAsync()
         {
             _logger.LogInformation($"NewsService --> Fetching all categories from NewsAPI.");
-
-            var url = $"https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}";
-            _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
-
-            var response = await _httpClient.GetAsync(url);
-            if (!response.IsSuccessStatusCode)
-            {
-                _logger.LogError($"NewsService --> Failed to fetch source categories from NewsAPI. Status: {response.StatusCode}");
-                var errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Error fetching source categories: {errorContent}");
-            }
-
-            var jsonResponse = await response.Content.ReadAsStringAsync();
-            var sourcesResponse = JsonConvert.DeserializeObject<SourcesResponse>(jsonResponse);
-
-            // Extract all unique categories from the sources
-            var sourceCategories = sourcesResponse?.Sources
-                .Select(s => s.Category)
-                .Distinct()
-                .ToList() ?? new List<string>();
-
-            _logger.LogInformation($"NewsService --> Fetched {sourceCategories.Count} unique categories.");
-            return sourceCategories;
+            var allCategories =  await GetSourceCategoriesAsync();
+            List<string> categories = allCategories.Values.Distinct().ToList(); ;   
+            _logger.LogInformation($"NewsService --> Fetched {categories.Count} unique categories.");
+            return categories;
         }
-
 
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
         {
@@ -180,91 +185,5 @@ namespace News.Service.Services
             await _unitOfWork.Repository<Category>().UpdateAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
         }
-        //// Using newsAPI
-        //public async Task<string> GetAllNewsAsync(int? page = 1, int? pageSize = 10)
-        //{
-        //    _logger.LogInformation($"NewsService --> GetAllNews called with page: {page} and pageSize: {pageSize}");
-        //    //NEWS API
-        //    //var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&page={page}&pageSize={pageSize}&apiKey={_apiKey}"; 
-        //    //var url = $" https://newsapi.org/v2/everything?q=bitcoin&apiKey={_apiKey}"; //not including the categories //total response 10330
-        //    //var url = $" https://newsapi.org/v2/top-headlines/sources?apiKey={_apiKey}"; //include categories //include all sources
-
-        //    //NEWS DATA
-        //    //var url = $"https://newsdata.io/api/1/latest?apikey=pub_6007775e8108a6bb924d771106d3d3a18e48a&q=social"; //include categories //total response 32031 
-
-        //    //MEDIA STACK
-        //    //var url = $"http://api.mediastack.com/v1/news?access_key=c3eca2376d67324d55ed5341e396a4fd"; //include categories //total response 10000
-
-        //    var url = $"{_baseUrl}?sortBy=popularity&q=tesla&apiKey={_apiKey}";
-        //    _logger.LogInformation($"NewsService --> Requesting URL: {url}");
-        //    _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
-        //    var response = await _httpClient.GetAsync(url);
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        _logger.LogError($"NewsService --> GetAllNews failed , Error fetching news");
-
-        //        var errorContent = await response.Content.ReadAsStringAsync();
-        //        return $"Error fetching news: {errorContent}";
-        //    }
-        //    return await response.Content.ReadAsStringAsync();
-        //}
-
-
-        ////Before categories
-        //public async Task<bool> CheckArticleExistsAsync(string newsId)
-        //{
-        //    _logger.LogInformation($"NewsService --> CheckArticleExists called with newsId : {newsId}");
-        //    var jsonResponse = await GetAllNewsAsync();
-        //    var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
-        //    return newsData?.Articles?.Any(a => a.Url.Contains(newsId, StringComparison.OrdinalIgnoreCase)) ?? false;
-        //}
-
-        //public async Task<IEnumerable<Category>> GetAllCategoriesAsync()
-        //{
-        //    _logger.LogInformation($"NewsService --> GetAllCategoriesAsync called");
-        //    return await _unitOfWork.Repository<Category>().GetAllAsync();
-        //}
-
-        //public async Task<ArticleDto> GetArticleByIdAsync(string id)
-        //{
-        //    _logger.LogInformation($"NewsService --> GetArticleById called with id : {id}");
-        //    _httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("News", "1.0"));
-
-        //    var url = $"https://newsapi.org/v2/top-headlines?sources=bbc-news&apiKey={_apiKey}";
-        //    var response = await _httpClient.GetAsync(url);
-
-        //    if (!response.IsSuccessStatusCode)
-        //    {
-        //        _logger.LogError($"NewsService --> GetArticleById failed with id : {id}. Status Code: {response.StatusCode}");
-        //        var errorContent = await response.Content.ReadAsStringAsync();
-        //        throw new Exception($"Error fetching news: {errorContent}");
-        //    }
-
-        //    var jsonResponse = await response.Content.ReadAsStringAsync();
-
-        //    try
-        //    {
-        //        var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
-
-        //        // Find the specific article by ID
-        //        var article = newsData?.Articles?.FirstOrDefault(a => a.Url.Contains(id, StringComparison.OrdinalIgnoreCase));
-
-        //        if (article == null)
-        //        {
-        //            _logger.LogWarning($"NewsService --> Article with id : {id} not found in the response.");
-        //            return null;
-        //        }
-
-        //        _logger.LogInformation($"NewsService --> Article with id : {id} successfully fetched.");
-
-        //        return _mapper.Map<ArticleDto>(article); ;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError($"NewsService --> Error deserializing article with id : {id}. Exception: {ex.Message}");
-        //        throw;
-        //    }
-        //}
-
     }
 }
