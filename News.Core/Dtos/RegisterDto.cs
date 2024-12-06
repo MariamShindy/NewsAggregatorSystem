@@ -10,6 +10,6 @@ namespace News.Core.Dtos
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public IFormFile? ProfilePicUrl {  get; set; }
-        //public string ConfirmPassword { get; set; }  = String.Empty;
+        public string ConfirmPassword { get; set; }  = String.Empty;
     }
 }
