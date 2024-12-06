@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace News.Core.Dtos
 {
-    public class ResetPasswordDto
+    public class ValidateVerificationCodeDto
     {
         public string Email { get; set; } = string.Empty;
-        //public string Token { get; set; } = string.Empty;
-        public string NewPassword { get; set; } = string.Empty;
         public string VerificationCode { get; set; } = string.Empty;
-
     }
 }

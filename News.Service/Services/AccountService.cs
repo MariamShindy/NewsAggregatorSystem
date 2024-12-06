@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
 using Microsoft.AspNetCore.Routing;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
@@ -17,7 +18,7 @@ using System.Text;
 
 namespace News.Service.Services
 {
-    public class AccountService(ILogger<AccountService> _logger ,ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
+    public class AccountService(ILogger<AccountService> _logger , IMemoryCache _memoryCache , ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
     {
         public async Task<(bool isSuccess, string message , string? token)> RegisterUserAsync(RegisterModel model)
         {
@@ -81,6 +82,86 @@ namespace News.Service.Services
             return (false, null, "Invalid credentials");
         }
 
+        public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
+        {
+            _logger.LogInformation("AccountService --> ForgotPassword called");
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogInformation("AccountService --> ForgotPassword --> user not found");
+                return (false, "User not found.");
+            }
+
+            var verificationCode = new Random().Next(100000, 999999).ToString(); 
+
+            _memoryCache.Set(email, verificationCode, TimeSpan.FromMinutes(15)); 
+
+            var emailBody = $"Your password reset verification code is: {verificationCode}";
+
+            var emailToSend = new Email
+            {
+                To = email,
+                Subject = "Password Reset Verification Code",
+                Body = emailBody
+            };
+
+            await _mailSettings.SendEmail(emailToSend);
+            _logger.LogInformation("AccountService --> ForgotPassword --> Verification code has been sent to user email");
+
+            return (true, "Verification code sent to your email."); 
+        }
+        public async Task<(bool Success, string Message)> ValidateVerificationCodeAsync(string email, string verificationCode)
+        {
+            _logger.LogInformation("AccountService --> ValidateVerificationCode called");
+
+            if (!_memoryCache.TryGetValue(email, out string storedCode) || storedCode != verificationCode)
+            {
+                _logger.LogWarning("AccountService --> ValidateVerificationCode --> Invalid or expired verification code");
+                return (false, "Invalid or expired verification code.");
+            }
+
+            _logger.LogInformation("AccountService --> ValidateVerificationCode --> Verification code is valid");
+            return (true, "Verification code is valid.");
+        }
+
+        public async Task<(bool Success, string Message , string? Token)> ResetPasswordAsync(string email, string verificationCode, string newPassword)
+        {
+            _logger.LogInformation("AccountService --> ResetPassword called");
+
+            var validateResult = await ValidateVerificationCodeAsync(email, verificationCode);
+            if (!validateResult.Success)
+                return (validateResult.Success, validateResult.Message, null);  
+
+            var user = await _userManager.FindByEmailAsync(email);
+            if (user == null)
+            {
+                _logger.LogInformation("AccountService --> ResetPassword --> user not found");
+                return (false, "User not found.",null);
+            }
+
+            var resetPasswordtoken =  await _userManager.GeneratePasswordResetTokenAsync(user);
+            var resetPassResult = await _userManager.ResetPasswordAsync(user, resetPasswordtoken, newPassword);
+
+            if (!resetPassResult.Succeeded)
+            {
+                var errors = string.Join(", ", resetPassResult.Errors.Select(e => e.Description));
+                _logger.LogWarning("AccountService --> ResetPassword failed");
+                return (false, "Password reset failed: " + errors,null);
+            }
+            var token = GenerateJwtToken(user);
+            _logger.LogInformation("AccountService --> ResetPassword succeeded");
+            return (true, "Password reset successful.",token);
+        }
+
+        public async Task<bool> CheckAdminRoleAsync(ApplicationUser currentUser)
+        {
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            if (roles.Contains("Admin"))
+                return true;
+            else
+                return false;
+        }
         private string GenerateJwtToken(ApplicationUser user)
         {
             _logger.LogInformation("AccountService --> GenerateJwtToken called");
@@ -104,69 +185,6 @@ namespace News.Service.Services
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
-        {
-            _logger.LogInformation("AccountService --> ForgotPassword called");
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                _logger.LogInformation("AccountService --> ForgotPassword --> user not found");
-                return (false, "User not found.");
-            }
-
-            var token = await _userManager.GeneratePasswordResetTokenAsync(user);
-
-            var actionContext = new ActionContext(_httpContextAccessor.HttpContext, _httpContextAccessor.HttpContext.GetRouteData(), new ActionDescriptor());
-            var urlHelper = _urlHelper.GetUrlHelper(actionContext);
-
-            var resetLink = urlHelper.Action("ResetPassword", "Account", new { token, email }, _httpContextAccessor.HttpContext.Request.Scheme);
-            var emailBody = $"Please reset your password by clicking this link: {resetLink}";
-
-            var emailToSend = new Email
-            {
-                To = email,
-                Subject = "Reset password",
-                Body = emailBody
-            };
-
-            await _mailSettings.SendEmail(emailToSend);
-            _logger.LogInformation("AccountService --> ForgotPassword --> Password reset link has been sent to user email");
-
-            return (true, "Password reset link has been sent to your email.");
-        }
-
-        //Should decode the token before use
-        public async Task<(bool Success, string Message)> ResetPasswordAsync(string email, string token, string newPassword)
-        {
-            _logger.LogInformation("AccountService --> ResetPassword called");
-
-            var user = await _userManager.FindByEmailAsync(email);
-            if (user == null)
-            {
-                _logger.LogInformation("AccountService --> ResetPassword --> user not found");
-
-                return (false, "User not found.");
-            }
-            var resetPassResult = await _userManager.ResetPasswordAsync(user, token, newPassword);
-            if (!resetPassResult.Succeeded)
-            {
-                var errors = string.Join(", ", resetPassResult.Errors.Select(e => e.Description));
-                _logger.LogWarning("AccountService --> ResetPassword failed");
-                return (false, "Password reset failed.");
-            }
-            _logger.LogInformation("AccountService --> ResetPassword succeeded");
-            return (true, "Password reset successful.");
-        }
-        public async Task<bool> CheckAdminRoleAsync(ApplicationUser currentUser)
-        {
-            var roles = await _userManager.GetRolesAsync(currentUser);
-            if (roles.Contains("Admin"))
-                return true;
-            else
-                return false;
-        }
-
     }
 }
 
