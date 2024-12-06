@@ -19,15 +19,19 @@ namespace News.Service.Services
 {
     public class AccountService(ILogger<AccountService> _logger ,ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
     {
-        public async Task<(bool isSuccess, string message)> RegisterUserAsync(RegisterModel model)
+        public async Task<(bool isSuccess, string message , string? token)> RegisterUserAsync(RegisterModel model)
         {
             _logger.LogInformation("AccountService --> RegisterUser called");
-
+            if (model.Password != model.ConfirmPassword)
+            {
+                _logger.LogWarning("AccountService --> RegisterUser --> Passwords do not match!");
+                return (false, "Password and Confirm Password do not match!", null);
+            }
             var userExists = await _userManager.FindByNameAsync(model.UserName);
             if (userExists != null)
             {
                 _logger.LogWarning("AccountService --> RegisterUser --> User already exists! ");
-                return (false, "User already exists!");
+                return (false, "User already exists!" ,null);
             }
 
             string? profilePicUrl = null;
@@ -47,12 +51,13 @@ namespace News.Service.Services
 
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
-                return (false, result.Errors.FirstOrDefault()?.Description ?? "User creation failed");
+                return (false, result.Errors.FirstOrDefault()?.Description ?? "User creation failed" , null);
 
             var role = !_userManager.Users.Any() ? "Admin" : "User";
             await _userManager.AddToRoleAsync(user, role);
             _logger.LogInformation("AccountService --> RegisterUser succeeded");
-            return (true, "User created successfully!");
+            var token = GenerateJwtToken(user);
+            return (true, "User created successfully!" , token);
         }
         public async Task<(bool isSuccess, string token, string message)> LoginUserAsync(LoginModel model)
         {
