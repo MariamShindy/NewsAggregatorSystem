@@ -45,9 +45,25 @@ namespace News.API.Controllers
         [HttpPost("forgot-password")]
         public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordDto model)
         {
-            var result = await _accountService.ForgotPasswordAsync(model.Email);
+            var (success, message) = await _accountService.ForgotPasswordAsync(model.Email);
+            if (!success)
+                return BadRequest(new { Status = "Error", Message = message });
+
+            return Ok(new
+            {
+                Status = "Success",
+                Message = message,
+            });
+        }
+
+        //POST : api/account/validate-verification-code
+        [HttpPost("validate-verification-code")]
+        public async Task<IActionResult> ValidateVerificationCode([FromBody] ValidateVerificationCodeDto model)
+        {
+            var result = await _accountService.ValidateVerificationCodeAsync(model.Email, model.VerificationCode);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
+
             return Ok(new { Status = "Success", Message = result.Message });
         }
 
@@ -55,10 +71,11 @@ namespace News.API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto model)
         {
-            var result = await _accountService.ResetPasswordAsync(model.Email, model.Token, model.NewPassword);
+            var result = await _accountService.ResetPasswordAsync(model.Email, model.VerificationCode, model.NewPassword);
             if (!result.Success)
                 return BadRequest(new { Status = "Error", Message = result.Message });
-            return Ok(new { Status = "Success", Message = result.Message });
+
+            return Ok(new { Status = "Success", Message = result.Message , Token = result.Token});
         }
     }
 
