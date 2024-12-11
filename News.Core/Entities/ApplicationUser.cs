@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Identity;
 
 namespace News.Core.Entities
 {
-	public class ApplicationUser : IdentityUser
+    public class ApplicationUser : IdentityUser
 	{
 		public string FirstName { get; set; } = string.Empty;
 		public string LastName { get; set; } = string.Empty;

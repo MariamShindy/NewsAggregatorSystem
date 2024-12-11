@@ -8,6 +8,6 @@ namespace News.Core.Entities
 {
     public class SourcesResponse
     {
-        public List<Source> Sources { get; set; }
+        public ICollection<Source> Sources { get; set; }
     }
 }
