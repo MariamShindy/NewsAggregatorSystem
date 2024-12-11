@@ -16,7 +16,7 @@ namespace News.Core.Entities
         //public bool IsTrending { get; set; }
         //public string Language { get; set; } = string.Empty;
         //public string? Sentiment { get; set; } = string.Empty;
-        public string urlToImage { get; set; } = string.Empty;
+        public string UrlToImage { get; set; } = string.Empty;
         public ICollection<Comment>? Comments { get; set; }
         //public Category Category { get; set; }
         public string Category { get; set; } = string.Empty;

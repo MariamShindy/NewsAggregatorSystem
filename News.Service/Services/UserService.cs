@@ -175,7 +175,7 @@ namespace News.Service.Services
                 _logger.LogWarning("UserService --> UpdateUser failed");
             return result;
         }
-        public async Task SetUserPreferredCategoriesAsync(ApplicationUser user, List<string> categoryNames)
+        public async Task SetUserPreferredCategoriesAsync(ApplicationUser user, ICollection<string> categoryNames)
         {
             _logger.LogInformation("UserService --> SetUserPreferredCategoriesAsync called");
             var categories = await _unitOfWork.Repository<Category>()

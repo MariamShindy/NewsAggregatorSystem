@@ -11,7 +11,7 @@ namespace News.API.Controllers
     {
         
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 10)
+        public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 40)
         {
             if (page <= 0 || pageSize <= 0)
                 return BadRequest("Page and pageSize must be positive integers.");

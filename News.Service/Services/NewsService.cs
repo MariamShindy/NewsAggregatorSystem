@@ -65,7 +65,7 @@ namespace News.Service.Services
             return sourceCategories;
         }
 
-        public async Task<IEnumerable<ArticleDto>> GetAllCategorizedArticlesAsync(int? page = 1, int? pageSize = 10)
+        public async Task<IEnumerable<ArticleDto>> GetAllCategorizedArticlesAsync(int? page = 1, int? pageSize = 40)
         {
             _logger.LogInformation($"NewsService --> GetAllCategorizedArticles called with page: {page} and pageSize: {pageSize}");
             var sourceCategories = await GetSourceCategoriesAsync();
@@ -81,7 +81,9 @@ namespace News.Service.Services
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
 
-            var articles = newsData?.Articles.Select(article =>
+            var articles = newsData?.Articles
+                .Where(article => !string.IsNullOrEmpty(article.UrlToImage))
+                .Select(article =>
             {
                 if (article.Source != null && !string.IsNullOrEmpty(article.Source.Id) && sourceCategories.ContainsKey(article.Source.Id))
                 {
@@ -96,9 +98,9 @@ namespace News.Service.Services
                 }
                 article.Id = article.Url;
                 return _mapper.Map<ArticleDto>(article);
-            });         
-
-            return articles;
+            });
+          
+            return articles ?? new List<ArticleDto>();
         }
        
         public async Task<ArticleDto> GetArticleByIdAsync(string id)
