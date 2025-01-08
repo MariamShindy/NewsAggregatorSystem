@@ -7,7 +7,9 @@ using News.Core.Entities;
 
 namespace News.Service.Services
 {
-    public class FavoriteService(ILogger<FavoriteService> _logger,INewsService _newsService, IMemoryCache _cache, IUnitOfWork _unitOfWork) : IFavoriteService
+    public class FavoriteService(ILogger<FavoriteService> _logger,
+        INewsService _newsService, IMemoryCache _cache,
+        IUnitOfWork _unitOfWork) : IFavoriteService
     {
         private const string CacheKeyPrefix = "FavoriteArticles_";
 

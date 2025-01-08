@@ -6,10 +6,10 @@ namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize]
+    [Authorize(Roles ="User")]
     public class NewsController (INewsService _newsService) : ControllerBase
     {
-        
+        // GET: api/news/all
         [HttpGet("all")]
         public async Task<IActionResult> GetAllNews([FromQuery] int? page = 1, [FromQuery] int? pageSize = 40)
         {

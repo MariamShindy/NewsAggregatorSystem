@@ -15,19 +15,14 @@ namespace News.API.Controllers
             var cachedKeys = _cache.Get<List<string>>(keysCacheKey);
 
             if (cachedKeys == null || !cachedKeys.Any())
-            {
                 return NotFound("No cached articles found.");
-            }
 
             var cachedArticles = new List<object>();
             foreach (var key in cachedKeys)
             {
                 if (_cache.TryGetValue(key, out var article))
-                {
                     cachedArticles.Add(new { Key = key, Article = article });
-                }
             }
-
             return Ok(cachedArticles);
         }
     }

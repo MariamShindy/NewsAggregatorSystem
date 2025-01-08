@@ -1,17 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace News.Core.Settings
+﻿namespace News.Core.Settings
 {
     public class MailSettings
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string DisplayName { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public string Password { get; set; } = string.Empty;
+        public string DisplayName { get; set; } = string.Empty;
         public int Port { get; set; }
-        public string Host { get; set; }
+        public string Host { get; set; } = string.Empty;
     }
 }

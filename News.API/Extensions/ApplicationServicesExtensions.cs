@@ -81,11 +81,11 @@ namespace News.API.Extensions
                                 ValidateIssuerSigningKey = true,
                                 ValidIssuer = configuration["Jwt:Issuer"],
                                 ValidAudience = configuration["Jwt:Audience"],
-                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]))
+                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(configuration["Jwt:Key"]!)),
+                                RoleClaimType = "http://schemas.microsoft.com/ws/2008/06/identity/claims/role"
                             };
                         });
             return services;
-
         }
     }
 }

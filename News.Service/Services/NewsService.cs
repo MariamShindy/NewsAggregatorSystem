@@ -10,7 +10,9 @@ using AutoMapper;
 
 namespace News.Service.Services
 {
-    public class NewsService(HttpClient _httpClient, IMapper _mapper, IUnitOfWork _unitOfWork,IConfiguration _configuration, ILogger<NewsService> _logger) : INewsService
+    public class NewsService(HttpClient _httpClient, IMapper _mapper, 
+        IUnitOfWork _unitOfWork,IConfiguration _configuration, 
+        ILogger<NewsService> _logger) : INewsService
     {
         private readonly string _apiKey = _configuration["NewsAPI:ApiKey"]!;
         private readonly string _baseUrl = _configuration["NewsAPI:BaseUrl"]!;
@@ -76,7 +78,7 @@ namespace News.Service.Services
             {
                 _logger.LogError($"NewsService --> GetAllNews failed, Error fetching news");
                 var errorContent = await response.Content.ReadAsStringAsync();
-                return null;
+                return null!;
             }
             var jsonResponse = await response.Content.ReadAsStringAsync();
             var newsData = JsonConvert.DeserializeObject<NewsResponse>(jsonResponse);
