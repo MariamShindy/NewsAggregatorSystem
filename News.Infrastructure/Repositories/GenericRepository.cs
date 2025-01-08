@@ -5,14 +5,8 @@ using System.Linq.Expressions;
 
 namespace News.Infrastructure.Repositories
 {
-    public class GenericRepository<T> : IGenericRepository<T> where T : class
+    public class GenericRepository<T> (ApplicationDbContext _dbContext) : IGenericRepository<T> where T : class
     {
-        private readonly ApplicationDbContext _dbContext;
-
-        public GenericRepository(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-        }
         public async Task<IReadOnlyList<T>> GetAllAsync()
         {
             return await _dbContext.Set<T>().AsNoTracking().ToListAsync();

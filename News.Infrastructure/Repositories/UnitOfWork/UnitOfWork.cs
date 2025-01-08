@@ -5,16 +5,8 @@ using System.Collections;
 
 namespace News.Infrastructure.Repositories.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(ApplicationDbContext _dbContext, Hashtable _repositories) : IUnitOfWork
     {
-        private readonly ApplicationDbContext _dbContext;
-        private Hashtable _repositories;
-
-        public UnitOfWork(ApplicationDbContext dbContext)
-        {
-            _dbContext = dbContext;
-            _repositories = new Hashtable();
-        }
         public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
         {
             var key = typeof(TEntity).Name;
@@ -30,6 +22,5 @@ namespace News.Infrastructure.Repositories.UnitOfWork
 
         public async ValueTask DisposeAsync()
             => await _dbContext.DisposeAsync();
-
     }
 }

@@ -6,10 +6,12 @@ using News.Core.Dtos;
 
 namespace News.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles ="User")]
 	[Route("api/[controller]")]
 	[ApiController]
-	public class UserController(IMapper _mapper, IUserService _userService,IFavoriteService _favoriteService , INewsService _newsService) : ControllerBase
+	public class UserController(IMapper _mapper,
+        IUserService _userService,IFavoriteService _favoriteService ,
+        INewsService _newsService) : ControllerBase
 	{
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
@@ -78,18 +80,14 @@ namespace News.API.Controllers
         public async Task<IActionResult> AddToFavorites(string newsId)
         {
             var user = await _userService.GetCurrentUserAsync();
-
-            // Check if the article exists
             var articleExists = await _newsService.CheckArticleExistsAsync(newsId);
             if (!articleExists)
                 return NotFound(new { message = "Article not found" });
-
-            // Check if the article is already favorited
+            
             var alreadyFavorited = await _favoriteService.IsArticleFavoritedAsync(user.Id, newsId);
             if (alreadyFavorited)
                 return BadRequest(new { message = "Article already in favorites" });
-
-            // Add to favorites
+            
             await _favoriteService.AddToFavoritesAsync(user.Id, newsId);
             return Ok(new { result = "Article added to favorites" });
         }

@@ -8,7 +8,7 @@ namespace News.Service.Helpers.ImageUploader
         public async Task<string> UploadProfileImageAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                return null; 
+                return null!; 
 
             try
             {

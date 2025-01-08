@@ -7,7 +7,6 @@ namespace News.Service.Helpers.EmailSettings
 {
     public class EmailSettings(IOptions<MailSettings> _options) : IMailSettings
     {
-    
         public async Task SendEmail(Email email)
         {
             var mail = new MimeMessage
@@ -17,8 +16,10 @@ namespace News.Service.Helpers.EmailSettings
             };
             mail.To.Add(MailboxAddress.Parse(email.To));
             mail.From.Add(new MailboxAddress(_options.Value.DisplayName, _options.Value.Email));
-            var builder = new BodyBuilder();
-            builder.TextBody = email.Body;
+            var builder = new BodyBuilder
+            {
+                HtmlBody = email.Body 
+            };
             mail.Body = builder.ToMessageBody();
             using var smtp = new SmtpClient();
             await smtp.ConnectAsync(_options.Value.Host, _options.Value.Port, MailKit.Security.SecureSocketOptions.StartTls);

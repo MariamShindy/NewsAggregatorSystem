@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.Routing;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
@@ -18,7 +15,9 @@ using System.Text;
 
 namespace News.Service.Services
 {
-    public class AccountService(ILogger<AccountService> _logger , IMemoryCache _memoryCache , ImageUploader _imageUploader, UserManager<ApplicationUser> _userManager, IUrlHelperFactory _urlHelper, IHttpContextAccessor _httpContextAccessor, SignInManager<ApplicationUser> _signInManager, IConfiguration _configuration, IMailSettings _mailSettings) : IAccountService
+    public class AccountService(ILogger<AccountService> _logger , IMemoryCache _memoryCache , ImageUploader _imageUploader, 
+        UserManager<ApplicationUser> _userManager, IConfiguration _configuration,
+        IMailSettings _mailSettings) : IAccountService
     {
         public async Task<(bool isSuccess, string message , string? token)> RegisterUserAsync(RegisterModel model)
         {
@@ -81,7 +80,6 @@ namespace News.Service.Services
             _logger.LogWarning("AccountService --> LoginUser --> Invalid credentials");
             return (false, null, "Invalid credentials");
         }
-
         public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
         {
             _logger.LogInformation("AccountService --> ForgotPassword called");
@@ -153,26 +151,19 @@ namespace News.Service.Services
             _logger.LogInformation("AccountService --> ResetPassword succeeded");
             return (true, "Password reset successful.",token);
         }
-
-        public async Task<bool> CheckAdminRoleAsync(ApplicationUser currentUser)
-        {
-            var roles = await _userManager.GetRolesAsync(currentUser);
-            if (roles.Contains("Admin"))
-                return true;
-            else
-                return false;
-        }
         private string GenerateJwtToken(ApplicationUser user)
         {
             _logger.LogInformation("AccountService --> GenerateJwtToken called");
 
-            var authClaims = new[]
+            var authClaims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.UserName),
+                new Claim(JwtRegisteredClaimNames.Sub, user?.UserName??""),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
             };
+            var userRoles = _userManager.GetRolesAsync(user!).Result;
+            authClaims.AddRange(userRoles.Select(role => new Claim(ClaimTypes.Role, role)));
 
-            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]));
+            var authSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!));
 
             var token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],

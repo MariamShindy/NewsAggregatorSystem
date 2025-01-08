@@ -1,12 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Entities;
 
 namespace News.Service.Services
 {
-    public class CommentService(ILogger<CommentService> _logger,IUnitOfWork _unitOfWork) : ICommentService
+    public class CommentService(ILogger<CommentService> _logger,
+        IUnitOfWork _unitOfWork) : ICommentService
 	{
 		public async Task<IEnumerable<Comment>> GetAllAsync()
 		{

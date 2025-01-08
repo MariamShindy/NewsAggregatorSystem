@@ -6,10 +6,11 @@ using News.Core.Entities;
 
 namespace News.API.Controllers
 {
-    [Authorize]
+    [Authorize(Roles = "Admin,User")]
     [Route("api/[controller]")]
     [ApiController]
-    public class CommentController(ICommentService _commentService, IUserService _userService) : ControllerBase
+    public class CommentController(ICommentService _commentService,
+        IUserService _userService) : ControllerBase
     {
         // GET: api/comment
         [HttpGet]
@@ -33,9 +34,7 @@ namespace News.API.Controllers
         {
             var comments = await _commentService.GetCommentsByUserIdAsync(userId);
             if (comments == null || !comments.Any())
-            {
                 return NotFound("No comments found for this user.");
-            }
             return Ok(comments);
         }
         // POST: api/comment/{newsId}/comments

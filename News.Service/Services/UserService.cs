@@ -1,116 +1,87 @@
 ﻿using AutoMapper;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using MimeKit;
 using News.Core.Contracts;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Dtos;
 using News.Core.Entities;
-using News.Core.Settings;
+using News.Service.Helpers.EmailSettings;
 using News.Service.Helpers.ImageUploader;
 using System.Security.Claims;
 
 namespace News.Service.Services
 {
-    public class UserService(IHttpContextAccessor _httpContextAccessor,IMapper _mapper ,ImageUploader _imageUploader,IUnitOfWork _unitOfWork, ILogger<UserService> _logger ,IConfiguration _configuration , UserManager<ApplicationUser> _userManager) : IUserService
+    public class UserService(IHttpContextAccessor _httpContextAccessor,
+        IMapper _mapper ,ImageUploader _imageUploader,IUnitOfWork _unitOfWork,
+        ILogger<UserService> _logger ,IMailSettings _mailSettings, 
+        UserManager<ApplicationUser> _userManager) : IUserService
     {
         public async Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto)
         {
             _logger.LogInformation("UserService --> SendFeedback called");
-            var smtpSettings = _configuration.GetSection("MailSettings").Get<MailSettings>();
-            if (smtpSettings == null)
-                return false;
 
-            var message = new MimeMessage
+            var email = new Email
             {
-                From = { new MailboxAddress(feedbackDto.FullName, feedbackDto.Email) },
-                To = { new MailboxAddress(smtpSettings.DisplayName, "MariamShindyRoute@gmail.com") },
+                To = "MariamShindyRoute@gmail.com",
                 Subject = "NewsAggregator Contact Us Form",
-                Body = new TextPart("html")
-                {
-                    Text = $@"
-                    <html>
-                    <body>
-                        <h2>Contact Us Form</h2>
-                        <p><strong>Subject:</strong> {feedbackDto.Subject}</p>
-                        <p><strong>Name:</strong> {feedbackDto.FullName}</p>
-                        <p><strong>Email:</strong> {feedbackDto.Email}</p>
-                        <p><strong>Message:</strong></p>
-                        <p>{feedbackDto.Message}</p>
-                    </body>
-                    </html>"
-                }
+                Body = $@"
+            <html>
+            <body>
+                <h2>Contact Us Form</h2>
+                <p><strong>Subject:</strong> {feedbackDto.Subject}</p>
+                <p><strong>Name:</strong> {feedbackDto.FullName}</p>
+                <p><strong>Email:</strong> {feedbackDto.Email}</p>
+                <p><strong>Message:</strong></p>
+                <p>{feedbackDto.Message}</p>
+            </body>
+            </html>"
             };
-
             try
             {
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync(smtpSettings.Host, smtpSettings.Port, SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync(smtpSettings.Email, smtpSettings.Password);
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
+                await _mailSettings.SendEmail(email);
                 _logger.LogInformation("UserService --> SendFeedback succeeded");
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogError("UserService --> SendFeedback failed");
+                _logger.LogError(ex, "UserService --> SendFeedback failed");
                 return false;
             }
         }
+
         public async Task<bool> SendSurveyAsync(SurveyDto surveyDto)
         {
             _logger.LogInformation("UserService --> SendSurveyAsync called");
-            var smtpSettings = _configuration.GetSection("MailSettings").Get<MailSettings>();
-            if (smtpSettings == null)
-                return false;
-            var currentUser = await GetCurrentUserAsync();
-            var message = new MimeMessage
-            {
-                From = { new MailboxAddress(currentUser.UserName, currentUser.Email) },
-                To = { new MailboxAddress(smtpSettings.DisplayName, "MariamShindyRoute@gmail.com") },
-                Subject = "NewsAggregator Survey Form",
-                Body = new TextPart("html")
-                {
-                    Text = $@"
-                    <html>
-                    <body>
-                        <h2>Survey Form</h2>
-                        <p><strong>How did you find out about our news website?</strong><br> {surveyDto.SourceDiscovery}</p>
-                        <p><strong>How often do you visit news websites?</strong><br> {surveyDto.VisitFrequency}</p>
-                        <p><strong>Is the website loading speed satisfactory?</strong><br> {surveyDto.IsLoadingSpeedSatisfactory}</p>
-                        <p><strong>How easy is it to navigate our website?</strong><br>{surveyDto.NavigationEaseRating}</p>
-                    </body>
-                    </html>"
-                }
-            };
 
+            var email = new Email
+            {
+                To = "MariamShindyRoute@gmail.com",
+                Subject = "NewsAggregator Survey Form",
+                Body = $@"
+            <html>
+            <body>
+                <h2>Survey Form</h2>
+                <p><strong>How did you find out about our news website?</strong><br> {surveyDto.SourceDiscovery}</p>
+                <p><strong>How often do you visit news websites?</strong><br> {surveyDto.VisitFrequency}</p>
+                <p><strong>Is the website loading speed satisfactory?</strong><br> {surveyDto.IsLoadingSpeedSatisfactory}</p>
+                <p><strong>How easy is it to navigate our website?</strong><br>{surveyDto.NavigationEaseRating}</p>
+            </body>
+            </html>"
+            };
             try
             {
-                using (var client = new SmtpClient())
-                {
-                    await client.ConnectAsync(smtpSettings.Host, smtpSettings.Port, SecureSocketOptions.StartTls);
-                    await client.AuthenticateAsync(smtpSettings.Email, smtpSettings.Password);
-                    await client.SendAsync(message);
-                    await client.DisconnectAsync(true);
-                }
+                await _mailSettings.SendEmail(email);
                 _logger.LogInformation("UserService --> SendSurveyAsync succeeded");
                 return true;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                _logger.LogError("UserService --> SendSurveyAsync failed");
+                _logger.LogError(ex, "UserService --> SendSurveyAsync failed");
                 return false;
             }
         }
-
         public async Task<ApplicationUser> GetCurrentUserAsync()
         {
             _logger.LogInformation("UserService --> GetCurrentUser called");

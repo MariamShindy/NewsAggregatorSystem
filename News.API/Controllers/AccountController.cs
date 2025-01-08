@@ -9,7 +9,9 @@ namespace News.API.Controllers
 {
     [ApiController]
 	[Route("api/[controller]")]
-	public class AccountController(IMapper _mapper, SignInManager<ApplicationUser> _signInManager, IAccountService _accountService) : ControllerBase
+	public class AccountController(IMapper _mapper,
+        SignInManager<ApplicationUser> _signInManager, 
+        IAccountService _accountService) : ControllerBase
 	{
         // POST : api/account/register
         [HttpPost("register")]
@@ -49,11 +51,7 @@ namespace News.API.Controllers
             if (!success)
                 return BadRequest(new { Status = "Error", Message = message });
 
-            return Ok(new
-            {
-                Status = "Success",
-                Message = message,
-            });
+            return Ok(new{ Status = "Success", Message = message,});
         }
 
         //POST : api/account/validate-verification-code
