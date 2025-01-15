@@ -48,12 +48,10 @@ namespace News.Service.Services
                 LastName = model.LastName,
                 ProfilePicUrl = profilePicUrl
             };
-
+            var role = !_userManager.Users.Any() ? "Admin" : "User";
             var result = await _userManager.CreateAsync(user, model.Password);
             if (!result.Succeeded)
                 return (false, result.Errors.FirstOrDefault()?.Description ?? "User creation failed" , null);
-
-            var role = !_userManager.Users.Any() ? "Admin" : "User";
             await _userManager.AddToRoleAsync(user, role);
             _logger.LogInformation("AccountService --> RegisterUser succeeded");
             var token = GenerateJwtToken(user);
@@ -68,7 +66,7 @@ namespace News.Service.Services
             if (user == null || await _userManager.IsLockedOutAsync(user))
             {
                 _logger.LogWarning("AccountService --> LoginUser --> Account is locked or does not exist");
-                return (false, null, "Account is locked or does not exist.");
+                return (false, null, "Account is locked or does not exist.")!;
             }
 
             if (await _userManager.CheckPasswordAsync(user, model.Password))
@@ -78,7 +76,7 @@ namespace News.Service.Services
                 return (true, token, "Login successful");
             }
             _logger.LogWarning("AccountService --> LoginUser --> Invalid credentials");
-            return (false, null, "Invalid credentials");
+            return (false, null, "Invalid credentials")!;
         }
         public async Task<(bool Success, string Message)> ForgotPasswordAsync(string email)
         {

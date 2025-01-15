@@ -88,7 +88,6 @@ namespace News.Service.Services
             var currentUserName = _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
             if (string.IsNullOrEmpty(currentUserName))
                 throw new UnauthorizedAccessException("No user is logged in.");
-            //var currentUser = await _userManager.FindByNameAsync(currentUserName);
             var currentUser = await _userManager.Users
             .Include(u => u.Categories)  
             .FirstOrDefaultAsync(u => u.UserName == currentUserName);
