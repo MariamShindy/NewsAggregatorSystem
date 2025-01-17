@@ -7,7 +7,11 @@ namespace News.Infrastructure.Data
 {
 	public class ApplicationDbContext :IdentityDbContext<ApplicationUser>
 	{
-		public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+        public ApplicationDbContext()
+        {
+            
+        }
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
 		: base(options)
 		{
 
@@ -36,6 +40,7 @@ namespace News.Infrastructure.Data
 		public DbSet<Comment> Comments { get; set; }
 		public DbSet<UserFavoriteArticle> UserFavoriteArticles { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
-	}
+    }
 }

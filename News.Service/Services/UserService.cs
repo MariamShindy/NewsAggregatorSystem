@@ -18,6 +18,16 @@ namespace News.Service.Services
         ILogger<UserService> _logger ,IMailSettings _mailSettings, 
         UserManager<ApplicationUser> _userManager) : IUserService
     {
+        public async Task<List<UserPreferencesDto>> GetUsersPreferencesAsync()
+        {
+            var users = await _unitOfWork.Repository<ApplicationUser>().GetAllAsync();
+            return users.Select(u => new UserPreferencesDto
+            {
+                UserId = u.Id,
+                PreferredCategories = u.Categories.Select(c => c.Name).ToList()
+            }).ToList();
+        }
+
         public async Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto)
         {
             _logger.LogInformation("UserService --> SendFeedback called");
@@ -174,7 +184,20 @@ namespace News.Service.Services
                 Name = c.Name
             });
         }
+        public async Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync(string userId)
+        {
+            _logger.LogInformation($"UserService --> GetUserPreferredCategoriesAsync for User with id {userId} called");
 
+            var user = await _userManager.Users.Include(u => u.Categories).FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+                throw new ArgumentException("User not found.");
+
+            return user.Categories.Select(c => new CategoryDto
+            {
+                Id = c.Id,
+                Name = c.Name
+            });
+        }
         public async Task<List<UserDto>> GetAllUsersAsync()
         {
             _logger.LogInformation("UserService --> GetAllUsersAsync called");

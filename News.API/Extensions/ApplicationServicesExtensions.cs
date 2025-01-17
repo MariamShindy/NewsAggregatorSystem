@@ -29,6 +29,7 @@ namespace News.API.Extensions
             services.AddScoped<INewsService, NewsService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddTransient<IMailSettings, EmailSettings>();
@@ -36,6 +37,7 @@ namespace News.API.Extensions
             services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
             services.AddMemoryCache();
             services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
+            services.AddSingleton<IHostedService, ArticleNotificationService>(); 
             services.AddSingleton(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new News.Core.Profilers.MappingProfile());

@@ -26,9 +26,6 @@ namespace News.Service.Services
         //MEDIA STACK
         //var url = $"http://api.mediastack.com/v1/news?access_key=c3eca2376d67324d55ed5341e396a4fd"; //include categories //total response 10000 
         #endregion
-        private readonly string _apiKey = _configuration["NewsAPI:ApiKey"]!;
-        private readonly string _baseUrl = _configuration["NewsAPI:BaseUrl"]!;
-        private readonly string _sourceBaseUrl = _configuration["NewsAPI:SourcesBaseUrl"]!;
 
         #region Old code
         //public async Task<Dictionary<string, string>> GetSourceCategoriesAsync()
@@ -104,6 +101,11 @@ namespace News.Service.Services
         //    return articles?.Where(a => a.Category != "Uncategorized") ?? new List<ArticleDto>();
         //} 
         #endregion
+
+        private readonly string _apiKey = _configuration["NewsAPI:ApiKey"]!;
+        private readonly string _baseUrl = _configuration["NewsAPI:BaseUrl"]!;
+        private readonly string _sourceBaseUrl = _configuration["NewsAPI:SourcesBaseUrl"]!;
+
 
         /*
          * Fetches the source categories from the NewsAPI and updates the database
@@ -192,7 +194,6 @@ namespace News.Service.Services
 
             //return ProcessArticles(jsonResponse, sourceCategories);
             _logger.LogInformation($"Fetching articles for all sources with page: {page}, pageSize: {pageSize}");
-            //int? articlesPerSource = 5;
             var sourceCategories = await GetSourceCategoriesAsync();
             var selectedSources = sourceCategories
                     .GroupBy(sc => sc.Value) 
@@ -361,6 +362,15 @@ namespace News.Service.Services
 
             await _unitOfWork.Repository<Category>().UpdateAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
+        }
+        public async Task<IEnumerable<Article>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories)
+        {
+            var categoryNames = preferredCategories.Select(c => c.Name).ToList();
+            var allArticles = await GetAllCategorizedArticlesAsync();
+            var articlesDtos = allArticles.ToList()
+                .FindAll(a => categoryNames.Contains(a.Category));
+            var articles = _mapper.Map<IEnumerable<Article>>(articlesDtos);
+            return articles;
         }
     }
 }
