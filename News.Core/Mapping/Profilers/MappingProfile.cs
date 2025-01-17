@@ -13,7 +13,8 @@ namespace News.Core.Profilers
             CreateMap<ApplicationUser,UserDto>().ReverseMap();
             CreateMap<FavoriteArticleDto,UserFavoriteArticle>().ReverseMap();
             CreateMap<Article, ArticleDto>().ReverseMap();
-           
+            CreateMap<Notification,NotificationDto>().ReverseMap();
+
             //CreateMap<Comment,AddCommentDto>().ReverseMap();
             //CreateMap<UpdateCommentDto, Comment>()
             //    .ForMember(dest => dest.Content , opt => opt.MapFrom(src => src.Content))

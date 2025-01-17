@@ -5,8 +5,15 @@ using System.Collections;
 
 namespace News.Infrastructure.Repositories.UnitOfWork
 {
-    public class UnitOfWork(ApplicationDbContext _dbContext, Hashtable _repositories) : IUnitOfWork
+    public class UnitOfWork : IUnitOfWork
     {
+        private readonly ApplicationDbContext _dbContext;
+        private Hashtable _repositories;
+        public UnitOfWork(ApplicationDbContext dbContext)
+        {
+            _dbContext = dbContext;
+            _repositories = new Hashtable();
+        }
         public IGenericRepository<TEntity> Repository<TEntity>() where TEntity : class
         {
             var key = typeof(TEntity).Name;

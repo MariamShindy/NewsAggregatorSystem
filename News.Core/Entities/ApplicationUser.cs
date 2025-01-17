@@ -8,5 +8,11 @@ namespace News.Core.Entities
 		public string LastName { get; set; } = string.Empty;
 		public string? ProfilePicUrl { get; set; } 
 		public ICollection<Category> Categories { get; set; } = new List<Category>();
-	}
+        public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+
+        public object Include(Func<object, object> value)
+        {
+            throw new NotImplementedException();
+        }
+    }
 }

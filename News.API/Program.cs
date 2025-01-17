@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Hosting;
 using News.API.Extensions;
+using News.Service.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 

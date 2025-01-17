@@ -1,4 +1,5 @@
 ﻿using News.Core.Dtos;
+using News.Core.Entities;
 
 namespace News.Core.Contracts
 {
@@ -14,5 +15,6 @@ namespace News.Core.Contracts
         Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto);
         Task<bool> DeleteCategoryAsync(int id);
         Task<bool> UpdateCategoryAsync(int id, AddOrUpdateCategoryDto categoryDto);
+        Task<IEnumerable<Article>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories);
     }
 }

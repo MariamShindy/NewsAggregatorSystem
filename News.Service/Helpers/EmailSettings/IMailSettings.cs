@@ -1,9 +1,11 @@
-﻿using News.Core.Entities;
+﻿using News.Core.Dtos;
+using News.Core.Entities;
 
 namespace News.Service.Helpers.EmailSettings
 {
     public interface IMailSettings
     {
-        public Task SendEmail(Email email);
+        Task SendEmail(Email email);
+        Task SendNotificationEmail(NotificationDto notificationDto , string userEmail);
     }
 }
