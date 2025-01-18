@@ -24,26 +24,27 @@ namespace News.Service.Services
             {
                 var preferredCategories = await _userService.GetUserPreferredCategoriesAsync(user.Id);
                 var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories);
-                var notifications = articlesByCategories.Select(article => new NotificationDto
-                {
-                    ApplicationUserId = user.Id,
-                    ArticleTitle = article.Title,
-                    ArticleUrl = article.Url,
-                    Category = article.Category,
-                    CreatedAt = DateTime.UtcNow
-                }).ToList();
+                var articleToSend = articlesByCategories.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
-                foreach (var notificationDto in notifications)
+                if (articleToSend != null)
                 {
+                    var notificationDto = new NotificationDto
+                    {
+                        ApplicationUserId = user.Id,
+                        ArticleTitle = articleToSend.Title,
+                        ArticleUrl = articleToSend.Url,
+                        Category = articleToSend.Category,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
                     var notification = _mapper.Map<Notification>(notificationDto);
 
                     await _unitOfWork.Repository<Notification>().AddAsync(notification);
                     await _unitOfWork.CompleteAsync();
                     var userEmail = (await _userManager.FindByIdAsync(notificationDto.ApplicationUserId))?.Email;
-                    await _mailSettings.SendNotificationEmail(notificationDto, userEmail??"User@gmail.com");
-                    _logger.LogInformation($"Notification sent in {notificationDto.CreatedAt} to uder with Email :{userEmail}");
+                    await _mailSettings.SendNotificationEmail(notificationDto, userEmail ?? "User@gmail.com");
+                    _logger.LogInformation($"Notification sent in {notificationDto.CreatedAt} to user with Email :{userEmail}");
                 }
-
             }
             _logger.LogInformation("Finished sending notifications.");
         }
