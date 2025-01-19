@@ -1,16 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 
-namespace News.API.Controllers
+namespace News.API.Controllers.NewsCatcher
 {
     [Route("api/[controller]")]
     [ApiController]
     public class NewsTwoController : ControllerBase
     {
-        private readonly INewsServiceTwo _newsService;
+        private readonly INewsTwoService _newsService;
 
-        public NewsTwoController(INewsServiceTwo newsService)
+        public NewsTwoController(INewsTwoService newsService)
         {
             _newsService = newsService;
         }

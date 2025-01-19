@@ -1,8 +1,8 @@
-﻿using News.Core.Entities;
+﻿using News.Core.Entities.NewsCatcher;
 
-namespace News.Core.Contracts
+namespace News.Core.Contracts.NewsCatcher
 {
-    public interface INewsServiceTwo
+    public interface INewsTwoService
     {
         Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us");
         Task<List<NewsArticle>> GetNewsByCategoryAsync(string category, string language = "en", string country = "us");
