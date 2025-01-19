@@ -7,9 +7,9 @@ using News.Core.Dtos;
 using News.Core.Entities;
 using News.Service.Helpers.EmailSettings;
 
-namespace News.Service.Services
+namespace News.Service.Services.NewsCatcher
 {
-    public class NotificationService(ILogger<NotificationService> _logger, IMailSettings _mailSettings,
+    public class NotificationTwoService(ILogger<NotificationTwoService> _logger, IMailSettings _mailSettings,
         IUserService _userService, INewsService _newsService, IMapper _mapper, 
         UserManager<ApplicationUser> _userManager , IUnitOfWork _unitOfWork)
         : INotificationService

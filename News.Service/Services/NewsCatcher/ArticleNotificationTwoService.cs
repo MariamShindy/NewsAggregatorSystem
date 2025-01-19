@@ -4,15 +4,15 @@ using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
 using static System.Formats.Asn1.AsnWriter;
 
-namespace News.Service.Services
+namespace News.Service.Services.NewsCatcher
 {
-    public class ArticleNotificationService  : IHostedService, IDisposable
+    public class ArticleNotificationTwoService  : IHostedService, IDisposable
     {
-        private readonly ILogger<ArticleNotificationService> _logger;
+        private readonly ILogger<ArticleNotificationTwoService> _logger;
         private readonly IServiceProvider _serviceProvider;  
         private Timer _timer;
 
-        public ArticleNotificationService(ILogger<ArticleNotificationService> logger, IServiceProvider serviceProvider)
+        public ArticleNotificationTwoService(ILogger<ArticleNotificationTwoService> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _serviceProvider = serviceProvider;  

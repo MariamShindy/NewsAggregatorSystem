@@ -15,6 +15,8 @@ using News.Core.Entities;
 using News.Infrastructure.Data;
 using System.Text;
 using Microsoft.EntityFrameworkCore;
+using News.Service.Services.NewsCatcher;
+using News.Core.Contracts.NewsCatcher;
 
 namespace News.API.Extensions
 {
@@ -30,6 +32,7 @@ namespace News.API.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddTransient<IMailSettings, EmailSettings>();
