@@ -7,6 +7,8 @@ namespace News.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles ="User")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+
     public class NewsController (INewsService _newsService) : ControllerBase
     {
         // GET: api/news/all

@@ -1,19 +1,19 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 using News.Core.Dtos;
 
-namespace News.API.Controllers
+namespace News.API.Controllers.NewsCatcher
 {
-    [Authorize(Roles ="User")]
-	[Route("api/[controller]")]
-	[ApiController]
-    [ApiExplorerSettings(IgnoreApi = true)]
-    public class UserController(IMapper _mapper,
-        IUserService _userService,IFavoriteService _favoriteService ,
-        INewsService _newsService) : ControllerBase
-	{
+    [Route("api/[controller]")]
+    [ApiController]
+    [Authorize]
+
+    public class UserTwoController(IUserService _userService , IMapper _mapper , INewsTwoService _newsService ,IFavoriteTwoService _favoriteService) : ControllerBase
+    {
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
@@ -26,7 +26,7 @@ namespace News.API.Controllers
         [HttpPut("me")]
         public async Task<IActionResult> EditUserInfo([FromBody] EditUserDto model)
         {
-            var result = await _userService.UpdateUserAsync(model); 
+            var result = await _userService.UpdateUserAsync(model);
             if (result.Succeeded)
                 return Ok(new { result = "User updated successfully" }); //not updated profile pic
 
@@ -48,7 +48,7 @@ namespace News.API.Controllers
             }
             try
             {
-                bool isSent = await _userService.SendFeedbackAsync(feedbackDto); 
+                bool isSent = await _userService.SendFeedbackAsync(feedbackDto);
                 return Ok(new { Status = "Success", Message = "Feedback received." });
             }
             catch (Exception ex)
@@ -61,7 +61,7 @@ namespace News.API.Controllers
         [HttpPost("send-survey")]
         public async Task<IActionResult> SendSurvey([FromBody] SurveyDto surveyDto)
         {
-            if (surveyDto == null )
+            if (surveyDto == null)
                 return BadRequest();
             try
             {
@@ -81,14 +81,14 @@ namespace News.API.Controllers
         public async Task<IActionResult> AddToFavorites(string newsId)
         {
             var user = await _userService.GetCurrentUserAsync();
-            var articleExists = await _newsService.CheckArticleExistsAsync(newsId);
-            if (!articleExists)
+            var articleExists = await _newsService.GetNewsByIdAsync(newsId);
+            if (articleExists is null)
                 return NotFound(new { message = "Article not found" });
-            
+
             var alreadyFavorited = await _favoriteService.IsArticleFavoritedAsync(user.Id, newsId);
             if (alreadyFavorited)
                 return BadRequest(new { message = "Article already in favorites" });
-            
+
             await _favoriteService.AddToFavoritesAsync(user.Id, newsId);
             return Ok(new { result = "Article added to favorites" });
         }
@@ -108,7 +108,7 @@ namespace News.API.Controllers
         {
             var user = await _userService.GetCurrentUserAsync();
             var favoriteArticles = await _favoriteService.GetFavoritesByUserAsync(user.Id);
-            return Ok(favoriteArticles); 
+            return Ok(favoriteArticles);
         }
 
 
@@ -126,7 +126,7 @@ namespace News.API.Controllers
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);  
+                return BadRequest(ex.Message);
             }
         }
         // GET : api/user/referred-categories
@@ -136,63 +136,12 @@ namespace News.API.Controllers
             try
             {
                 var categories = await _userService.GetUserPreferredCategoriesAsync();
-                return Ok(categories);  
+                return Ok(categories);
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);  
+                return NotFound(ex.Message);
             }
         }
-        #region Favorite before caching
-        //// POST: api/user/favorites/{newsId}
-        //[HttpPost("favorites/{newsId}")]
-        //public async Task<IActionResult> AddToFavorites(string newsId)
-        //{
-
-        //    var user = await _userService.GetCurrentUser();
-        //    var articleExists = await _newsService.CheckArticleExists(newsId);
-        //    if (!articleExists)
-        //        return NotFound(new { message = "Article not found" });
-
-        //    var alreadyFavorited = await _favoriteService.IsArticleFavorited(user.Id, newsId);
-        //    if (alreadyFavorited)
-        //        return BadRequest(new { message = "Article already in favorites" });
-
-        //    var favorite = new UserFavoriteArticle
-        //    {
-        //        UserId = user.Id,
-        //        ArticleId = newsId,
-        //        AddedAt = DateTime.UtcNow
-        //    };
-
-        //    await _favoriteService.Add(favorite);
-        //    return Ok(new { result = "Article added to favorites" });
-        //}
-
-        //// DELETE: api/user/favorites/{favoriteId}
-        //[HttpDelete("favorites/{favoriteId}")]
-        //public async Task<IActionResult> RemoveFromFavorites(int favoriteId)
-        //{
-        //    var user = await _userService.GetCurrentUser();
-        //    var favorite = await _favoriteService.GetFavoriteById(favoriteId);
-        //    if (favorite == null)
-        //        return NotFound(new { message = "Favorite not found" });
-        //    if (favorite.UserId != user.Id)
-        //        return Forbid();
-        //    await _favoriteService.Remove(favoriteId);
-        //    return Ok(new { result = "Article removed from favorites" });
-        //}
-
-        //// GET : api/user/favorites
-        //[HttpGet("favorites")]
-        //public async Task<IActionResult> GetUserFavorites()
-        //{
-        //    var user = await _userService.GetCurrentUser();
-        //    var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
-        //    var favoriteDtos = _mapper.Map<List<FavoriteArticleDto>>(favorites);
-        //    return Ok(favoriteDtos);
-        //} 
-        #endregion
-
     }
 }

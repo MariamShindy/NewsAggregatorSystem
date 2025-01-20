@@ -27,11 +27,13 @@ namespace News.API.Extensions
             services.AddSingleton<ImageUploader>();
             services.AddControllers();
             services.AddScoped<IFavoriteService, FavoriteService>();
+            services.AddScoped<IFavoriteTwoService, FavoriteTwoService>();
             services.AddScoped<ICommentService, CommentService>();
             services.AddScoped<INewsService, NewsService>();
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
-            services.AddScoped<INotificationService, NotificationService>();
+            //services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationService, NotificationTwoService>();
             services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));

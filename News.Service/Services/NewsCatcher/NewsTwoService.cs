@@ -80,9 +80,25 @@ namespace News.Service.Services.NewsCatcher
                 .Distinct()
                 .ToList();
 
+
+            await AddCategoriesToDatabaseAsync(categories);
+
             return categories ?? [];
         }
-
+        private async Task AddCategoriesToDatabaseAsync(List<string?> Categories)
+        {
+            var existingCategories = await _unitOfWork.Repository<Category>().GetAllAsync();
+            
+            if (!existingCategories.Any() && Categories is not null)
+            {
+                foreach (var category in Categories)
+                {
+                    AddOrUpdateCategoryDto categoryDto = new AddOrUpdateCategoryDto { Name = category };
+                    await AddCategoryAsync(categoryDto);
+                    _logger.LogInformation($"Added {categoryDto.Name} category to database.");
+                }
+            }
+        }
         public async Task<List<NewsArticle>> GetNewsByCategoryAsync(string category, string language = "en", string country = "us")
         {
             var newsResponse = await GetAllNewsAsync();
@@ -99,7 +115,7 @@ namespace News.Service.Services.NewsCatcher
             var newsResponse = await GetAllNewsAsync();
             var article = newsResponse.FirstOrDefault(a => a._Id == id);
 
-            return article ?? new NewsArticle();
+            return article ;
         }
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
         {
