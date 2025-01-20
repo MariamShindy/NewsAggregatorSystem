@@ -8,36 +8,35 @@ using News.Core.Dtos.NewsCatcher;
 using News.Core.Entities;
 using News.Core.Entities.NewsCatcher;
 using Newtonsoft.Json;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace News.Service.Services.NewsCatcher
 {
-    public class NewsTwoService : INewsTwoService
+    public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
+        IUnitOfWork _unitOfWork, IConfiguration _configuration) : INewsTwoService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IMapper _mapper;
-        private readonly ILogger<NewsTwoService> _logger;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly string _apiKey;
-        private readonly string _baseUrl;
-
-        public NewsTwoService(HttpClient httpClient, IMapper mapper, ILogger<NewsTwoService> logger, IUnitOfWork unitOfWork, IConfiguration configuration)
+        private readonly string _apiKey = _configuration["NewsCatcher:ApiKey"]!;
+        private readonly string _baseUrl = _configuration["NewsCatcher:BaseUrl"]!;
+        private readonly List<string> _categories = new List<string>()
         {
-            _httpClient = httpClient;
-            _mapper = mapper;
-            _logger = logger;
-            _unitOfWork = unitOfWork;
-            _apiKey = configuration["NewsCatcher:ApiKey"]!;
-            _baseUrl = configuration["NewsCatcher:BaseUrl"]!;
-        }
+            "gaming", "news", "sport", "tech",
+            "world","finance", "politics","business", 
+            "economics", "entertainment", "beauty",
+            "travel","music","food","science","energy",
+            "stockmarketinformationandanalysis","newsandcareerportal",
+            "newsandmedia"
+        };
+       
         public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         {
             //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
-            int pageSize = 100;
+            int pageSize = 400;
             string from = "6 days ago", to = "5 days ago";
             var formattedFrom = Uri.EscapeDataString(from);
             var formattedTo = Uri.EscapeDataString(to);
-            var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Tesla")}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
+            //var query = Uri.EscapeDataString("gaming OR news OR sport OR tech OR world OR finance OR politics OR business OR economics OR entertainment OR beauty OR travel OR music OR food OR science OR energy");
+            var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+
+            var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
@@ -48,8 +47,16 @@ namespace News.Service.Services.NewsCatcher
                 var response = await _httpClient.GetStringAsync(requestUrl);
 
                 var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
-                newsResponse.TotalResults = newsResponse.Articles.Count;
+                if (newsResponse?.Articles != null)
+                {
+                    var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
 
+                    var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+
+                    newsResponse.Articles = balancedArticles;
+                    newsResponse.TotalResults = newsResponse.Articles.Count;
+
+                }
                 foreach (var article in newsResponse?.Articles ?? new List<NewsArticle>())
                 {
                     if (article.Authors is string author)
@@ -73,16 +80,9 @@ namespace News.Service.Services.NewsCatcher
 
         public async Task<List<string>> GetCategoriesAsync()
         {
-            var newsResponse = await GetAllNewsAsync();
-
-            var categories = newsResponse
-                .Select(article => article.Topic)
-                .Distinct()
-                .ToList();
-
-
+            //var newsResponse = await GetAllNewsAsync();
+            var categories = _categories;
             await AddCategoriesToDatabaseAsync(categories);
-
             return categories ?? [];
         }
         private async Task AddCategoriesToDatabaseAsync(List<string?> Categories)
