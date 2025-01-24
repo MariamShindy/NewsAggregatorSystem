@@ -1,5 +1,6 @@
 ﻿using News.Core.Dtos;
 using News.Core.Entities;
+using News.Core.Entities.NewsCatcher;
 
 namespace News.Core.Contracts
 {
@@ -16,5 +17,7 @@ namespace News.Core.Contracts
         Task<bool> DeleteCategoryAsync(int id);
         Task<bool> UpdateCategoryAsync(int id, AddOrUpdateCategoryDto categoryDto);
         Task<IEnumerable<Article>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories);
+        byte[] GenerateArticlePdf(ArticleDto article);
+
     }
 }

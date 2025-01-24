@@ -1,4 +1,9 @@
 ﻿using AutoMapper;
+using iText.IO.Image;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using News.Core.Contracts.NewsCatcher;
@@ -19,13 +24,13 @@ namespace News.Service.Services.NewsCatcher
         private readonly List<string> _categories = new List<string>()
         {
             "gaming", "news", "sport", "tech",
-            "world","finance", "politics","business", 
+            "world","finance", "politics","business",
             "economics", "entertainment", "beauty",
             "travel","music","food","science","energy",
             "stockmarketinformationandanalysis","newsandcareerportal",
             "newsandmedia"
         };
-       
+
         public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         {
             //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
@@ -88,7 +93,7 @@ namespace News.Service.Services.NewsCatcher
         private async Task AddCategoriesToDatabaseAsync(List<string?> Categories)
         {
             var existingCategories = await _unitOfWork.Repository<Category>().GetAllAsync();
-            
+
             if (!existingCategories.Any() && Categories is not null)
             {
                 foreach (var category in Categories)
@@ -115,7 +120,7 @@ namespace News.Service.Services.NewsCatcher
             var newsResponse = await GetAllNewsAsync();
             var article = newsResponse.FirstOrDefault(a => a._Id == id);
 
-            return article ;
+            return article;
         }
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
         {
@@ -167,6 +172,95 @@ namespace News.Service.Services.NewsCatcher
                 .FindAll(a => categoryNames.Contains(a.Topic));
             var resArticles = _mapper.Map<IEnumerable<NewsArticleDto>>(articles);
             return resArticles;
+        }
+
+        public byte[] GenerateArticlePdf(NewsArticle article)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = new PdfWriter(memoryStream))
+                {
+                    using (var pdfDoc = new PdfDocument(writer))
+                    {
+                        var document = new Document(pdfDoc);
+                        string cleanedSummary = CleanText(article.Summary);
+
+                        document.Add(new Paragraph()
+                            .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
+                            .SetTextAlignment(TextAlignment.CENTER));
+
+                        document.Add(new Paragraph("\n"));
+
+                        if (!string.IsNullOrEmpty(article.Media))
+                        {
+                            try
+                            {
+                                var imageData = ImageDataFactory.Create(article.Media);
+                                var image = new Image(imageData).SetWidth(500).SetHeight(500);
+                                document.Add(image);
+                                document.Add(new Paragraph("\n"));
+                            }
+                            catch
+                            {
+                                document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
+                            }
+                        }
+
+                        if (article.Authors is IEnumerable<string> authors && authors.Any())
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Authors: ")).SetBold()
+                                .Add(new Text(string.Join(", ", authors))));
+                        }
+                        if (article.Topic != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Topic : ")).SetBold()
+                                .Add(new Text(article.Topic)));
+                        }
+                        if (article.Published_Date != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Published Date: ")).SetBold()
+                                .Add(new Text(article.Published_Date.ToString())));
+                        }
+
+                        if (!string.IsNullOrEmpty(cleanedSummary))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Summary: ")).SetBold()
+                                .Add(new Text(cleanedSummary)));
+                        }
+
+                        if (!string.IsNullOrEmpty(article.Link))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Read More: ")).SetBold()
+                                .Add(new Text(article.Link).SetUnderline()));
+                            document.Add(new Paragraph("\n"));
+                        }
+                    }
+                }
+
+                return memoryStream.ToArray();
+            }
+
+        }
+        private string CleanText(string input)
+        {
+            string cleaned = string.Join("\n", input.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
+
+            string[] socialMediaSections = new string[]
+            {
+            "Share this:", "Facebook", "Tumblr", "Twitter", "LinkedIn", "Email", "Pinterest", "Reddit", "Pocket", "Print", "Telegram", "WhatsApp", "Like this:" , "Like"
+            };
+
+            foreach (var section in socialMediaSections)
+            {
+                cleaned = cleaned.Replace(section, "");
+            }
+
+            return cleaned;
         }
     }
 }

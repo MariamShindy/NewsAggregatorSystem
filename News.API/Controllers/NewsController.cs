@@ -44,5 +44,18 @@ namespace News.API.Controllers
             var categories = await _newsService.GetAllCategoriesAsync();
             return Ok(categories); 
         }
+        //GET : api/news/generate-pdf/{id}
+        [HttpGet("generate-pdf/{id}")]
+        public IActionResult GeneratePdf(string id)
+        {
+            var article = _newsService.GetArticleByIdAsync(id);
+
+            if (article == null)
+                return NotFound("Article not found.");
+
+            byte[] pdfBytes = _newsService.GenerateArticlePdf(article.Result);
+
+            return File(pdfBytes, "application/pdf", $"{article.Result.Title}.pdf");
+        }
     }
 }
