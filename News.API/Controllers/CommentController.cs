@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 using News.Core.Dtos;
 using News.Core.Entities;
 
@@ -10,7 +11,7 @@ namespace News.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     public class CommentController(ICommentService _commentService,
-        IUserService _userService) : ControllerBase
+        IUserService _userService ,INewsTwoService _newsService) : ControllerBase
     {
         // GET: api/comment
         [HttpGet]
@@ -41,6 +42,8 @@ namespace News.API.Controllers
         [HttpPost("{newsId}/comments")]
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)
         {
+            var article = await _newsService.GetNewsByIdAsync(newsId);
+            if (article == null) return NotFound(new {result = "Article not found"});
             var user = await _userService.GetCurrentUserAsync();
             var comment = new Comment
             {

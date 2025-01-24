@@ -1,82 +1,22 @@
 ﻿using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Dtos;
+using News.Core.Dtos.NewsCatcher;
 using News.Core.Entities;
+using News.Core.Entities.NewsCatcher;
 
 namespace News.Service.Services.NewsCatcher
 {
     public class FavoriteTwoService(ILogger<FavoriteTwoService> _logger,
-        INewsService _newsService, IMemoryCache _cache,
-        IUnitOfWork _unitOfWork) : IFavoriteService
+        INewsTwoService _newsService, IMemoryCache _cache,
+        IUnitOfWork _unitOfWork) : IFavoriteTwoService
     {
         private const string CacheKeyPrefix = "FavoriteArticles_";
 
-        #region Favorite before caching
-        //public async Task Add(UserFavoriteArticle favorite)
-        //{
-        //    _logger.LogInformation("FavoriteService --> Add called");
-        //    _unitOfWork.Repository<UserFavoriteArticle>().Add(favorite);
-        //    await _unitOfWork.CompleteAsync();
-        //    _logger.LogInformation("FavoriteService --> Add succeeded");
-        //}
-
-        //public async Task<IEnumerable<UserFavoriteArticle>> GetFavoritesByUser(string userId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> GetFavoritesByUser with userId : {userId} called");
-        //    var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
-        //    _logger.LogInformation($"FavoriteService --> GetFavoritesByUser with userId : {userId} succeeded");
-        //    return favorites.Where(f => f.UserId == userId).ToList();
-        //}
-
-        //public async Task Remove(int favoriteId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> Remove with favoriteId : {favoriteId} called");
-
-        //    var favorite = await _unitOfWork.Repository<UserFavoriteArticle>().GetByIdAsync(favoriteId);
-        //    if (favorite != null)
-        //    {
-        //        _unitOfWork.Repository<UserFavoriteArticle>().Delete(favorite);
-        //        await _unitOfWork.CompleteAsync();
-        //        _logger.LogInformation($"FavoriteService --> Remove with favoriteId : {favoriteId} succeeded");
-        //    }
-
-        //}
-        //public async Task<bool> IsArticleFavorited(string userId, string newsId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> IsArticleFavorited for userId : {userId} for newsId : {newsId} called");
-
-        //    var userFavorites = await GetFavoritesByUser(userId);
-        //    return userFavorites.Any(f => f.ArticleId == newsId);
-        //}
-        //public async Task<UserFavoriteArticle> GetFavoriteById(int favoriteId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> GetFavoriteById with favoriteId : {favoriteId} called");
-        //    return await _unitOfWork.Repository<UserFavoriteArticle>().GetByIdAsync(favoriteId);
-        //} 
-        #endregion
-
-        //public async Task AddToFavorites(string userId, string articleId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> AddToFavorites called for userId: {userId} and articleId: {articleId}");
-        //    var favorite = new UserFavoriteArticle { UserId = userId, ArticleId = articleId , AddedAt = DateTime.UtcNow };
-        //    _unitOfWork.Repository<UserFavoriteArticle>().Add(favorite);
-        //    await _unitOfWork.CompleteAsync();
-
-        //    var cacheKey = $"{CacheKeyPrefix}{userId}_{articleId}";
-        //    if (!_cache.TryGetValue(cacheKey, out _))
-        //    {
-        //        var article = await _newsService.GetArticleById(articleId);
-        //        if (article is not null)
-        //        {
-        //            //_cache.Set(cacheKey, article, TimeSpan.FromDays(2));
-        //            _cache.Set(cacheKey, article, TimeSpan.FromMinutes(5));
-
-        //            _logger.LogInformation($"Article cached for userId: {userId} and articleId: {articleId}");
-        //        }
-        //    }
-        //}
+    
         public async Task AddToFavoritesAsync(string userId, string articleId)
         {
             _logger.LogInformation($"FavoriteService --> AddToFavorites called for userId: {userId} and articleId: {articleId}");
@@ -88,7 +28,7 @@ namespace News.Service.Services.NewsCatcher
             var cacheKey = $"{CacheKeyPrefix}{articleId}";
             if (!_cache.TryGetValue(cacheKey, out _))
             {
-                var article = await _newsService.GetArticleByIdAsync(articleId);
+                var article = await _newsService.GetNewsByIdAsync(articleId);
                 if (article is not null)
                 {
                     _cache.Set(cacheKey, article, TimeSpan.FromDays(1)); 
@@ -102,123 +42,20 @@ namespace News.Service.Services.NewsCatcher
                 }
             }
         }
-        //public async Task<IEnumerable<ArticleDto>> GetFavoritesByUser(string userId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> GetFavoritesByUser called for userId: {userId}");
-
-        //    // Get all favorites for the user
-        //    var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
-        //    var userFavorites = favorites.Where(f => f.UserId == userId).Select(f => f.ArticleId);
-
-        //    var favoriteArticles = new List<ArticleDto>();
-
-        //    foreach (var articleId in userFavorites)
-        //    {
-        //        var cacheKey = $"{CacheKeyPrefix}{userId}_{articleId}";
-        //        if (!_cache.TryGetValue(cacheKey, out ArticleDto article))
-        //        {
-        //            article = await _newsService.GetArticleById(articleId);
-        //            if (article is not null)
-        //            {
-        //                // Cache the article JSON for 2 days
-        //                _cache.Set(cacheKey, article, TimeSpan.FromDays(2));
-        //                _logger.LogInformation($"Article {articleId} fetched and cached for userId: {userId}");
-        //                favoriteArticles.Add(article);
-
-        //            }
-        //            else
-        //            {
-        //                _logger.LogWarning($"Article with ID {articleId} not found.");
-        //            }
-        //        }
-        //    }
-
-        //    return favoriteArticles;
-        //}
-        //public async Task<IEnumerable<ArticleDto>> GetFavoritesByUser(string userId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> GetFavoritesByUser called for userId: {userId}");
-
-        //    var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
-        //    _logger.LogInformation($"Total favorites found in database: {favorites.Count()}");
-        //    var userFavorites = favorites.Where(f => f.UserId == userId).Select(f => f.ArticleId).ToList();
-
-        //    _logger.LogInformation($"User {userId} favorites (ArticleIds): {string.Join(", ", userFavorites)}");
-
-        //    var favoriteArticles = new List<ArticleDto>();
-
-        //    foreach (var articleId in userFavorites)
-        //    {
-        //        var cacheKey = $"{CacheKeyPrefix}{userId}_{articleId}";
-        //        _logger.LogInformation($"Checking cache for article with key: {cacheKey}");
-        //        if (!_cache.TryGetValue(cacheKey, out ArticleDto article))
-        //        {
-        //            article = await _newsService.GetArticleById(articleId);
-        //            if (article != null)
-        //            {
-        //                //_cache.Set(cacheKey, article, TimeSpan.FromDays(2)); // Cache for 2 days
-        //                _cache.Set(cacheKey, article, TimeSpan.FromMinutes(5));
-        //                _logger.LogInformation($"Article {articleId} fetched and cached for userId: {userId}");
-        //                favoriteArticles.Add(article);
-        //            }
-        //            else
-        //            {
-        //                _logger.LogWarning($"Article with ID {articleId} not found for userId: {userId}");
-        //            }
-        //        }
-        //        else
-        //        {
-        //            _logger.LogInformation($"Article {articleId} found in cache for userId: {userId}");
-        //            favoriteArticles.Add(article);
-        //        }
-        //    }
-        //    _logger.LogInformation($"Total favorite articles fetched for user {userId}: {favoriteArticles.Count()}");
-        //    return favoriteArticles;
-        //}
-
-        //public async Task<IEnumerable<string>> GetFavoritesByUser(string userId)
-        //{
-        //    _logger.LogInformation($"FavoriteService --> GetFavoritesByUser called for userId: {userId}");
-
-        //    var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
-        //    var userFavorites = favorites.Where(f => f.UserId == userId).Select(f => f.ArticleId);
-
-        //    var favoriteArticles = new List<string>();
-
-        //    foreach (var articleId in userFavorites)
-        //    {
-        //        var cacheKey = $"{CacheKeyPrefix}{userId}_{articleId}";
-        //        if (!_cache.TryGetValue(cacheKey, out string article))
-        //        {
-        //            article = await _newsService.GetArticleById(articleId);
-        //            if (!string.IsNullOrEmpty(article))
-        //            {
-        //                _cache.Set(cacheKey, article, TimeSpan.FromDays(2));
-        //                _logger.LogInformation($"Article {articleId} fetched and cached for userId: {userId}");
-        //            }
-        //        }
-
-        //        if (!string.IsNullOrEmpty(article))
-        //        {
-        //            favoriteArticles.Add(article);
-        //        }
-        //    }
-
-        //    return favoriteArticles;
-        //}
-        public async Task<IEnumerable<ArticleDto>> GetFavoritesByUserAsync(string userId)
+        
+        public async Task<IEnumerable<NewsArticle>> GetFavoritesByUserAsync(string userId)
         {
             _logger.LogInformation($"FavoriteService --> GetFavoritesByUser called for userId: {userId}");
             var favorites = await _unitOfWork.Repository<UserFavoriteArticle>().GetAllAsync();
             var userFavoriteIds = favorites.Where(f => f.UserId == userId).Select(f => f.ArticleId).ToList();
-            var favoriteArticles = new List<ArticleDto>();
+            var favoriteArticles = new List<NewsArticle>();
             foreach (var articleId in userFavoriteIds)
             {
                 var cacheKey = $"{CacheKeyPrefix}{articleId}";
 
-                if (!_cache.TryGetValue(cacheKey, out ArticleDto article))
+                if (!_cache.TryGetValue(cacheKey, out NewsArticle article))
                 {
-                    article = await _newsService.GetArticleByIdAsync(articleId);
+                    article = await _newsService.GetNewsByIdAsync(articleId);
 
                     if (article != null)
                     {
@@ -279,7 +116,7 @@ namespace News.Service.Services.NewsCatcher
                 _logger.LogInformation($"Article {articleId} found in database for userId: {userId}");
 
                 // Fetch the article from the API and cache it
-                var article = await _newsService.GetArticleByIdAsync(articleId);
+                var article = await _newsService.GetNewsByIdAsync(articleId);
                 if (article is not null)
                 {
                     _cache.Set(cacheKey, article, TimeSpan.FromDays(2));

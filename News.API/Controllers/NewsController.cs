@@ -7,6 +7,8 @@ namespace News.API.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(Roles ="User")]
+    [ApiExplorerSettings(IgnoreApi = true)]
+
     public class NewsController (INewsService _newsService) : ControllerBase
     {
         // GET: api/news/all
@@ -41,6 +43,19 @@ namespace News.API.Controllers
         {
             var categories = await _newsService.GetAllCategoriesAsync();
             return Ok(categories); 
+        }
+        //GET : api/news/generate-pdf/{id}
+        [HttpGet("generate-pdf/{id}")]
+        public IActionResult GeneratePdf(string id)
+        {
+            var article = _newsService.GetArticleByIdAsync(id);
+
+            if (article == null)
+                return NotFound("Article not found.");
+
+            byte[] pdfBytes = _newsService.GenerateArticlePdf(article.Result);
+
+            return File(pdfBytes, "application/pdf", $"{article.Result.Title}.pdf");
         }
     }
 }

@@ -1,4 +1,9 @@
 ﻿using AutoMapper;
+using iText.IO.Image;
+using iText.Kernel.Pdf;
+using iText.Layout;
+using iText.Layout.Element;
+using iText.Layout.Properties;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using News.Core.Contracts.NewsCatcher;
@@ -8,36 +13,35 @@ using News.Core.Dtos.NewsCatcher;
 using News.Core.Entities;
 using News.Core.Entities.NewsCatcher;
 using Newtonsoft.Json;
-using static Microsoft.Extensions.Logging.EventSource.LoggingEventSource;
 
 namespace News.Service.Services.NewsCatcher
 {
-    public class NewsTwoService : INewsTwoService
+    public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
+        IUnitOfWork _unitOfWork, IConfiguration _configuration) : INewsTwoService
     {
-        private readonly HttpClient _httpClient;
-        private readonly IMapper _mapper;
-        private readonly ILogger<NewsTwoService> _logger;
-        private readonly IUnitOfWork _unitOfWork;
-        private readonly string _apiKey;
-        private readonly string _baseUrl;
-
-        public NewsTwoService(HttpClient httpClient, IMapper mapper, ILogger<NewsTwoService> logger, IUnitOfWork unitOfWork, IConfiguration configuration)
+        private readonly string _apiKey = _configuration["NewsCatcher:ApiKey"]!;
+        private readonly string _baseUrl = _configuration["NewsCatcher:BaseUrl"]!;
+        private readonly List<string> _categories = new List<string>()
         {
-            _httpClient = httpClient;
-            _mapper = mapper;
-            _logger = logger;
-            _unitOfWork = unitOfWork;
-            _apiKey = configuration["NewsCatcher:ApiKey"]!;
-            _baseUrl = configuration["NewsCatcher:BaseUrl"]!;
-        }
+            "gaming", "news", "sport", "tech",
+            "world","finance", "politics","business",
+            "economics", "entertainment", "beauty",
+            "travel","music","food","science","energy",
+            "stockmarketinformationandanalysis","newsandcareerportal",
+            "newsandmedia"
+        };
+
         public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         {
             //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
-            int pageSize = 100;
+            int pageSize = 400;
             string from = "6 days ago", to = "5 days ago";
             var formattedFrom = Uri.EscapeDataString(from);
             var formattedTo = Uri.EscapeDataString(to);
-            var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Tesla")}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
+            //var query = Uri.EscapeDataString("gaming OR news OR sport OR tech OR world OR finance OR politics OR business OR economics OR entertainment OR beauty OR travel OR music OR food OR science OR energy");
+            var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+
+            var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
 
             _httpClient.DefaultRequestHeaders.Clear();
             _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
@@ -48,8 +52,16 @@ namespace News.Service.Services.NewsCatcher
                 var response = await _httpClient.GetStringAsync(requestUrl);
 
                 var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
-                newsResponse.TotalResults = newsResponse.Articles.Count;
+                if (newsResponse?.Articles != null)
+                {
+                    var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
 
+                    var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+
+                    newsResponse.Articles = balancedArticles;
+                    newsResponse.TotalResults = newsResponse.Articles.Count;
+
+                }
                 foreach (var article in newsResponse?.Articles ?? new List<NewsArticle>())
                 {
                     if (article.Authors is string author)
@@ -73,16 +85,25 @@ namespace News.Service.Services.NewsCatcher
 
         public async Task<List<string>> GetCategoriesAsync()
         {
-            var newsResponse = await GetAllNewsAsync();
-
-            var categories = newsResponse
-                .Select(article => article.Topic)
-                .Distinct()
-                .ToList();
-
+            //var newsResponse = await GetAllNewsAsync();
+            var categories = _categories;
+            await AddCategoriesToDatabaseAsync(categories);
             return categories ?? [];
         }
+        private async Task AddCategoriesToDatabaseAsync(List<string?> Categories)
+        {
+            var existingCategories = await _unitOfWork.Repository<Category>().GetAllAsync();
 
+            if (!existingCategories.Any() && Categories is not null)
+            {
+                foreach (var category in Categories)
+                {
+                    AddOrUpdateCategoryDto categoryDto = new AddOrUpdateCategoryDto { Name = category };
+                    await AddCategoryAsync(categoryDto);
+                    _logger.LogInformation($"Added {categoryDto.Name} category to database.");
+                }
+            }
+        }
         public async Task<List<NewsArticle>> GetNewsByCategoryAsync(string category, string language = "en", string country = "us")
         {
             var newsResponse = await GetAllNewsAsync();
@@ -99,7 +120,7 @@ namespace News.Service.Services.NewsCatcher
             var newsResponse = await GetAllNewsAsync();
             var article = newsResponse.FirstOrDefault(a => a._Id == id);
 
-            return article ?? new NewsArticle();
+            return article;
         }
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
         {
@@ -151,6 +172,95 @@ namespace News.Service.Services.NewsCatcher
                 .FindAll(a => categoryNames.Contains(a.Topic));
             var resArticles = _mapper.Map<IEnumerable<NewsArticleDto>>(articles);
             return resArticles;
+        }
+
+        public byte[] GenerateArticlePdf(NewsArticle article)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = new PdfWriter(memoryStream))
+                {
+                    using (var pdfDoc = new PdfDocument(writer))
+                    {
+                        var document = new Document(pdfDoc);
+                        string cleanedSummary = CleanText(article.Summary);
+
+                        document.Add(new Paragraph()
+                            .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
+                            .SetTextAlignment(TextAlignment.CENTER));
+
+                        document.Add(new Paragraph("\n"));
+
+                        if (!string.IsNullOrEmpty(article.Media))
+                        {
+                            try
+                            {
+                                var imageData = ImageDataFactory.Create(article.Media);
+                                var image = new Image(imageData).SetWidth(500).SetHeight(500);
+                                document.Add(image);
+                                document.Add(new Paragraph("\n"));
+                            }
+                            catch
+                            {
+                                document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
+                            }
+                        }
+
+                        if (article.Authors is IEnumerable<string> authors && authors.Any())
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Authors: ")).SetBold()
+                                .Add(new Text(string.Join(", ", authors))));
+                        }
+                        if (article.Topic != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Topic : ")).SetBold()
+                                .Add(new Text(article.Topic)));
+                        }
+                        if (article.Published_Date != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Published Date: ")).SetBold()
+                                .Add(new Text(article.Published_Date.ToString())));
+                        }
+
+                        if (!string.IsNullOrEmpty(cleanedSummary))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Summary: ")).SetBold()
+                                .Add(new Text(cleanedSummary)));
+                        }
+
+                        if (!string.IsNullOrEmpty(article.Link))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Read More: ")).SetBold()
+                                .Add(new Text(article.Link).SetUnderline()));
+                            document.Add(new Paragraph("\n"));
+                        }
+                    }
+                }
+
+                return memoryStream.ToArray();
+            }
+
+        }
+        private string CleanText(string input)
+        {
+            string cleaned = string.Join("\n", input.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
+
+            string[] socialMediaSections = new string[]
+            {
+            "Share this:", "Facebook", "Tumblr", "Twitter", "LinkedIn", "Email", "Pinterest", "Reddit", "Pocket", "Print", "Telegram", "WhatsApp", "Like this:" , "Like"
+            };
+
+            foreach (var section in socialMediaSections)
+            {
+                cleaned = cleaned.Replace(section, "");
+            }
+
+            return cleaned;
         }
     }
 }

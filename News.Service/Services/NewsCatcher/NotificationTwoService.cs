@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Dtos;
 using News.Core.Entities;
@@ -10,7 +11,7 @@ using News.Service.Helpers.EmailSettings;
 namespace News.Service.Services.NewsCatcher
 {
     public class NotificationTwoService(ILogger<NotificationTwoService> _logger, IMailSettings _mailSettings,
-        IUserService _userService, INewsService _newsService, IMapper _mapper, 
+        IUserService _userService, INewsTwoService _newsService, IMapper _mapper, 
         UserManager<ApplicationUser> _userManager , IUnitOfWork _unitOfWork)
         : INotificationService
     {
@@ -32,9 +33,9 @@ namespace News.Service.Services.NewsCatcher
                     {
                         ApplicationUserId = user.Id,
                         ArticleTitle = articleToSend.Title,
-                        ArticleUrl = articleToSend.Url,
-                        Category = articleToSend.Category,
-                        CreatedAt = DateTime.UtcNow
+                        ArticleUrl = articleToSend.Clean_Url,
+                        Category = articleToSend.Topic,
+                        CreatedAt = DateTime.UtcNow,
                     };
 
                     var notification = _mapper.Map<Notification>(notificationDto);

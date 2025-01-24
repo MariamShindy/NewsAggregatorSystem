@@ -7,6 +7,12 @@ using Microsoft.Extensions.Logging;
 using News.Core.Contracts.UnitOfWork;
 using News.Core.Dtos;
 using AutoMapper;
+using iText.IO.Image;
+using iText.Kernel.Pdf;
+using iText.Layout.Element;
+using iText.Layout.Properties;
+using News.Core.Entities.NewsCatcher;
+using iText.Layout;
 
 namespace News.Service.Services
 {
@@ -371,6 +377,94 @@ namespace News.Service.Services
                 .FindAll(a => categoryNames.Contains(a.Category));
             var articles = _mapper.Map<IEnumerable<Article>>(articlesDtos);
             return articles;
+        }
+        public byte[] GenerateArticlePdf(ArticleDto article)
+        {
+            using (var memoryStream = new MemoryStream())
+            {
+                using (var writer = new PdfWriter(memoryStream))
+                {
+                    using (var pdfDoc = new PdfDocument(writer))
+                    {
+                        var document = new Document(pdfDoc);
+                        string cleanedSummary = CleanText(article.Content);
+
+                        document.Add(new Paragraph()
+                            .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
+                            .SetTextAlignment(TextAlignment.CENTER));
+
+                        document.Add(new Paragraph("\n"));
+
+                        if (!string.IsNullOrEmpty(article.urlToImage))
+                        {
+                            try
+                            {
+                                var imageData = ImageDataFactory.Create(article.urlToImage);
+                                var image = new Image(imageData).SetWidth(500).SetHeight(500);
+                                document.Add(image);
+                                document.Add(new Paragraph("\n"));
+                            }
+                            catch
+                            {
+                                document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
+                            }
+                        }
+
+                        if (article.Author != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Authors: ")).SetBold()
+                                .Add(new Text(article.Author)));
+                        }
+                        if (article.Category != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Topic : ")).SetBold()
+                                .Add(new Text(article.Category)));
+                        }
+                        if (article.PublishedAt != null)
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Published Date: ")).SetBold()
+                                .Add(new Text(article.PublishedAt.ToString())));
+                        }
+
+                        if (!string.IsNullOrEmpty(cleanedSummary))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Summary: ")).SetBold()
+                                .Add(new Text(cleanedSummary)));
+                        }
+
+                        if (!string.IsNullOrEmpty(article.Url))
+                        {
+                            document.Add(new Paragraph()
+                                .Add(new Text("Read More: ")).SetBold()
+                                .Add(new Text(article.Url).SetUnderline()));
+                            document.Add(new Paragraph("\n"));
+                        }
+                    }
+                }
+
+                return memoryStream.ToArray();
+            }
+
+        }
+        private string CleanText(string input)
+        {
+            string cleaned = string.Join("\n", input.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
+
+            string[] socialMediaSections = new string[]
+            {
+            "Share this:", "Facebook", "Tumblr", "Twitter", "LinkedIn", "Email", "Pinterest", "Reddit", "Pocket", "Print", "Telegram", "WhatsApp", "Like this:" , "Like"
+            };
+
+            foreach (var section in socialMediaSections)
+            {
+                cleaned = cleaned.Replace(section, "");
+            }
+
+            return cleaned;
         }
     }
 }
