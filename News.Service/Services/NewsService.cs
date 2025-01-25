@@ -387,7 +387,6 @@ namespace News.Service.Services
                     using (var pdfDoc = new PdfDocument(writer))
                     {
                         var document = new Document(pdfDoc);
-                        string cleanedSummary = CleanText(article.Content);
 
                         document.Add(new Paragraph()
                             .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
@@ -428,12 +427,11 @@ namespace News.Service.Services
                                 .Add(new Text("Published Date: ")).SetBold()
                                 .Add(new Text(article.PublishedAt.ToString())));
                         }
-
-                        if (!string.IsNullOrEmpty(cleanedSummary))
+                        if (!string.IsNullOrEmpty(article.Content))
                         {
                             document.Add(new Paragraph()
-                                .Add(new Text("Summary: ")).SetBold()
-                                .Add(new Text(cleanedSummary)));
+                                .Add(new Text("Summary: ")).SetBold().SetFontSize(15)
+                                .Add(new Text(article.Content)));
                         }
 
                         if (!string.IsNullOrEmpty(article.Url))
@@ -450,21 +448,6 @@ namespace News.Service.Services
             }
 
         }
-        private string CleanText(string input)
-        {
-            string cleaned = string.Join("\n", input.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
-
-            string[] socialMediaSections = new string[]
-            {
-            "Share this:", "Facebook", "Tumblr", "Twitter", "LinkedIn", "Email", "Pinterest", "Reddit", "Pocket", "Print", "Telegram", "WhatsApp", "Like this:" , "Like"
-            };
-
-            foreach (var section in socialMediaSections)
-            {
-                cleaned = cleaned.Replace(section, "");
-            }
-
-            return cleaned;
-        }
+        
     }
 }
