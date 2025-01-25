@@ -14,8 +14,8 @@ using System.Security.Claims;
 namespace News.Service.Services
 {
     public class UserService(IHttpContextAccessor _httpContextAccessor,
-        IMapper _mapper ,ImageUploader _imageUploader,IUnitOfWork _unitOfWork,
-        ILogger<UserService> _logger ,IMailSettings _mailSettings, 
+        IMapper _mapper, ImageUploader _imageUploader, IUnitOfWork _unitOfWork,
+        ILogger<UserService> _logger, IMailSettings _mailSettings,
         UserManager<ApplicationUser> _userManager) : IUserService
     {
         public async Task<List<UserPreferencesDto>> GetUsersPreferencesAsync()
@@ -27,7 +27,6 @@ namespace News.Service.Services
                 PreferredCategories = u.Categories.Select(c => c.Name).ToList()
             }).ToList();
         }
-
         public async Task<bool> SendFeedbackAsync(FeedbackDto feedbackDto)
         {
             _logger.LogInformation("UserService --> SendFeedback called");
@@ -36,17 +35,7 @@ namespace News.Service.Services
             {
                 To = "MariamShindyRoute@gmail.com",
                 Subject = "NewsAggregator Contact Us Form",
-                Body = $@"
-            <html>
-            <body>
-                <h2>Contact Us Form</h2>
-                <p><strong>Subject:</strong> {feedbackDto.Subject}</p>
-                <p><strong>Name:</strong> {feedbackDto.FullName}</p>
-                <p><strong>Email:</strong> {feedbackDto.Email}</p>
-                <p><strong>Message:</strong></p>
-                <p>{feedbackDto.Message}</p>
-            </body>
-            </html>"
+                Body = BuildFeedbackEmailBody(feedbackDto)
             };
             try
             {
@@ -60,7 +49,6 @@ namespace News.Service.Services
                 return false;
             }
         }
-
         public async Task<bool> SendSurveyAsync(SurveyDto surveyDto)
         {
             _logger.LogInformation("UserService --> SendSurveyAsync called");
@@ -69,16 +57,7 @@ namespace News.Service.Services
             {
                 To = "MariamShindyRoute@gmail.com",
                 Subject = "NewsAggregator Survey Form",
-                Body = $@"
-            <html>
-            <body>
-                <h2>Survey Form</h2>
-                <p><strong>How did you find out about our news website?</strong><br> {surveyDto.SourceDiscovery}</p>
-                <p><strong>How often do you visit news websites?</strong><br> {surveyDto.VisitFrequency}</p>
-                <p><strong>Is the website loading speed satisfactory?</strong><br> {surveyDto.IsLoadingSpeedSatisfactory}</p>
-                <p><strong>How easy is it to navigate our website?</strong><br>{surveyDto.NavigationEaseRating}</p>
-            </body>
-            </html>"
+                Body = BuildSurveyEmailBody(surveyDto)
             };
             try
             {
@@ -99,10 +78,10 @@ namespace News.Service.Services
             if (string.IsNullOrEmpty(currentUserName))
                 throw new UnauthorizedAccessException("No user is logged in.");
             var currentUser = await _userManager.Users
-            .Include(u => u.Categories)  
+            .Include(u => u.Categories)
             .FirstOrDefaultAsync(u => u.UserName == currentUserName);
             if (currentUser is null)
-                 throw new InvalidOperationException("The user was not found.");
+                throw new InvalidOperationException("The user was not found.");
             _logger.LogInformation("UserService --> GetCurrentUser succeeded");
             return currentUser;
         }
@@ -146,8 +125,8 @@ namespace News.Service.Services
                 var imagePath = await _imageUploader.UploadProfileImageAsync(editUserDto.ProfilePicUrl);
                 user.ProfilePicUrl = imagePath;
             }
-            user.FirstName = editUserDto.FirstName??user.FirstName;
-            user.LastName = editUserDto.LastName??user.LastName;
+            user.FirstName = editUserDto.FirstName ?? user.FirstName;
+            user.LastName = editUserDto.LastName ?? user.LastName;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
                 _logger.LogInformation("UserService --> UpdateUser succeeded");
@@ -205,7 +184,7 @@ namespace News.Service.Services
             try
             {
                 var users = await _userManager.GetUsersInRoleAsync("User");
-                var userDtos = _mapper.Map<List<UserDto>>(users); 
+                var userDtos = _mapper.Map<List<UserDto>>(users);
                 return userDtos;
             }
             catch (Exception ex)
@@ -213,6 +192,113 @@ namespace News.Service.Services
                 _logger.LogError($"Error while getting users: {ex.Message}");
                 return new List<UserDto>();
             }
+        }
+
+        private string BuildFeedbackEmailBody(FeedbackDto feedbackDto)
+        {
+            var Body = $@"
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333333;
+                }}
+                h2 {{
+                    color: #007BFF;
+                }}
+                .container {{
+                    border: 1px solid #dddddd;
+                    padding: 20px;
+                    border-radius: 10px;
+                    background-color: #f9f9f9;
+                    max-width: 600px;
+                    margin: 20px auto;
+                }}
+                .content {{
+                    margin-bottom: 15px;
+                }}
+                .footer {{
+                    font-size: 0.9em;
+                    color: #555555;
+                    margin-top: 20px;
+                    border-top: 1px solid #dddddd;
+                    padding-top: 10px;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h2>Contact Us Form</h2>
+                <div class='content'>
+                    <p><strong>Subject:</strong> {feedbackDto.Subject}</p>
+                    <p><strong>Name:</strong> {feedbackDto.FullName}</p>
+                    <p><strong>Email:</strong> {feedbackDto.Email}</p>
+                    <p><strong>Message:</strong></p>
+                    <p>{feedbackDto.Message}</p>
+                </div>
+                <div class='footer'>
+                    <p>This email was sent via the NewsAggregator Contact Us form.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+            return Body;
+        }
+
+        private string BuildSurveyEmailBody(SurveyDto surveyDto)
+        {
+            var Body = $@"
+        <html>
+        <head>
+            <style>
+                body {{
+                    font-family: Arial, sans-serif;
+                    line-height: 1.6;
+                    color: #333333;
+                }}
+                h2 {{
+                    color: #007BFF;
+                }}
+                .container {{
+                    border: 1px solid #dddddd;
+                    padding: 20px;
+                    border-radius: 10px;
+                    background-color: #f9f9f9;
+                    max-width: 600px;
+                    margin: 20px auto;
+                }}
+                .content {{
+                    margin-bottom: 15px;
+                }}
+                .footer {{
+                    font-size: 0.9em;
+                    color: #555555;
+                    margin-top: 20px;
+                    border-top: 1px solid #dddddd;
+                    padding-top: 10px;
+                    text-align: center;
+                }}
+            </style>
+        </head>
+        <body>
+            <div class='container'>
+                <h2>Survey Form</h2>
+                <div class='content'>
+                    <p><strong>How did you find out about our news website?</strong><br>{surveyDto.SourceDiscovery}</p>
+                    <p><strong>How often do you visit news websites?</strong><br>{surveyDto.VisitFrequency}</p>
+                    <p><strong>Is the website loading speed satisfactory?</strong><br>{surveyDto.IsLoadingSpeedSatisfactory}</p>
+                    <p><strong>How easy is it to navigate our website?</strong><br>{surveyDto.NavigationEaseRating}</p>
+                </div>
+                <div class='footer'>
+                    <p>This email was sent via the NewsAggregator Survey Form.</p>
+                </div>
+            </div>
+        </body>
+        </html>";
+            return Body;
         }
     }
 }
