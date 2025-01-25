@@ -183,7 +183,6 @@ namespace News.Service.Services.NewsCatcher
                     using (var pdfDoc = new PdfDocument(writer))
                     {
                         var document = new Document(pdfDoc);
-                        string cleanedSummary = CleanText(article.Summary);
 
                         document.Add(new Paragraph()
                             .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
@@ -225,11 +224,11 @@ namespace News.Service.Services.NewsCatcher
                                 .Add(new Text(article.Published_Date.ToString())));
                         }
 
-                        if (!string.IsNullOrEmpty(cleanedSummary))
+                        if (!string.IsNullOrEmpty(article.Excerpt))
                         {
                             document.Add(new Paragraph()
-                                .Add(new Text("Summary: ")).SetBold()
-                                .Add(new Text(cleanedSummary)));
+                                .Add(new Text("Excerpt: ")).SetBold()
+                                .Add(new Text(article.Excerpt)));
                         }
 
                         if (!string.IsNullOrEmpty(article.Link))
@@ -246,21 +245,6 @@ namespace News.Service.Services.NewsCatcher
             }
 
         }
-        private string CleanText(string input)
-        {
-            string cleaned = string.Join("\n", input.Split('\n').Where(line => !string.IsNullOrWhiteSpace(line)));
-
-            string[] socialMediaSections = new string[]
-            {
-            "Share this:", "Facebook", "Tumblr", "Twitter", "LinkedIn", "Email", "Pinterest", "Reddit", "Pocket", "Print", "Telegram", "WhatsApp", "Like this:" , "Like"
-            };
-
-            foreach (var section in socialMediaSections)
-            {
-                cleaned = cleaned.Replace(section, "");
-            }
-
-            return cleaned;
-        }
+        
     }
 }
