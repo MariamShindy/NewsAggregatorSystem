@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using News.Core.Dtos;
+using News.Core.Dtos.NewsCatcher;
 using News.Core.Entities;
 using News.Core.Entities.NewsCatcher;
 
@@ -15,7 +16,8 @@ namespace News.Core.Profilers
             CreateMap<FavoriteArticleDto,UserFavoriteArticle>().ReverseMap();
             CreateMap<Article, ArticleDto>().ReverseMap();
             CreateMap<Notification,NotificationDto>().ReverseMap();
-            CreateMap<Article, NewsArticle>().ReverseMap(); 
+            CreateMap<Article, NewsArticle>().ReverseMap();
+            CreateMap<NewsArticleDto, NewsArticle>().ReverseMap();
 
             //CreateMap<Comment,AddCommentDto>().ReverseMap();
             //CreateMap<UpdateCommentDto, Comment>()

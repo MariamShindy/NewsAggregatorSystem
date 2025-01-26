@@ -31,55 +31,101 @@ namespace News.Service.Services.NewsCatcher
             "newsandmedia"
         };
 
+        #region Reading from API
+        //public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
+        //{
+        //    //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
+        //    int pageSize = 400;
+        //    string from = "6 days ago", to = "5 days ago";
+        //    var formattedFrom = Uri.EscapeDataString(from);
+        //    var formattedTo = Uri.EscapeDataString(to);
+        //    //var query = Uri.EscapeDataString("gaming OR news OR sport OR tech OR world OR finance OR politics OR business OR economics OR entertainment OR beauty OR travel OR music OR food OR science OR energy");
+        //    var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+
+        //    var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
+
+        //    _httpClient.DefaultRequestHeaders.Clear();
+        //    _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
+        //    _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+        //    try
+        //    {
+        //        var response = await _httpClient.GetStringAsync(requestUrl);
+
+        //        var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
+        //        if (newsResponse?.Articles != null)
+        //        {
+        //            var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
+
+        //            var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+
+        //            newsResponse.Articles = balancedArticles;
+        //            newsResponse.TotalResults = newsResponse.Articles.Count;
+
+        //        }
+        //        foreach (var article in newsResponse?.Articles ?? new List<NewsArticle>())
+        //        {
+        //            if (article.Authors is string author)
+        //            {
+        //                article.Authors = new List<string> { author };
+        //            }
+        //            else if (article.Authors == null)
+        //            {
+        //                article.Authors = new List<string>();
+        //            }
+        //        }
+        //        Console.WriteLine($"Number of articles fetched ==> {newsResponse?.TotalResults}");
+        //        return newsResponse?.Articles ?? new List<NewsArticle>();
+        //    }
+        //    catch (HttpRequestException e)
+        //    {
+        //        Console.WriteLine($"Request failed: {e.Message}");
+        //    }
+        //    return new List<NewsArticle>();
+        //}
+
+        #endregion
+
+
+        //Reading from the json file
         public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         {
-            //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
-            int pageSize = 400;
-            string from = "6 days ago", to = "5 days ago";
-            var formattedFrom = Uri.EscapeDataString(from);
-            var formattedTo = Uri.EscapeDataString(to);
-            //var query = Uri.EscapeDataString("gaming OR news OR sport OR tech OR world OR finance OR politics OR business OR economics OR entertainment OR beauty OR travel OR music OR food OR science OR energy");
-            var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
-
-            var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={pageSize}";
-
-            _httpClient.DefaultRequestHeaders.Clear();
-            _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
-            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
-
             try
             {
-                var response = await _httpClient.GetStringAsync(requestUrl);
+                string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+                string filePath = Path.Combine(baseDirectory, "DataSeeding", "NewsData.json");
 
-                var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
-                if (newsResponse?.Articles != null)
+                var jsonData = await File.ReadAllTextAsync(filePath);
+
+                var articles = JsonConvert.DeserializeObject<List<NewsArticle>>(jsonData);
+
+                if (articles != null)
                 {
-                    var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
 
+                    foreach (var article in articles)
+                    {
+                        if (article.Authors is IEnumerable<string> authorList)
+                        {
+                            article.Authors = authorList.ToList();
+                        }
+                        else
+                        {
+                            article.Authors = new List<string>();
+                        }
+                    }
+
+                    var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
                     var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
 
-                    newsResponse.Articles = balancedArticles;
-                    newsResponse.TotalResults = newsResponse.Articles.Count;
-
+                    Console.WriteLine($"Number of articles fetched ==> {balancedArticles.Count}");
+                    return balancedArticles;
                 }
-                foreach (var article in newsResponse?.Articles ?? new List<NewsArticle>())
-                {
-                    if (article.Authors is string author)
-                    {
-                        article.Authors = new List<string> { author };
-                    }
-                    else if (article.Authors == null)
-                    {
-                        article.Authors = new List<string>();
-                    }
-                }
-                Console.WriteLine($"Number of articles fetched ==> {newsResponse?.TotalResults}");
-                return newsResponse?.Articles ?? new List<NewsArticle>();
             }
-            catch (HttpRequestException e)
+            catch (Exception ex)
             {
-                Console.WriteLine($"Request failed: {e.Message}");
+                Console.WriteLine($"Error reading JSON file: {ex.Message}");
             }
+
             return new List<NewsArticle>();
         }
 
@@ -245,6 +291,7 @@ namespace News.Service.Services.NewsCatcher
             }
 
         }
-        
+
+      
     }
 }

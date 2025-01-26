@@ -20,7 +20,7 @@ namespace News.Service.Helpers.EmailSettings
             mail.From.Add(new MailboxAddress(_options.Value.DisplayName, _options.Value.Email));
             var builder = new BodyBuilder
             {
-                HtmlBody = email.Body 
+                HtmlBody = email.Body
             };
             mail.Body = builder.ToMessageBody();
             using var smtp = new SmtpClient();
@@ -29,23 +29,82 @@ namespace News.Service.Helpers.EmailSettings
             smtp.Send(mail);
             smtp.Disconnect(true);
         }
-        public async Task SendNotificationEmail(NotificationDto notificationDto , string userEmail)
+        public async Task SendNotificationEmail(NotificationDto notificationDto, string userEmail)
         {
             var email = new Email
             {
-                To = userEmail, 
+                To = userEmail,
                 Subject = $"New Article in {notificationDto.Category}",
-                Body = $@"
-            <html>
-            <body>
-                <h2>{notificationDto.ArticleTitle}</h2>
-                <p>Check out this new article in your preferred category <strong>{notificationDto.Category}</strong>:</p>
-                <a href='{notificationDto.ArticleUrl}'>Read more</a>
-            </body>
-            </html>"
+                Body = BuildNotificationEmailBody(notificationDto, userEmail)
             };
-
             await SendEmail(email);
+        }
+        private string BuildNotificationEmailBody(NotificationDto notificationDto, string userEmail)
+        {
+            var body = $@"
+               <html>
+               <head>
+                   <style>
+                       body {{
+                           font-family: Arial, sans-serif;
+                           line-height: 1.6;
+                           color: #333333;
+                       }}
+                       h2 {{
+                           color: #007BFF;
+                       }}
+                       .container {{
+                           border: 1px solid #dddddd;
+                           padding: 20px;
+                           border-radius: 10px;
+                           background-color: #f9f9f9;
+                           max-width: 600px;
+                           margin: 20px auto;
+                       }}
+                       .content {{
+                           margin-bottom: 15px;
+                       }}
+                       .footer {{
+                           font-size: 0.9em;
+                           color: #555555;
+                           margin-top: 20px;
+                           border-top: 1px solid #dddddd;
+                           padding-top: 10px;
+                           text-align: center;
+                       }}
+                       .link {{
+                           display: inline-block;
+                           background-color: #007BFF;
+                           color: white;
+                           text-decoration: none;
+                           padding: 10px 20px;
+                           border-radius: 5px;
+                           margin-top: 10px;
+                       }}
+                       .link:hover {{
+                           background-color: #0056b3;
+                           color: white;
+                       }}
+                      
+                   </style>
+               </head>
+               <body>
+                   <div class='container'>
+                       <h2>New Article Alert: {notificationDto.Category}</h2>
+                       <div class='content'>
+                           <p>Dear User,</p>
+                           <p>We have a new article in your preferred category <strong>{notificationDto.Category}</strong>:</p>
+                           <p><strong>{notificationDto.ArticleTitle}</strong></p>
+                           <a href='{notificationDto.ArticleUrl}' class='link'>Read More</a>
+                       </div>
+                       <div class='footer'>
+                           <p>This email was sent to notify you about updates in your preferred category.</p>
+                           <p>Thank you for using our service!</p>
+                       </div>
+                   </div>
+               </body>
+               </html>";
+            return body;
         }
     }
 }
