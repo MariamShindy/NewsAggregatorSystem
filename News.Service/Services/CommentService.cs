@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
 using News.Core.Contracts.NewsCatcher;
 using News.Core.Contracts.UnitOfWork;
@@ -12,19 +13,28 @@ namespace News.Service.Services
         public async Task<IEnumerable<Comment>> GetAllAsync()
         {
             _logger.LogInformation("CommentService --> GetAll called");
-            return await _unitOfWork.Repository<Comment>().GetAllAsync();
+            //return await _unitOfWork.Repository<Comment>().GetAllAsync();
+            return await _unitOfWork.Repository<Comment>()
+        .GetAllAsync(query => query.Include(c => c.User));
         }
 
         public async Task<Comment> GetByIdAsync(int id)
         {
+            //_logger.LogInformation($"CommentService --> GetById with id : {id} called");
+            //return await _unitOfWork.Repository<Comment>().GetByIdAsync(id);
             _logger.LogInformation($"CommentService --> GetById with id : {id} called");
-            return await _unitOfWork.Repository<Comment>().GetByIdAsync(id);
+            var comment = await _unitOfWork.Repository<Comment>()
+                .FindAsync(c => c.Id == id, query => query.Include(c => c.User));
+
+            return comment.FirstOrDefault() ?? new Comment();
         }
         public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string userId)
         {
             _logger.LogInformation($"CommentService --> GetCommentsByUserIdAsync with userId : {userId} called");
+            //return await _unitOfWork.Repository<Comment>()
+            //                     .FindAsync(c => c.UserId == userId);
             return await _unitOfWork.Repository<Comment>()
-                                 .FindAsync(c => c.UserId == userId);
+           .FindAsync(c => c.UserId == userId, query => query.Include(c => c.User));
         }
         public async Task AddAsync(Comment comment)
         {

@@ -11,6 +11,15 @@ namespace News.Infrastructure.Repositories
         {
             return await _dbContext.Set<T>().AsNoTracking().ToListAsync();
         }
+        public async Task<IReadOnlyList<T>> GetAllAsync(Func<IQueryable<T>, IQueryable<T>>? include = null)
+        {
+            IQueryable<T> query = _dbContext.Set<T>();
+
+            if (include != null)
+                query = include(query); 
+
+            return await query.AsNoTracking().ToListAsync();
+        }
         public async Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate)
         {
             return  _dbContext.Set<T>().Where(predicate).AsEnumerable();
@@ -32,6 +41,19 @@ namespace News.Infrastructure.Repositories
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)
         {
             return await _dbContext.Set<T>().AnyAsync(predicate);
+        }
+        public async Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>>? predicate = null,
+        Func<IQueryable<T>, IQueryable<T>>? include = null)
+        {
+            IQueryable<T> query = _dbContext.Set<T>();
+
+            if (include != null)
+                query = include(query); 
+
+            if (predicate != null)
+                query = query.Where(predicate);
+
+            return await query.ToListAsync();
         }
     }
 }
