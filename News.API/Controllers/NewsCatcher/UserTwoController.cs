@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Contracts.NewsCatcher;
 using News.Core.Dtos;
+using News.Core.Entities;
 
 namespace News.API.Controllers.NewsCatcher
 {
@@ -12,7 +13,9 @@ namespace News.API.Controllers.NewsCatcher
     [ApiController]
     [Authorize]
 
-    public class UserTwoController(IUserService _userService , IMapper _mapper , INewsTwoService _newsService ,IFavoriteTwoService _favoriteService) : ControllerBase
+    public class UserTwoController(IUserService _userService , IMapper _mapper ,
+        INewsTwoService _newsService ,IFavoriteTwoService _favoriteService
+        , ISocialMediaService _socialMediaService): ControllerBase
     {
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
@@ -22,7 +25,7 @@ namespace News.API.Controllers.NewsCatcher
             return Ok(userInfo);
         }
 
-        // PUT: api/user/me
+        // PUT: api/userTwo/me
         [HttpPut("me")]
         public async Task<IActionResult> EditUserInfo([FromBody] EditUserDto model)
         {
@@ -33,7 +36,7 @@ namespace News.API.Controllers.NewsCatcher
             return BadRequest(result.Errors);
         }
 
-        // POST: api/user/send-feedback
+        // POST: api/userTwo/send-feedback
         [HttpPost("send-feedback")]
         [AllowAnonymous]
         public async Task<IActionResult> SendFeedback([FromBody] FeedbackDto feedbackDto)
@@ -57,7 +60,7 @@ namespace News.API.Controllers.NewsCatcher
                 return StatusCode(500, new { Status = "Error", Message = "An error occurred while sending feedback. Please try again later." });
             }
         }
-        // POST: api/user/send-survey
+        // POST: api/userTwo/send-survey
         [HttpPost("send-survey")]
         public async Task<IActionResult> SendSurvey([FromBody] SurveyDto surveyDto)
         {
@@ -76,7 +79,7 @@ namespace News.API.Controllers.NewsCatcher
         }
 
 
-        // POST: api/user/favorites/{newsId}
+        // POST: api/userTwo/favorites/{newsId}
         [HttpPost("favorites/{newsId}")]
         public async Task<IActionResult> AddToFavorites(string newsId)
         {
@@ -93,7 +96,7 @@ namespace News.API.Controllers.NewsCatcher
             return Ok(new { result = "Article added to favorites" });
         }
 
-        // DELETE: api/user/favorites/{newsId}
+        // DELETE: api/userTwo/favorites/{newsId}
         [HttpDelete("favorites/{newsId}")]
         public async Task<IActionResult> RemoveFromFavorites(string newsId)
         {
@@ -102,7 +105,7 @@ namespace News.API.Controllers.NewsCatcher
             return Ok(new { result = "Article removed from favorites" });
         }
 
-        // GET : api/user/favorites
+        // GET : api/userTwo/favorites
         [HttpGet("favorites")]
         public async Task<IActionResult> GetUserFavorites()
         {
@@ -112,7 +115,7 @@ namespace News.API.Controllers.NewsCatcher
         }
 
 
-        // GET : api/user/set-preferred-categories
+        // GET : api/userTwo/set-preferred-categories
         [HttpPost("set-preferred-categories")]
         public async Task<IActionResult> SetPreferredCategories(SetPreferredCategoriesDto model)
         {
@@ -129,7 +132,7 @@ namespace News.API.Controllers.NewsCatcher
                 return BadRequest(ex.Message);
             }
         }
-        // GET : api/user/referred-categories
+        // GET : api/userTwo/preferred-categories
         [HttpGet("preferred-categories")]
         public async Task<IActionResult> GetUserPreferredCategories()
         {
@@ -141,6 +144,37 @@ namespace News.API.Controllers.NewsCatcher
             catch (ArgumentException ex)
             {
                 return NotFound(ex.Message);
+            }
+        }
+
+        // POST : api/userTwo/share-article/{newsId}
+
+        [HttpPost("share-article/{newsId}")]
+        public IActionResult ShareArticle(string newsId, [FromBody] ShareArticleRequest request)
+        {
+            var articleExists = _newsService.GetNewsByIdAsync(newsId);
+            if (articleExists is not null)
+            {
+                try
+                {
+
+                    var shareLinks = _socialMediaService.GenerateShareLinks(newsId, request?.Platform, request?.CustomMessage);
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Article share links generated successfully.",
+                        shareLinks
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { success = false, message = ex.Message });
+                }
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Article does not exist" });
             }
         }
     }

@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Dtos;
+using News.Core.Entities;
+using News.Service.Services;
 
 namespace News.API.Controllers
 {
@@ -12,7 +14,7 @@ namespace News.API.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class UserController(IMapper _mapper,
         IUserService _userService,IFavoriteService _favoriteService ,
-        INewsService _newsService) : ControllerBase
+        INewsService _newsService , SocialMediaService _socialMediaService) : ControllerBase
 	{
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
@@ -143,6 +145,36 @@ namespace News.API.Controllers
                 return NotFound(ex.Message);  
             }
         }
+
+        // POST : api/user/share-article/{newsId}
+        [HttpPost("share-article/{newsId}")]
+        public async Task<IActionResult> ShareArticle(string newsId, [FromBody] ShareArticleRequest request)
+        {
+            bool articleExists = await _newsService.CheckArticleExistsAsync(newsId);
+            if (!articleExists)
+            {
+                try
+                {
+                    var shareLinks = _socialMediaService.GenerateShareLinks(newsId, request?.Platform, request?.CustomMessage);
+
+                    return Ok(new
+                    {
+                        success = true,
+                        message = "Article share links generated successfully.",
+                        shareLinks
+                    });
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest(new { success = false, message = ex.Message });
+                }
+            }
+            else
+            {
+                return BadRequest(new { success = false, message = "Article does not exist" });
+            }
+        }
+
         #region Favorite before caching
         //// POST: api/user/favorites/{newsId}
         //[HttpPost("favorites/{newsId}")]

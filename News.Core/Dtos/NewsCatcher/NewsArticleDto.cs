@@ -21,7 +21,7 @@ namespace News.Core.Dtos.NewsCatcher
         public string? Topic { get; set; }
         public string? Country { get; set; }
         public string? Language { get; set; }
-        public object Authors { get; set; }
+        public List<string> Authors { get; set; } = new List<string>();
         public string? Media { get; set; }
         public bool Is_Opinion { get; set; }
         public string? Twitter_Account { get; set; }

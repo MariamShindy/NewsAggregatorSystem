@@ -1,6 +1,9 @@
 ﻿using AutoMapper;
 using iText.IO.Image;
+using iText.Kernel.Colors;
 using iText.Kernel.Pdf;
+using iText.Kernel.Pdf.Action;
+using iText.Kernel.Pdf.Canvas.Draw;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
@@ -13,6 +16,7 @@ using News.Core.Dtos.NewsCatcher;
 using News.Core.Entities;
 using News.Core.Entities.NewsCatcher;
 using Newtonsoft.Json;
+using System.Text.RegularExpressions;
 
 namespace News.Service.Services.NewsCatcher
 {
@@ -229,69 +233,101 @@ namespace News.Service.Services.NewsCatcher
                     using (var pdfDoc = new PdfDocument(writer))
                     {
                         var document = new Document(pdfDoc);
+                        document.SetMargins(40, 40, 40, 40);
 
-                        document.Add(new Paragraph()
-                            .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
-                            .SetTextAlignment(TextAlignment.CENTER));
+                        BuildArticlePdfBody(document, article); 
 
-                        document.Add(new Paragraph("\n"));
-
-                        if (!string.IsNullOrEmpty(article.Media))
-                        {
-                            try
-                            {
-                                var imageData = ImageDataFactory.Create(article.Media);
-                                var image = new Image(imageData).SetWidth(500).SetHeight(500);
-                                document.Add(image);
-                                document.Add(new Paragraph("\n"));
-                            }
-                            catch
-                            {
-                                document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
-                            }
-                        }
-
-                        if (article.Authors is IEnumerable<string> authors && authors.Any())
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Authors: ")).SetBold()
-                                .Add(new Text(string.Join(", ", authors))));
-                        }
-                        if (article.Topic != null)
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Topic : ")).SetBold()
-                                .Add(new Text(article.Topic)));
-                        }
-                        if (article.Published_Date != null)
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Published Date: ")).SetBold()
-                                .Add(new Text(article.Published_Date.ToString())));
-                        }
-
-                        if (!string.IsNullOrEmpty(article.Excerpt))
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Excerpt: ")).SetBold()
-                                .Add(new Text(article.Excerpt)));
-                        }
-
-                        if (!string.IsNullOrEmpty(article.Link))
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Read More: ")).SetBold()
-                                .Add(new Text(article.Link).SetUnderline()));
-                            document.Add(new Paragraph("\n"));
-                        }
+                        document.Close();
                     }
                 }
 
                 return memoryStream.ToArray();
             }
-
         }
 
-      
+        #region Helper methods 
+        private void BuildArticlePdfBody(Document document, NewsArticle article)
+        {
+            document.Add(new Paragraph(article.Title ?? "Untitled")
+                .SetFontSize(24)
+                .SetBold()
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontColor(ColorConstants.DARK_GRAY));
+
+            document.Add(new LineSeparator(new SolidLine()));
+            document.Add(new Paragraph("\n"));
+
+            if (!string.IsNullOrEmpty(article.Media))
+            {
+                try
+                {
+                    var imageData = ImageDataFactory.Create(article.Media);
+                    var image = new Image(imageData).SetAutoScale(true)
+                                                     .SetHorizontalAlignment(HorizontalAlignment.CENTER);
+                    document.Add(image);
+                }
+                catch
+                {
+                    document.Add(new Paragraph("Image unavailable").SetFontColor(ColorConstants.RED));
+                }
+            }
+
+            document.Add(new Paragraph("\n"));
+
+            if (article.Authors is IEnumerable<string> authors && authors.Any())
+            {
+                document.Add(new Paragraph()
+                        .Add(new Text("Authors: ").SetBold().SetFontSize(16))
+                        .Add(new Text(string.Join(" , ", authors)).SetFontSize(16)));
+            }
+
+            if (!string.IsNullOrEmpty(article.Topic))
+            {
+                document.Add(new Paragraph()
+                        .Add(new Text("Topic: ").SetBold().SetFontSize(16))
+                        .Add(new Text(article.Topic).SetFontSize(16)));
+            }
+
+            if (article.Published_Date != null)
+            {
+                document.Add(new Paragraph()
+                        .Add(new Text("Published Date: ").SetBold().SetFontSize(16))
+                        .Add(new Text(article.Published_Date.ToString()).SetFontSize(16)));
+            }
+
+            document.Add(new LineSeparator(new DottedLine()));
+
+            AddSection(document, "Excerpt", article.Excerpt, 12, true);
+            AddSection(document, "Summary", article.Summary, 12, true);
+
+            document.Add(new LineSeparator(new DashedLine()));
+
+            if (!string.IsNullOrEmpty(article.Link))
+            {
+                Link link = new Link("Read more", PdfAction.CreateURI(article.Link));
+                document.Add(new Paragraph(link.SetFontSize(12).SetUnderline().SetFontColor(ColorConstants.BLUE)));
+            }
+
+            document.Add(new Paragraph("\n"));
+        }
+
+        private void AddSection(Document document, string title, string content, float fontSize, bool italic = false)
+        {
+            if (!string.IsNullOrEmpty(content))
+            {
+                string cleanedContent = Regex.Replace(content.Trim(), @"(\n\s*)+", "\n"); // Remove extra newlines
+
+                var paragraph = new Paragraph()
+                    .Add(new Text($"{title}: ").SetBold())
+                    .Add(new Text(cleanedContent))
+                    .SetFontSize(fontSize);
+
+                if (italic) paragraph.SetItalic();
+
+                document.Add(paragraph);
+            }
+        }
+
+        #endregion
     }
 }

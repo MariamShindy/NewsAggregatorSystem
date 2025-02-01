@@ -184,8 +184,24 @@ namespace News.Service.Services
             try
             {
                 var users = await _userManager.GetUsersInRoleAsync("User");
-                var userDtos = _mapper.Map<List<UserDto>>(users);
-                return userDtos;
+                //var userDtos = _mapper.Map<List<UserDto>>(users);
+                if (users is not null)
+                {
+                    var userDtos = users.Select(user => new UserDto
+                    {
+                        Id = user.Id,
+                        UserName = user.UserName,
+                        FirstName = user.FirstName,
+                        LastName = user.LastName,
+                        Email = user.Email,
+                        PasswordHash = user.PasswordHash,
+                        ProfilePicUrl = user.ProfilePicUrl,
+                        IsLockedOut = user.LockoutEnd.HasValue && user.LockoutEnd > DateTimeOffset.UtcNow
+                    }).ToList();
+                    return userDtos;
+                }
+                else
+                    return new List<UserDto>();
             }
             catch (Exception ex)
             {

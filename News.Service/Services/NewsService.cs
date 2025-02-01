@@ -13,6 +13,8 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using News.Core.Entities.NewsCatcher;
 using iText.Layout;
+using iText.Kernel.Pdf.Canvas.Draw;
+using iText.Kernel.Colors;
 
 namespace News.Service.Services
 {
@@ -378,6 +380,79 @@ namespace News.Service.Services
             var articles = _mapper.Map<IEnumerable<Article>>(articlesDtos);
             return articles;
         }
+        #region Old pdf
+        //public byte[] GenerateArticlePdf(ArticleDto article)
+        //{
+        //    using (var memoryStream = new MemoryStream())
+        //    {
+        //        using (var writer = new PdfWriter(memoryStream))
+        //        {
+        //            using (var pdfDoc = new PdfDocument(writer))
+        //            {
+        //                var document = new Document(pdfDoc);
+
+        //                document.Add(new Paragraph()
+        //                    .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
+        //                    .SetTextAlignment(TextAlignment.CENTER));
+
+        //                document.Add(new Paragraph("\n"));
+
+        //                if (!string.IsNullOrEmpty(article.urlToImage))
+        //                {
+        //                    try
+        //                    {
+        //                        var imageData = ImageDataFactory.Create(article.urlToImage);
+        //                        var image = new Image(imageData).SetWidth(500).SetHeight(500);
+        //                        document.Add(image);
+        //                        document.Add(new Paragraph("\n"));
+        //                    }
+        //                    catch
+        //                    {
+        //                        document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
+        //                    }
+        //                }
+
+        //                if (article.Author != null)
+        //                {
+        //                    document.Add(new Paragraph()
+        //                        .Add(new Text("Authors: ")).SetBold()
+        //                        .Add(new Text(article.Author)));
+        //                }
+        //                if (article.Category != null)
+        //                {
+        //                    document.Add(new Paragraph()
+        //                        .Add(new Text("Topic : ")).SetBold()
+        //                        .Add(new Text(article.Category)));
+        //                }
+        //                if (article.PublishedAt != null)
+        //                {
+        //                    document.Add(new Paragraph()
+        //                        .Add(new Text("Published Date: ")).SetBold()
+        //                        .Add(new Text(article.PublishedAt.ToString())));
+        //                }
+        //                if (!string.IsNullOrEmpty(article.Content))
+        //                {
+        //                    document.Add(new Paragraph()
+        //                        .Add(new Text("Summary: ")).SetBold().SetFontSize(15)
+        //                        .Add(new Text(article.Content)));
+        //                }
+
+        //                if (!string.IsNullOrEmpty(article.Url))
+        //                {
+        //                    document.Add(new Paragraph()
+        //                        .Add(new Text("Read More: ")).SetBold()
+        //                        .Add(new Text(article.Url).SetUnderline()));
+        //                    document.Add(new Paragraph("\n"));
+        //                }
+        //            }
+        //        }
+
+        //        return memoryStream.ToArray();
+        //    }
+
+        //} 
+        #endregion
+
         public byte[] GenerateArticlePdf(ArticleDto article)
         {
             using (var memoryStream = new MemoryStream())
@@ -388,66 +463,85 @@ namespace News.Service.Services
                     {
                         var document = new Document(pdfDoc);
 
-                        document.Add(new Paragraph()
-                            .Add(new Text(article.Title ?? "Untitled").SetBold().SetFontSize(30))
-                            .SetTextAlignment(TextAlignment.CENTER));
+                        AddTitle(document, article.Title);  
+                        AddImage(document, article.urlToImage); 
+                        AddMetadata(document, article); 
 
-                        document.Add(new Paragraph("\n"));
-
-                        if (!string.IsNullOrEmpty(article.urlToImage))
-                        {
-                            try
-                            {
-                                var imageData = ImageDataFactory.Create(article.urlToImage);
-                                var image = new Image(imageData).SetWidth(500).SetHeight(500);
-                                document.Add(image);
-                                document.Add(new Paragraph("\n"));
-                            }
-                            catch
-                            {
-                                document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
-                            }
-                        }
-
-                        if (article.Author != null)
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Authors: ")).SetBold()
-                                .Add(new Text(article.Author)));
-                        }
-                        if (article.Category != null)
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Topic : ")).SetBold()
-                                .Add(new Text(article.Category)));
-                        }
-                        if (article.PublishedAt != null)
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Published Date: ")).SetBold()
-                                .Add(new Text(article.PublishedAt.ToString())));
-                        }
-                        if (!string.IsNullOrEmpty(article.Content))
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Summary: ")).SetBold().SetFontSize(15)
-                                .Add(new Text(article.Content)));
-                        }
-
-                        if (!string.IsNullOrEmpty(article.Url))
-                        {
-                            document.Add(new Paragraph()
-                                .Add(new Text("Read More: ")).SetBold()
-                                .Add(new Text(article.Url).SetUnderline()));
-                            document.Add(new Paragraph("\n"));
-                        }
+                        document.Close();
                     }
                 }
 
                 return memoryStream.ToArray();
             }
-
         }
-        
+
+        private void AddTitle(Document document, string title)
+        {
+            document.Add(new Paragraph()
+                .Add(new Text(title ?? "Untitled").SetBold().SetFontSize(30))
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetFontColor(ColorConstants.DARK_GRAY));
+            
+            document.Add(new LineSeparator(new SolidLine()));
+            document.Add(new Paragraph("\n"));
+        }
+
+        private void AddImage(Document document, string imageUrl)
+        {
+            if (!string.IsNullOrEmpty(imageUrl))
+            {
+                try
+                {
+                    var imageData = ImageDataFactory.Create(imageUrl);
+                    var image = new Image(imageData).SetWidth(500).SetHeight(500);
+                    document.Add(image);
+                    document.Add(new Paragraph("\n"));
+                }
+                catch
+                {
+                    document.Add(new Paragraph("Media: Unable to render image (invalid URL or network issue)."));
+                }
+            }
+        }
+
+        private void AddMetadata(Document document, ArticleDto article)
+        {
+            if (article.Author != null)
+            {
+                document.Add(new Paragraph()
+                    .Add(new Text("Authors: ")).SetBold()
+                    .Add(new Text(article.Author)));
+            }
+
+            if (article.Category != null)
+            {
+                document.Add(new Paragraph()
+                    .Add(new Text("Topic: ")).SetBold()
+                    .Add(new Text(article.Category)));
+            }
+
+            if (article.PublishedAt != null)
+            {
+                document.Add(new Paragraph()
+                    .Add(new Text("Published Date: ")).SetBold()
+                    .Add(new Text(article.PublishedAt.ToString())));
+            }
+
+            if (!string.IsNullOrEmpty(article.Content))
+            {
+                document.Add(new Paragraph()
+                    .Add(new Text("Summary: ")).SetBold().SetFontSize(15)
+                    .Add(new Text(article.Content)));
+            }
+
+            if (!string.IsNullOrEmpty(article.Url))
+            {
+                document.Add(new Paragraph()
+                    .Add(new Text("Read More: ")).SetBold()
+                    .Add(new Text(article.Url).SetUnderline()));
+                document.Add(new Paragraph("\n"));
+            }
+        }
+
     }
 }
