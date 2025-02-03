@@ -84,5 +84,15 @@ namespace News.API.Controllers
             await _commentService.DeleteAsync(id);
             return Ok(new { result = "Comment deleted" });
         }
+
+        // GET: api/comment/article/{articleId}
+        [HttpGet("article/{articleId}")]
+        public async Task<IActionResult> GetCommentsByArticleId(string articleId)
+        {
+            var comments = await _commentService.GetCommentsByArticleIdAsync(articleId);
+            if (comments == null || !comments.Any())
+                return NotFound("No comments found for this article.");
+            return Ok(comments);
+        }
     }
 }
