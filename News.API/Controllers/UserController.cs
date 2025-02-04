@@ -14,7 +14,7 @@ namespace News.API.Controllers
     [ApiExplorerSettings(IgnoreApi = true)]
     public class UserController(IMapper _mapper,
         IUserService _userService,IFavoriteService _favoriteService ,
-        INewsService _newsService , SocialMediaService _socialMediaService) : ControllerBase
+        INewsService _newsService , ISocialMediaService _socialMediaService) : ControllerBase
 	{
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
