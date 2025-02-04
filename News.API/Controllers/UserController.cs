@@ -8,7 +8,7 @@ using News.Service.Services;
 
 namespace News.API.Controllers
 {
-    [Authorize(Roles ="User")]
+    [Authorize/*(Roles ="User")*/]
 	[Route("api/[controller]")]
 	[ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
