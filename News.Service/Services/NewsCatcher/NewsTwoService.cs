@@ -172,6 +172,7 @@ namespace News.Service.Services.NewsCatcher
 
             return article;
         }
+
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
         {
             _logger.LogInformation($"NewsService --> AddCategoryAsync called");

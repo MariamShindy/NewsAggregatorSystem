@@ -10,5 +10,7 @@ namespace News.Core.Contracts
 		Task UpdateAsync(Comment comment);        
 		Task DeleteAsync(int id);
         Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string userId);
+		Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(string articleId);
+
     }
 }

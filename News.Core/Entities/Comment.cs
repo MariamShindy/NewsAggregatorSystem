@@ -1,4 +1,6 @@
-﻿namespace News.Core.Entities
+﻿using News.Core.Entities.NewsCatcher;
+
+namespace News.Core.Entities
 {
 	public class Comment
 	{
@@ -8,6 +10,8 @@
 		public string ArticleId { get; set; } = string.Empty;
         //public Article Article { get; set; }  
         public string UserId { get; set; } = string.Empty;
-        public ApplicationUser User { get; set; }  
-	}
+        public ApplicationUser User { get; set; }
+        public NewsArticle Article { get; set; }
+
+    }
 }

@@ -68,5 +68,12 @@ namespace News.Service.Services
             await _unitOfWork.CompleteAsync();
             _logger.LogInformation($"CommentService --> Delete with id : {id} succeeded");
         }
+        public async Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(string articleId)
+        {
+            _logger.LogInformation($"CommentService --> GetCommentsByArticleIdAsync with articleId: {articleId} called");
+
+            return await _unitOfWork.Repository<Comment>()
+                .FindAsync(c => c.ArticleId == articleId, query => query.Include(c => c.User));
+        }
     }
 }
