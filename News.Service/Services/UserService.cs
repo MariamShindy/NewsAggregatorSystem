@@ -111,6 +111,12 @@ namespace News.Service.Services
             }
             if (!string.IsNullOrWhiteSpace(editUserDto.Password))
             {
+                if (editUserDto.Password != editUserDto.ConfirmPassword)
+                {
+                    _logger.LogWarning("Passwords do not match.");
+                    return IdentityResult.Failed(new IdentityError { Description = "Password and ConfirmPassword do not match." });
+                }
+
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
                 var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.Password);
                 if (!passwordValidationResult.Succeeded)
