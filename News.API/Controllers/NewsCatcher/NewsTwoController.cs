@@ -7,7 +7,7 @@ namespace News.API.Controllers.NewsCatcher
 {
     [Route("api/[controller]")]
     [ApiController]
-    [Authorize(Roles = "User")]
+    [Authorize/*(Roles = "User")*/]
     public class NewsTwoController(INewsTwoService _newsService) : ControllerBase
     {
         // Get all news articles

@@ -7,7 +7,7 @@ using News.Core.Entities;
 
 namespace News.API.Controllers
 {
-    [Authorize(Roles = "Admin,User")]
+    [Authorize/*(Roles = "Admin,User")*/]
     [Route("api/[controller]")]
     [ApiController]
     public class CommentController(ICommentService _commentService,
