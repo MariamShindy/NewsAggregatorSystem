@@ -61,10 +61,15 @@ namespace News.Service.Services
 
             var user = await _userManager.FindByNameAsync(model.UserName);
 
-            if (user == null || await _userManager.IsLockedOutAsync(user))
+            if (user == null)
             {
-                _logger.LogWarning("AccountService --> LoginUser --> Account is locked or does not exist");
-                return (false, null, "Account is locked or does not exist.")!;
+                _logger.LogWarning("AccountService --> LoginUser --> Account does not exist");
+                return (false, null, "Account does not exist.")!;
+            }
+            if (await _userManager.IsLockedOutAsync(user))
+            {
+                _logger.LogWarning("AccountService --> LoginUser --> Account locked");
+                return (false, null, "Account locked.")!;
             }
 
             if (await _userManager.CheckPasswordAsync(user, model.Password))

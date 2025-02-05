@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using iText.StyledXmlParser.Jsoup.Nodes;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Contracts.NewsCatcher;
 using News.Core.Dtos;
 using News.Core.Entities;
+using Comment = News.Core.Entities.Comment;
 
 namespace News.API.Controllers
 {
@@ -13,31 +15,6 @@ namespace News.API.Controllers
     public class CommentController(ICommentService _commentService,
         IUserService _userService ,INewsTwoService _newsService) : ControllerBase
     {
-        // GET: api/comment
-        [HttpGet]
-        public async Task<IActionResult> GetAllComments()
-        {
-            var comments = await _commentService.GetAllAsync();
-            return Ok(comments);
-        }
-
-        // GET: api/comment/{id}
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetCommentById(int id)
-        {
-            var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null) return NotFound();
-            return Ok(comment);
-        }
-        // GET: api/comment/user/{userId}
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetCommentsByUserId(string userId)
-        {
-            var comments = await _commentService.GetCommentsByUserIdAsync(userId);
-            if (comments == null || !comments.Any())
-                return NotFound("No comments found for this user.");
-            return Ok(comments);
-        }
         // POST: api/comment/{newsId}/comments
         [HttpPost("{newsId}/comments")]
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)
@@ -67,7 +44,6 @@ namespace News.API.Controllers
             if (comment.UserId != user.Id)
                 return Forbid("You are not authorized to edit this comment.");
 
-            ////AUTOMAPPER
             comment.Content = model.Content;
             comment.CreatedAt = DateTime.UtcNow;
             await _commentService.UpdateAsync(comment);
@@ -85,6 +61,65 @@ namespace News.API.Controllers
             return Ok(new { result = "Comment deleted" });
         }
 
+        // GET: api/comment
+        [HttpGet]
+        public async Task<IActionResult> GetAllComments()
+        {
+            var comments = await _commentService.GetAllAsync();
+            var formattedComments = comments.Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
+                UserId = c.UserId,
+                UserName = c.User.UserName,
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
+
+            });
+            return Ok(formattedComments);
+        }
+
+        // GET: api/comment/{id}
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetCommentById(int id)
+        {
+            var comment = await _commentService.GetByIdAsync(id);
+            if (comment == null) return NotFound();
+
+            var formattedComment = new CommentDto
+            {
+                Id = comment.Id,
+                Content = comment.Content,
+                CreatedAt = comment.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
+                UserId = comment.UserId,
+                UserName = comment.User.UserName,
+                IsLocked = comment.User.LockoutEnd.HasValue && comment.User.LockoutEnd > DateTimeOffset.UtcNow
+            };
+            return Ok(formattedComment);
+        }
+
+        // GET: api/comment/user/{userId}
+        [HttpGet("user/{userId}")]
+        public async Task<IActionResult> GetCommentsByUserId(string userId)
+        {
+            var comments = await _commentService.GetCommentsByUserIdAsync(userId);
+            if (comments == null || !comments.Any())
+                return NotFound("No comments found for this user.");
+
+            var formattedComments = comments.Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
+                UserId = c.UserId,
+                UserName = c.User.UserName,
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
+
+            });
+
+            return Ok(formattedComments);
+        }
+
         // GET: api/comment/article/{articleId}
         [HttpGet("article/{articleId}")]
         public async Task<IActionResult> GetCommentsByArticleId(string articleId)
@@ -92,7 +127,19 @@ namespace News.API.Controllers
             var comments = await _commentService.GetCommentsByArticleIdAsync(articleId);
             if (comments == null || !comments.Any())
                 return NotFound("No comments found for this article.");
-            return Ok(comments);
+
+            var formattedComments = comments.Select(c => new CommentDto
+            {
+                Id = c.Id,
+                Content = c.Content,
+                CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
+                UserId = c.UserId,
+                UserName = c.User.UserName,
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
+
+            });
+
+            return Ok(formattedComments);
         }
     }
 }

@@ -109,22 +109,36 @@ namespace News.Service.Services
                 }
                 user.Email = editUserDto.Email;
             }
-            if (!string.IsNullOrWhiteSpace(editUserDto.Password))
+            if (!string.IsNullOrWhiteSpace(editUserDto.OldPassword) || !string.IsNullOrWhiteSpace(editUserDto.NewPassword))
             {
-                if (editUserDto.Password != editUserDto.ConfirmPassword)
+                if (string.IsNullOrWhiteSpace(editUserDto.OldPassword))
                 {
-                    _logger.LogWarning("Passwords do not match.");
-                    return IdentityResult.Failed(new IdentityError { Description = "Password and ConfirmPassword do not match." });
+                    _logger.LogWarning("Old password is required to change password.");
+                    return IdentityResult.Failed(new IdentityError { Description = "Old password is required." });
+                }
+
+                var passwordValid = await _userManager.CheckPasswordAsync(user, editUserDto.OldPassword);
+                if (!passwordValid)
+                {
+                    _logger.LogWarning("Old password is incorrect.");
+                    return IdentityResult.Failed(new IdentityError { Description = "Old password is incorrect." });
+                }
+
+                if (editUserDto.NewPassword != editUserDto.ConfirmNewPassword)
+                {
+                    _logger.LogWarning("New password and confirmation do not match.");
+                    return IdentityResult.Failed(new IdentityError { Description = "New password and confirmation do not match." });
                 }
 
                 var passwordValidator = new PasswordValidator<ApplicationUser>();
-                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.Password);
+                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.NewPassword);
                 if (!passwordValidationResult.Succeeded)
                 {
-                    _logger.LogWarning("Password validation failed.");
+                    _logger.LogWarning("New password validation failed.");
                     return passwordValidationResult;
                 }
-                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserDto.Password);
+
+                user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserDto.NewPassword);
             }
             if (editUserDto.ProfilePicUrl != null && editUserDto.ProfilePicUrl.Length > 0)
             {
@@ -140,6 +154,7 @@ namespace News.Service.Services
                 _logger.LogWarning("UserService --> UpdateUser failed");
             return result;
         }
+
         public async Task SetUserPreferredCategoriesAsync(ApplicationUser user, ICollection<string> categoryNames)
         {
             _logger.LogInformation("UserService --> SetUserPreferredCategoriesAsync called");
