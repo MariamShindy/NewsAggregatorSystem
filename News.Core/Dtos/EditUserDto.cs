@@ -8,8 +8,6 @@ namespace News.Core.Dtos
         public string? LastName { get; set; } 
         public IFormFile? ProfilePicUrl { get; set; }
         public string? Username { get; set; }
-        //public string? Password { get; set; }
-        //public string? ConfirmPassword { get; set; } 
         public string? OldPassword { get; set; }
         public string? NewPassword { get; set; }
         public string? ConfirmNewPassword { get; set; }

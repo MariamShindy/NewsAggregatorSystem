@@ -13,6 +13,7 @@ namespace News.Core.Dtos
         public string CreatedAt { get; set; } = string.Empty; 
         public string UserId { get; set; } = string.Empty;
         public string UserName { get; set; } = string.Empty;
-        public bool IsLocked { get; set; } 
+        public bool IsLocked { get; set; }
+        public string ProfilePicUrl { get; set; } = string.Empty;
     }
 }

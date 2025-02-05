@@ -8,20 +8,17 @@ using News.Core.Entities;
 namespace News.Service.Services
 {
     public class CommentService(ILogger<CommentService> _logger,
-        IUnitOfWork _unitOfWork, INewsTwoService _newsService) : ICommentService
+        IUnitOfWork _unitOfWork) : ICommentService
     {
         public async Task<IEnumerable<Comment>> GetAllAsync()
         {
             _logger.LogInformation("CommentService --> GetAll called");
-            //return await _unitOfWork.Repository<Comment>().GetAllAsync();
             return await _unitOfWork.Repository<Comment>()
         .GetAllAsync(query => query.Include(c => c.User));
         }
 
         public async Task<Comment> GetByIdAsync(int id)
         {
-            //_logger.LogInformation($"CommentService --> GetById with id : {id} called");
-            //return await _unitOfWork.Repository<Comment>().GetByIdAsync(id);
             _logger.LogInformation($"CommentService --> GetById with id : {id} called");
             var comment = await _unitOfWork.Repository<Comment>()
                 .FindAsync(c => c.Id == id, query => query.Include(c => c.User));
@@ -31,8 +28,6 @@ namespace News.Service.Services
         public async Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string userId)
         {
             _logger.LogInformation($"CommentService --> GetCommentsByUserIdAsync with userId : {userId} called");
-            //return await _unitOfWork.Repository<Comment>()
-            //                     .FindAsync(c => c.UserId == userId);
             return await _unitOfWork.Repository<Comment>()
            .FindAsync(c => c.UserId == userId, query => query.Include(c => c.User));
         }

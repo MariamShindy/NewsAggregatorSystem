@@ -28,7 +28,8 @@ namespace News.API.Controllers
                 UserId = user.Id,
                 User = user,
                 ArticleId = newsId,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+               
             };
             await _commentService.AddAsync(comment);
             return Ok(new { result = "Comment added" });
@@ -73,8 +74,8 @@ namespace News.API.Controllers
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = c.UserId,
                 UserName = c.User.UserName,
-                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
-
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
+                ProfilePicUrl = c.User.ProfilePicUrl
             });
             return Ok(formattedComments);
         }
@@ -93,7 +94,9 @@ namespace News.API.Controllers
                 CreatedAt = comment.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = comment.UserId,
                 UserName = comment.User.UserName,
-                IsLocked = comment.User.LockoutEnd.HasValue && comment.User.LockoutEnd > DateTimeOffset.UtcNow
+                IsLocked = comment.User.LockoutEnd.HasValue && comment.User.LockoutEnd > DateTimeOffset.UtcNow,
+                ProfilePicUrl = comment.User.ProfilePicUrl
+
             };
             return Ok(formattedComment);
         }
@@ -113,8 +116,8 @@ namespace News.API.Controllers
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = c.UserId,
                 UserName = c.User.UserName,
-                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
-
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
+                ProfilePicUrl = c.User.ProfilePicUrl
             });
 
             return Ok(formattedComments);
@@ -135,8 +138,8 @@ namespace News.API.Controllers
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = c.UserId,
                 UserName = c.User.UserName,
-                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow
-
+                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
+                ProfilePicUrl = c.User.ProfilePicUrl
             });
 
             return Ok(formattedComments);
