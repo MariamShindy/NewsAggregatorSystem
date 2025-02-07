@@ -103,5 +103,12 @@ namespace News.API.Controllers
                 return StatusCode(500, new { Status = "Error", Message = "An error occurred while fetching users." });
             }
         }
+        //GET : api/admin/all-surveys
+        [HttpGet("all-surveys")]
+        public async Task<ActionResult> GetSurveys()
+        {
+            var surveys = await _userService.GetAllSurvyesAsync();
+            return Ok(surveys); 
+        }
     }
 }
