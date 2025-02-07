@@ -174,6 +174,22 @@ namespace News.API.Controllers
                 return BadRequest(new { success = false, message = "Article does not exist" });
             }
         }
+        // GET : api/user/get-notifications
+        [HttpGet("get-notifications")]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var user = await _userService.GetCurrentUserAsync();
+            if (user is null)
+            {
+                return Unauthorized();
+            }
+            var notifications = await _userService.GetUserNotificationsAsync(user.Id);
+            if (!notifications.Any())
+            {
+                return NotFound("No notifications found");
+            }
+            return Ok(notifications);
+        }
 
         #region Favorite before caching
         //// POST: api/user/favorites/{newsId}

@@ -15,6 +15,7 @@ namespace News.Core.Contracts
         Task SetUserPreferredCategoriesAsync(ApplicationUser user, ICollection<string> categoryNames);
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync();
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync(string userId);
+        Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(string userId);
 
     }
 }

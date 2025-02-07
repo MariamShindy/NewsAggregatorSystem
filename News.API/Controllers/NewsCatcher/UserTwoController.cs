@@ -6,6 +6,7 @@ using News.Core.Contracts;
 using News.Core.Contracts.NewsCatcher;
 using News.Core.Dtos;
 using News.Core.Entities;
+using News.Service.Services;
 
 namespace News.API.Controllers.NewsCatcher
 {
@@ -15,7 +16,7 @@ namespace News.API.Controllers.NewsCatcher
 
     public class UserTwoController(IUserService _userService , IMapper _mapper ,
         INewsTwoService _newsService ,IFavoriteTwoService _favoriteService
-        , ISocialMediaService _socialMediaService): ControllerBase
+        , ISocialMediaService _socialMediaService ): ControllerBase
     {
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
@@ -31,7 +32,7 @@ namespace News.API.Controllers.NewsCatcher
         {
             var result = await _userService.UpdateUserAsync(model);
             if (result.Succeeded)
-                return Ok(new { result = "User updated successfully" }); //not updated profile pic
+                return Ok(new { result = "User updated successfully" }); 
 
             return BadRequest(result.Errors);
         }
@@ -176,6 +177,24 @@ namespace News.API.Controllers.NewsCatcher
             {
                 return BadRequest(new { success = false, message = "Article does not exist" });
             }
+        }
+
+
+        // GET : api/userTwo/get-notifications
+        [HttpGet("get-notifications")]
+        public async Task<IActionResult> GetNotifications()
+        {
+            var user = await _userService.GetCurrentUserAsync();
+            if(user is null)
+            {
+                return Unauthorized();
+            }
+            var notifications = await _userService.GetUserNotificationsAsync(user.Id);
+            if (!notifications.Any())
+            {
+                return NotFound("No notifications found");
+            }
+            return Ok(notifications);
         }
     }
 }
