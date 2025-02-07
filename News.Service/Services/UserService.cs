@@ -130,13 +130,13 @@ namespace News.Service.Services
                     return IdentityResult.Failed(new IdentityError { Description = "New password and confirmation do not match." });
                 }
 
-                var passwordValidator = new PasswordValidator<ApplicationUser>();
-                var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.NewPassword);
-                if (!passwordValidationResult.Succeeded)
-                {
-                    _logger.LogWarning("New password validation failed.");
-                    return passwordValidationResult;
-                }
+                //var passwordValidator = new PasswordValidator<ApplicationUser>();
+                //var passwordValidationResult = await passwordValidator.ValidateAsync(_userManager, user, editUserDto.NewPassword);
+                //if (!passwordValidationResult.Succeeded)
+                //{
+                //    _logger.LogWarning("New password validation failed.");
+                //    return passwordValidationResult;
+                //}
 
                 user.PasswordHash = _userManager.PasswordHasher.HashPassword(user, editUserDto.NewPassword);
             }
@@ -230,7 +230,13 @@ namespace News.Service.Services
                 return new List<UserDto>();
             }
         }
+        public async Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(string userId)
+        {
+            var notifications = await _unitOfWork.Repository<Notification>()
+                .FindAsync(n => n.ApplicationUserId == userId);
 
+            return _mapper.Map<IEnumerable<NotificationDto>>(notifications);
+        }
         private string BuildFeedbackEmailBody(FeedbackDto feedbackDto)
         {
             var Body = $@"

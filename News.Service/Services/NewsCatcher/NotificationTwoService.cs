@@ -36,6 +36,7 @@ namespace News.Service.Services.NewsCatcher
                         ArticleUrl = articleToSend.Clean_Url,
                         Category = articleToSend.Topic,
                         CreatedAt = DateTime.UtcNow,
+                        ArticleDescription = articleToSend.Excerpt,
                     };
 
                     var notification = _mapper.Map<Notification>(notificationDto);

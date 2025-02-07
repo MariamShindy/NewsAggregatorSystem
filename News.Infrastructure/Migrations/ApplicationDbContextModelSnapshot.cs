@@ -66,13 +66,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "1b6a8b34-1503-400c-ae04-ce6d958aca29",
+                            Id = "efd3647a-3b5b-48ff-bdf3-b436d862993a",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "8c168845-68f3-4d98-b624-dc4fa94bb54f",
+                            Id = "74772542-4253-43db-be14-34d50421c38b",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -337,9 +337,6 @@ namespace News.Infrastructure.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRead")
-                        .HasColumnType("bit");
 
                     b.HasKey("Id");
 
