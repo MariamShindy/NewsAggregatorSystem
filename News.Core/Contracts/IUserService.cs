@@ -16,6 +16,7 @@ namespace News.Core.Contracts
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync();
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync(string userId);
         Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(string userId);
+        Task<IEnumerable<SurveyResponseDto>> GetAllSurvyesAsync();
 
     }
 }

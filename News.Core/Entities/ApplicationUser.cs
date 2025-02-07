@@ -9,10 +9,6 @@ namespace News.Core.Entities
 		public string? ProfilePicUrl { get; set; } 
 		public ICollection<Category> Categories { get; set; } = new List<Category>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
-
-        public object Include(Func<object, object> value)
-        {
-            throw new NotImplementedException();
-        }
+		public ICollection<Survey> Surveys { get; set;} = new List<Survey>();
     }
 }

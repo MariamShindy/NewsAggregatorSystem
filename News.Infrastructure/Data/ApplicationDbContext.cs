@@ -41,6 +41,8 @@ namespace News.Infrastructure.Data
 		public DbSet<UserFavoriteArticle> UserFavoriteArticles { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<Survey> Surveys { get; set; }
+
 
     }
 }

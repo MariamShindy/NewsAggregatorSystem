@@ -63,6 +63,11 @@ namespace News.Service.Services
             {
                 await _mailSettings.SendEmail(email);
                 _logger.LogInformation("UserService --> SendSurveyAsync succeeded");
+                var survey = _mapper.Map<Survey>(surveyDto);
+                var user = await GetCurrentUserAsync();
+                survey.ApplicationUser = user;
+                await _unitOfWork.Repository<Survey>().AddAsync(survey);
+                await _unitOfWork.CompleteAsync();
                 return true;
             }
             catch (Exception ex)
@@ -70,6 +75,25 @@ namespace News.Service.Services
                 _logger.LogError(ex, "UserService --> SendSurveyAsync failed");
                 return false;
             }
+        }
+        public async Task<IEnumerable<SurveyResponseDto>> GetAllSurvyesAsync()
+        {
+            var surveys = await _unitOfWork.Repository<Survey>()
+                                        .GetAllAsync(include: q => q.Include(s => s.ApplicationUser));
+
+            var surveyDtos = surveys.Select(s => new SurveyResponseDto
+            {
+                SourceDiscovery = s.SourceDiscovery,
+                VisitFrequency = s.VisitFrequency,
+                IsLoadingSpeedSatisfactory = s.IsLoadingSpeedSatisfactory,
+                NavigationEaseRating = s.NavigationEaseRating,
+
+                ApplicationUserId = s.ApplicationUser?.Id??"0",
+                ApplicationUserName = s.ApplicationUser?.UserName??"N/A",
+                ApplicationUserEmail = s.ApplicationUser?.Email??"N/A"
+            }).ToList();
+
+            return surveyDtos;
         }
         public async Task<ApplicationUser> GetCurrentUserAsync()
         {

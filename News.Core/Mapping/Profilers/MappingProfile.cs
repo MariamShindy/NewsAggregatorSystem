@@ -18,6 +18,8 @@ namespace News.Core.Profilers
             CreateMap<Notification,NotificationDto>().ReverseMap();
             CreateMap<Article, NewsArticle>().ReverseMap();
             CreateMap<NewsArticleDto, NewsArticle>().ReverseMap();
+            CreateMap<Survey,SurveyDto>().ReverseMap();
+
 
             //CreateMap<Comment,AddCommentDto>().ReverseMap();
             //CreateMap<UpdateCommentDto, Comment>()
