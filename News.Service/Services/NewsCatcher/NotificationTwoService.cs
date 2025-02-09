@@ -27,16 +27,16 @@ namespace News.Service.Services.NewsCatcher
                 var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories);
                 var articleToSend = articlesByCategories.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
-                if (articleToSend != null)
+                if (articleToSend is not null)
                 {
                     var notificationDto = new NotificationDto
                     {
                         ApplicationUserId = user.Id,
-                        ArticleTitle = articleToSend.Title,
-                        ArticleUrl = articleToSend.Clean_Url,
-                        Category = articleToSend.Topic,
+                        ArticleTitle = articleToSend.Title??"No title avilable",
+                        ArticleUrl = articleToSend.Clean_Url??"No url avilable",
+                        Category = articleToSend.Topic ??"No topic available",
                         CreatedAt = DateTime.UtcNow,
-                        ArticleDescription = articleToSend.Excerpt,
+                        ArticleDescription = articleToSend.Excerpt??"No excerpt available",
                     };
 
                     var notification = _mapper.Map<Notification>(notificationDto);
