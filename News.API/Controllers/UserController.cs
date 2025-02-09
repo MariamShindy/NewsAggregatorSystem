@@ -26,7 +26,7 @@ namespace News.API.Controllers
 
         // PUT: api/user/me
         [HttpPut("me")]
-        public async Task<IActionResult> EditUserInfo([FromBody] EditUserDto model)
+        public async Task<IActionResult> EditUserInfo(/*[FromBody]*/ [FromForm] EditUserDto model)
         {
             var result = await _userService.UpdateUserAsync(model); 
             if (result.Succeeded)
