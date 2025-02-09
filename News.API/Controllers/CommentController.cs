@@ -137,7 +137,7 @@ namespace News.API.Controllers
                 Content = c.Content,
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = c.UserId,
-                UserName = c.User.UserName,
+                UserName = c.User?.UserName??"N/A",
                 IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
                 ProfilePicUrl = c.User.ProfilePicUrl
             });
