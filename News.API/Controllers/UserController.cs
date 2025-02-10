@@ -16,6 +16,7 @@ namespace News.API.Controllers
         IUserService _userService,IFavoriteService _favoriteService ,
         INewsService _newsService , ISocialMediaService _socialMediaService) : ControllerBase
 	{
+        // GET: api/use/me
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
