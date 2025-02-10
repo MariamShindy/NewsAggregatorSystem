@@ -18,39 +18,54 @@ namespace News.Service.Services.NewsCatcher
 
         public async Task SendNotificationsAsync()
         {
-            _logger.LogInformation($"Start Sending notifications.");
-            var users = await _userService.GetAllUsersAsync();
-
-            foreach (var user in users)
+            try
             {
-                var preferredCategories = await _userService.GetUserPreferredCategoriesAsync(user.Id);
-                var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories);
-                var articleToSend = articlesByCategories.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
+                _logger.LogInformation("Start Sending notifications.");
+                var users = await _userService.GetAllUsersAsync();
 
-                if (articleToSend is not null)
+                foreach (var user in users)
                 {
-                    var notificationDto = new NotificationDto
+                    try
                     {
-                        ApplicationUserId = user.Id,
-                        ArticleTitle = articleToSend.Title??"No title avilable",
-                        ArticleUrl = articleToSend.Clean_Url??"No url avilable",
-                        Category = articleToSend.Topic ??"No topic available",
-                        CreatedAt = DateTime.UtcNow,
-                        ArticleDescription = articleToSend.Excerpt??"No excerpt available",
-                        ArticleId = articleToSend._Id ?? "No Id available"
-                    };
+                        var preferredCategories = await _userService.GetUserPreferredCategoriesAsync(user.Id);
+                        var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories);
+                        var articleToSend = articlesByCategories.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
-                    var notification = _mapper.Map<Notification>(notificationDto);
+                        if (articleToSend is not null)
+                        {
+                            var notificationDto = new NotificationDto
+                            {
+                                ApplicationUserId = user.Id,
+                                ArticleTitle = articleToSend.Title ?? "No title available",
+                                ArticleUrl = articleToSend.Clean_Url ?? "No url available",
+                                Category = articleToSend.Topic ?? "No topic available",
+                                CreatedAt = DateTime.UtcNow,
+                                ArticleDescription = articleToSend.Excerpt ?? "No excerpt available",
+                                ArticleId = articleToSend._Id ?? "No Id available"
+                            };
 
-                    await _unitOfWork.Repository<Notification>().AddAsync(notification);
-                    await _unitOfWork.CompleteAsync();
-                    var userEmail = (await _userManager.FindByIdAsync(notificationDto.ApplicationUserId))?.Email;
-                    await _mailSettings.SendNotificationEmail(notificationDto, userEmail ?? "User@gmail.com");
-                    _logger.LogInformation($"Notification sent in {notificationDto.CreatedAt} to user with Email :{userEmail}");
+                            var notification = _mapper.Map<Notification>(notificationDto);
+
+                            await _unitOfWork.Repository<Notification>().AddAsync(notification);
+                            await _unitOfWork.CompleteAsync();
+
+                            var userEmail = (await _userManager.FindByIdAsync(notificationDto.ApplicationUserId))?.Email;
+                            await _mailSettings.SendNotificationEmail(notificationDto, userEmail ?? "User@gmail.com");
+                            _logger.LogInformation($"Notification sent at {notificationDto.CreatedAt} to user with Email: {userEmail}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogError(ex, $"Error sending notification to user {user.Id}");
+                    }
                 }
+                _logger.LogInformation("Finished sending notifications.");
             }
-            _logger.LogInformation("Finished sending notifications.");
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "An error occurred while sending notifications.");
+            }
         }
     }
-
 }
+    

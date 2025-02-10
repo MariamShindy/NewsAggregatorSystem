@@ -1,13 +1,15 @@
 ﻿using News.Core.Contracts;
+using News.Core.Contracts.NewsCatcher;
 
 namespace News.Service.Services
 {
-    public class SocialMediaService : ISocialMediaService
+    public class SocialMediaService(INewsTwoService _newsService) : ISocialMediaService
     {
-        private const string ArticleUrlTemplate = "https://localhost:7291/newsTwo/{0}";
+        //private const string ArticleUrlTemplate = "https://localhost:7291/newsTwo/{0}";
         public Dictionary<string, string> GenerateShareLinks(string newsId, string platform = null, string customMessage = null)
         {
-            var baseUrl = string.Format(ArticleUrlTemplate, newsId);
+            //var baseUrl = string.Format(ArticleUrlTemplate, newsId);
+            var baseUrl = _newsService.GetNewsByIdAsync(newsId).Result.Link;
             var shareLinks = new Dictionary<string, string>();
 
             shareLinks["facebook"] = $"https://www.facebook.com/sharer/sharer.php?quote={Uri.EscapeDataString(customMessage ?? "Check this article out!")}&u={Uri.EscapeDataString(baseUrl)}";

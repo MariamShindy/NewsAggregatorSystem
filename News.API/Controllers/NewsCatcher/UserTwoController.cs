@@ -193,7 +193,7 @@ namespace News.API.Controllers.NewsCatcher
             var notifications = await _userService.GetUserNotificationsAsync(user.Id);
             if (!notifications.Any())
                 return NoContent();
-            //return NotFound("No notifications found");
+                //return NotFound("No notifications found");
             return Ok(notifications);
         }
     }
