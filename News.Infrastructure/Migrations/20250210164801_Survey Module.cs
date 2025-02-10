@@ -12,7 +12,13 @@ namespace News.Infrastructure.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-          
+            migrationBuilder.AddColumn<string>(
+                name: "ArticleId",
+                table: "Notifications",
+                type: "nvarchar(max)",
+                nullable: false,
+                defaultValue: "");
+
             migrationBuilder.CreateTable(
                 name: "Surveys",
                 columns: table => new
@@ -35,7 +41,8 @@ namespace News.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id");
                 });
-           
+
+
             migrationBuilder.CreateIndex(
                 name: "IX_Surveys_ApplicationUserId1",
                 table: "Surveys",
@@ -46,7 +53,11 @@ namespace News.Infrastructure.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Surveys");        
+                name: "Surveys");
+
+            migrationBuilder.DropColumn(
+                name: "ArticleId",
+                table: "Notifications");
         }
     }
 }

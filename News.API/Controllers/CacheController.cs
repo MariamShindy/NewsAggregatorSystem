@@ -8,6 +8,7 @@ namespace News.API.Controllers
     [ApiController]
     public class CacheController(IMemoryCache _cache) : ControllerBase
     {
+        // GET: api/cache/chaced-articles
         [HttpGet("cached-articles")]
         public IActionResult GetAllCachedArticles()
         {

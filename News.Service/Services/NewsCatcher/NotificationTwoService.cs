@@ -37,6 +37,7 @@ namespace News.Service.Services.NewsCatcher
                         Category = articleToSend.Topic ??"No topic available",
                         CreatedAt = DateTime.UtcNow,
                         ArticleDescription = articleToSend.Excerpt??"No excerpt available",
+                        ArticleId = articleToSend._Id ?? "No Id available"
                     };
 
                     var notification = _mapper.Map<Notification>(notificationDto);

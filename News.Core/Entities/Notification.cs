@@ -14,8 +14,8 @@ namespace News.Core.Entities
         public string ArticleTitle { get; set; } = string.Empty;
         public string ArticleDescription { get; set; } = string.Empty;
         public string ArticleUrl { get; set; } = string.Empty;
-
         public DateTime CreatedAt { get; set; }
+        public string ArticleId { get; set; } = string.Empty;
 
         public  ApplicationUser User { get; set; }
     }

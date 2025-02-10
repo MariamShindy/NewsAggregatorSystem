@@ -18,6 +18,7 @@ namespace News.API.Controllers.NewsCatcher
         INewsTwoService _newsService ,IFavoriteTwoService _favoriteService
         , ISocialMediaService _socialMediaService ): ControllerBase
     {
+        // GET: api/userTwo/me
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
