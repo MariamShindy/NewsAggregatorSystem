@@ -16,7 +16,6 @@ namespace News.Core.Dtos
         public string ArticleDescription { get; set; } = string.Empty;
         public string ArticleUrl { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
-
-        //public ApplicationUser User { get; set; }
+        public string ArticleId { get; set; } = string.Empty;
     }
 }

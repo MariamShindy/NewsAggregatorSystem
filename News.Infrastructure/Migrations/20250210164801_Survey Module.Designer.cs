@@ -12,7 +12,7 @@ using News.Infrastructure.Data;
 namespace News.Infrastructure.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250207153505_Survey Module")]
+    [Migration("20250210164801_Survey Module")]
     partial class SurveyModule
     {
         /// <inheritdoc />
@@ -69,13 +69,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "b2974d1d-2295-49de-ab40-35103abf3855",
+                            Id = "feb4fd37-d346-4ef1-b4a1-2a7f5a84225f",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "aab50642-db31-4a73-b0eb-558f8ed95a91",
+                            Id = "4b9f87f7-5277-4d2c-8ba8-7fdedf18c7df",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -323,6 +323,10 @@ namespace News.Infrastructure.Migrations
                         .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ArticleDescription")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ArticleId")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

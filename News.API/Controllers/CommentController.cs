@@ -20,7 +20,9 @@ namespace News.API.Controllers
         public async Task<IActionResult> AddComment(string newsId, [FromBody] AddCommentDto model)
         {
             var article = await _newsService.GetNewsByIdAsync(newsId);
-            if (article == null) return NotFound(new {result = "Article not found"});
+            if (article == null)
+                return NoContent(); 
+                //return NotFound(new {result = "Article not found"});
             var user = await _userService.GetCurrentUserAsync();
             var comment = new Comment
             {
@@ -41,7 +43,8 @@ namespace News.API.Controllers
             var user = await _userService.GetCurrentUserAsync();
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
-                return NotFound("Comment not found.");
+                return NoContent();
+                //return NotFound("Comment not found.");
             if (comment.UserId != user.Id)
                 return Forbid("You are not authorized to edit this comment.");
 
@@ -56,7 +59,9 @@ namespace News.API.Controllers
         public async Task<IActionResult> DeleteComment(int id)
         {
             var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+                return NoContent();
+                //return NotFound();
 
             await _commentService.DeleteAsync(id);
             return Ok(new { result = "Comment deleted" });
@@ -85,7 +90,9 @@ namespace News.API.Controllers
         public async Task<IActionResult> GetCommentById(int id)
         {
             var comment = await _commentService.GetByIdAsync(id);
-            if (comment == null) return NotFound();
+            if (comment == null)
+                return NoContent();
+               // return NotFound();
 
             var formattedComment = new CommentDto
             {
@@ -107,7 +114,8 @@ namespace News.API.Controllers
         {
             var comments = await _commentService.GetCommentsByUserIdAsync(userId);
             if (comments == null || !comments.Any())
-                return NotFound("No comments found for this user.");
+                return NoContent();
+                //return NotFound("No comments found for this user.");
 
             var formattedComments = comments.Select(c => new CommentDto
             {
@@ -129,7 +137,8 @@ namespace News.API.Controllers
         {
             var comments = await _commentService.GetCommentsByArticleIdAsync(articleId);
             if (comments == null || !comments.Any())
-                return NotFound("No comments found for this article.");
+                return NoContent();
+               //return NotFound("No comments found for this article.");
 
             var formattedComments = comments.Select(c => new CommentDto
             {
@@ -138,8 +147,8 @@ namespace News.API.Controllers
                 CreatedAt = c.CreatedAt.ToString("yyyy-MM-dd HH:mm:ss"), 
                 UserId = c.UserId,
                 UserName = c.User?.UserName??"N/A",
-                IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
-                ProfilePicUrl = c.User.ProfilePicUrl
+                IsLocked = c.User?.LockoutEnd.HasValue ?? false && c.User.LockoutEnd > DateTimeOffset.UtcNow,
+                ProfilePicUrl = c.User?.ProfilePicUrl ?? string.Empty
             });
 
             return Ok(formattedComments);

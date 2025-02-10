@@ -33,7 +33,8 @@ namespace News.API.Controllers.NewsCatcher
             var news = await _newsService.GetNewsByIdAsync(id);
             if (news == null)
             {
-                return NotFound();
+                //return NotFound();
+                return NoContent();
             }
             return Ok(news);
         }
@@ -53,7 +54,8 @@ namespace News.API.Controllers.NewsCatcher
             var article = _newsService.GetNewsByIdAsync(id); 
 
             if (article == null)
-                return NotFound("Article not found.");
+                return NoContent();
+            //return NotFound("Article not found.");
 
             byte[] pdfBytes = _newsService.GenerateArticlePdf(article.Result); 
 
