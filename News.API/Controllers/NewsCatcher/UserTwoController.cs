@@ -88,7 +88,8 @@ namespace News.API.Controllers.NewsCatcher
             var user = await _userService.GetCurrentUserAsync();
             var articleExists = await _newsService.GetNewsByIdAsync(newsId);
             if (articleExists is null)
-                return NotFound(new { message = "Article not found" });
+                return NoContent();
+            //return NotFound(new { message = "Article not found" });
 
             var alreadyFavorited = await _favoriteService.IsArticleFavoritedAsync(user.Id, newsId);
             if (alreadyFavorited)
@@ -145,7 +146,8 @@ namespace News.API.Controllers.NewsCatcher
             }
             catch (ArgumentException ex)
             {
-                return NotFound(ex.Message);
+                return NoContent();
+                //return NotFound(ex.Message);
             }
         }
 
@@ -187,14 +189,11 @@ namespace News.API.Controllers.NewsCatcher
         {
             var user = await _userService.GetCurrentUserAsync();
             if(user is null)
-            {
                 return Unauthorized();
-            }
             var notifications = await _userService.GetUserNotificationsAsync(user.Id);
             if (!notifications.Any())
-            {
-                return NotFound("No notifications found");
-            }
+                return NoContent();
+            //return NotFound("No notifications found");
             return Ok(notifications);
         }
     }

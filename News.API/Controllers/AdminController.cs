@@ -18,8 +18,9 @@ namespace News.API.Controllers
         public async Task<IActionResult> LockUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) 
-                return NotFound();
+            if (user == null)
+                return NoContent();
+            //return NotFound();
             user.LockoutEnd = DateTimeOffset.MaxValue;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -32,8 +33,9 @@ namespace News.API.Controllers
         public async Task<IActionResult> UnlockUser(string id)
         {
             var user = await _userManager.FindByIdAsync(id);
-            if (user == null) 
-                return NotFound();
+            if (user == null)
+                return NoContent();
+            //return NotFound();
             user.LockoutEnd = null;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -65,7 +67,8 @@ namespace News.API.Controllers
                 {
                     var result = await _newsService.DeleteCategoryAsync(id);
                     if (!result)
-                        return NotFound("Category not found.");
+                        return NoContent();
+                        //return NotFound("Category not found.");
                     return Ok("Category deleted successfully.");
                 }
                 catch (Exception)
@@ -81,7 +84,8 @@ namespace News.API.Controllers
                 {
                     var result = await _newsService.UpdateCategoryAsync(id, categoryDto);
                     if (!result)
-                        return NotFound("Category not found or update failed.");
+                        return NoContent();
+                        //return NotFound("Category not found or update failed.");
                     return Ok("Category updated successfully.");
                 }
                 catch (Exception)
