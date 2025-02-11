@@ -92,7 +92,49 @@ namespace News.Service.Services.NewsCatcher
 
 
         //Reading from the json file
-        public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
+        //public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
+        //{
+        //    try
+        //    {
+        //        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
+        //        string filePath = Path.Combine(baseDirectory, "DataSeeding", "NewsData.json");
+
+        //        var jsonData = await File.ReadAllTextAsync(filePath);
+
+        //        var articles = JsonConvert.DeserializeObject<List<NewsArticle>>(jsonData);
+
+        //        if (articles != null)
+        //        {
+
+        //            foreach (var article in articles)
+        //            {
+        //                if (article.Authors is IEnumerable<string> authorList)
+        //                {
+        //                    article.Authors = authorList.ToList();
+        //                }
+        //                else
+        //                {
+        //                    article.Authors = new List<string>();
+        //                }
+        //            }
+
+        //            var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
+        //            var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+
+        //            Console.WriteLine($"Number of articles fetched ==> {balancedArticles.Count}");
+        //            return balancedArticles;
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Console.WriteLine($"Error reading JSON file: {ex.Message}");
+        //    }
+
+        //    return new List<NewsArticle>();
+        //}
+
+        //Reading from json file with pagination
+        public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         {
             try
             {
@@ -100,12 +142,10 @@ namespace News.Service.Services.NewsCatcher
                 string filePath = Path.Combine(baseDirectory, "DataSeeding", "NewsData.json");
 
                 var jsonData = await File.ReadAllTextAsync(filePath);
-
                 var articles = JsonConvert.DeserializeObject<List<NewsArticle>>(jsonData);
 
                 if (articles != null)
                 {
-
                     foreach (var article in articles)
                     {
                         if (article.Authors is IEnumerable<string> authorList)
@@ -121,8 +161,21 @@ namespace News.Service.Services.NewsCatcher
                     var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
                     var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
 
-                    Console.WriteLine($"Number of articles fetched ==> {balancedArticles.Count}");
-                    return balancedArticles;
+                    // If pageSize is null,  return all articles
+                    if (pageSize is null || pageNumber == 0 )
+                    {
+                        Console.WriteLine($"Returning all articles ==> {balancedArticles.Count}");
+                        return balancedArticles;
+                    }
+
+                    //Else apply pagination
+                    var paginatedArticles = balancedArticles
+                        .Skip((pageNumber - 1) * pageSize.Value)
+                        .Take(pageSize.Value)
+                        .ToList();
+
+                    Console.WriteLine($"Number of articles fetched ==> {paginatedArticles.Count}");
+                    return paginatedArticles;
                 }
             }
             catch (Exception ex)
@@ -132,6 +185,7 @@ namespace News.Service.Services.NewsCatcher
 
             return new List<NewsArticle>();
         }
+
 
         public async Task<List<string>> GetCategoriesAsync()
         {
