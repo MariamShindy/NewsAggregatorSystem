@@ -8,6 +8,6 @@ namespace News.Core.Contracts
 {
     public interface ISocialMediaService
     {
-         Dictionary<string, string> GenerateShareLinks(string newsId, string platform = null!, string customMessage = null!);
+         Dictionary<string, string> GenerateShareLinks(string newsId, string platform = null!);
     }
 }

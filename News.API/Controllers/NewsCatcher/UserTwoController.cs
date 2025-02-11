@@ -162,7 +162,7 @@ namespace News.API.Controllers.NewsCatcher
                 try
                 {
 
-                    var shareLinks = _socialMediaService.GenerateShareLinks(newsId, request?.Platform, request?.CustomMessage);
+                    var shareLinks = _socialMediaService.GenerateShareLinks(newsId, request?.Platform ?? "Facebook");
 
                     return Ok(new
                     {
