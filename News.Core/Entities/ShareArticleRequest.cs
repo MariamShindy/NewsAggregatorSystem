@@ -9,7 +9,5 @@ namespace News.Core.Entities
     public class ShareArticleRequest
     {
         public string Platform { get; set; }  = string.Empty;
-        public string CustomMessage { get; set; } = string.Empty;
-
     }
 }
