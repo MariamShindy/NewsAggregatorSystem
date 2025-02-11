@@ -10,11 +10,20 @@ namespace News.API.Controllers.NewsCatcher
     [Authorize/*(Roles = "User")*/]
     public class NewsTwoController(INewsTwoService _newsService) : ControllerBase
     {
-        //GET : api/newsTwo/all
+        ////GET : api/newsTwo/all
+        //[HttpGet("all")]
+        //public async Task<IActionResult> GetAllNews([FromQuery] string language = "en", [FromQuery] string country = "us")
+        //{
+        //    var news = await _newsService.GetAllNewsAsync(language, country);
+        //    return Ok(news);
+        //}
+
+        //Apply pagination
+        //GET : api/newsTwo/all?pageNumber=1&pageSize=35
         [HttpGet("all")]
-        public async Task<IActionResult> GetAllNews([FromQuery] string language = "en", [FromQuery] string country = "us")
+        public async Task<IActionResult> GetAllNews([FromQuery] int pageNumber = 0 , [FromQuery] int? pageSize = null, [FromQuery] string language = "en", [FromQuery] string country = "us")
         {
-            var news = await _newsService.GetAllNewsAsync(language, country);
+            var news = await _newsService.GetAllNewsAsync(pageNumber, pageSize, language, country);
             return Ok(news);
         }
 
