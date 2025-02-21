@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
 using News.Core.Contracts;
-using System.Globalization;
 using System.Speech.Synthesis;
 
 namespace News.Service.Services
 {
-    public class TextToSpeechService(ILogger<TextToSpeechService> _logger) : ITextToSpeechService
+    public class SpeechService(ILogger<SpeechService> _logger) : ISpeechService
     {
         public byte[] ConvertTextToSpeech(string text, string language = "en-US")
         {
@@ -48,5 +47,6 @@ namespace News.Service.Services
                 throw new InvalidOperationException($"No installed voices found for language: {language}");
             }
         }
+    
     }
 }

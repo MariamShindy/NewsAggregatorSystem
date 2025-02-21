@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace News.Core.Contracts
 {
-    public interface ITextToSpeechService
+    public interface ISpeechService
     {
         byte[] ConvertTextToSpeech(string text, string language = "en-US");
+
     }
 }
