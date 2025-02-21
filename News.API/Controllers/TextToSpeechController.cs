@@ -23,7 +23,9 @@ namespace News.API.Controllers
         {
             try
             {
-                var audioBytes = _textToSpeechService.ConvertTextToSpeech(request.Text);
+                //var audioBytes = _textToSpeechService.ConvertTextToSpeech(request.Text);
+                var audioBytes = _textToSpeechService.ConvertTextToSpeech(request.Text,request.Language);
+
                 return File(audioBytes, "audio/wav", "speech.wav");
             }
             catch (Exception ex)

@@ -8,6 +8,6 @@ namespace News.Core.Contracts
 {
     public interface ITextToSpeechService
     {
-        byte[] ConvertTextToSpeech(string text);
+        byte[] ConvertTextToSpeech(string text, string language = "en-US");
     }
 }
