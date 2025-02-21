@@ -164,7 +164,7 @@ namespace News.Service.Services.NewsCatcher
                     // If pageSize is null,  return all articles
                     if (pageSize is null || pageNumber == 0 )
                     {
-                        Console.WriteLine($"Returning all articles ==> {balancedArticles.Count}");
+                        _logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
                         return balancedArticles;
                     }
 
@@ -174,13 +174,13 @@ namespace News.Service.Services.NewsCatcher
                         .Take(pageSize.Value)
                         .ToList();
 
-                    Console.WriteLine($"Number of articles fetched ==> {paginatedArticles.Count}");
+                   _logger.LogInformation($"Number of articles fetched ==> {paginatedArticles.Count}");
                     return paginatedArticles;
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error reading JSON file: {ex.Message}");
+                _logger.LogError($"Error reading JSON file: {ex.Message}");
             }
 
             return new List<NewsArticle>();
