@@ -37,6 +37,7 @@ namespace News.API.Extensions
             services.AddScoped<INotificationService, NotificationTwoService>();
             services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped<ITextToSpeechService, TextToSpeechService>();
+            services.AddScoped<ITranslationService, TranslationService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddTransient<IMailSettings, EmailSettings>();
