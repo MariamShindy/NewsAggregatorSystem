@@ -9,23 +9,15 @@ namespace News.API.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class TextToSpeechController : ControllerBase
+    public class SpeechController(ISpeechService _textToSpeechService) : ControllerBase
     {
-        private readonly ITextToSpeechService _textToSpeechService;
-
-        public TextToSpeechController(ITextToSpeechService textToSpeechService)
-        {
-            _textToSpeechService = textToSpeechService;
-        }
-        //GET : api/TextToSpeech/speak
-        [HttpPost("speak")]
+        //GET : api/Speech/text-to-speech
+        [HttpPost("text-to-speech")]
         public IActionResult Speak([FromBody] TextToSpeechRequest request)
         {
             try
             {
-                //var audioBytes = _textToSpeechService.ConvertTextToSpeech(request.Text);
                 var audioBytes = _textToSpeechService.ConvertTextToSpeech(request.Text,request.Language);
-
                 return File(audioBytes, "audio/wav", "speech.wav");
             }
             catch (Exception ex)
@@ -33,5 +25,7 @@ namespace News.API.Controllers
                 return BadRequest(ex.Message);
             }
         }
+        //GET : api/Speech/voice-search
+       
     }
 }
