@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using News.Core.Contracts;
 using News.Core.Entities;
+using Newtonsoft.Json;
 
 namespace News.API.Controllers
 {
@@ -23,8 +24,16 @@ namespace News.API.Controllers
             if (string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.Language))
                 return BadRequest("Text and target language are required.");
 
-            string translatedText = await _translationService.TranslateText(request.Text, request.Language);
-            return Ok(new { translatedText });
+            var translatedText = await _translationService.TranslateText(request.Text, request.Language);
+                try
+                {
+                    return Ok(new { translation = translatedText });
+                }
+                catch (JsonReaderException ex)
+                {
+                    return BadRequest($"Invalid JSON response: {ex.Message}");
+                }
         }
+
     }
 }

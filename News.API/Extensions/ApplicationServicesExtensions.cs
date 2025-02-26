@@ -17,6 +17,7 @@ using System.Text;
 using Microsoft.EntityFrameworkCore;
 using News.Service.Services.NewsCatcher;
 using News.Core.Contracts.NewsCatcher;
+using GTranslate.Translators;
 
 namespace News.API.Extensions
 {
@@ -26,6 +27,7 @@ namespace News.API.Extensions
         {
             services.AddSingleton<ImageUploader>();
             services.AddControllers();
+            services.AddSingleton<AggregateTranslator>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IFavoriteTwoService, FavoriteTwoService>();
             services.AddScoped<ICommentService, CommentService>();
