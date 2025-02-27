@@ -1,10 +1,5 @@
-﻿using GTranslate.Results;
-using GTranslate.Translators;
-using Microsoft.Extensions.Configuration;
+﻿using GTranslate.Translators;
 using News.Core.Contracts;
-using System.Text;
-using System.Text.Json;
-using System.Web;
 
 namespace News.Service.Services
 {
