@@ -9,11 +9,11 @@ using News.Infrastructure.Data;
 
 #nullable disable
 
-namespace News.Infrastructure.Migrations
+namespace News.Infrastructure.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250207142525_Notification Module")]
-    partial class NotificationModule
+    [Migration("20250228123117_Intial Create")]
+    partial class IntialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -69,13 +69,13 @@ namespace News.Infrastructure.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "efd3647a-3b5b-48ff-bdf3-b436d862993a",
+                            Id = "d5207dd3-a4b6-4075-9c7d-b9f9f60232c8",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "74772542-4253-43db-be14-34d50421c38b",
+                            Id = "552fc914-8b2a-4eb2-8c71-dcd4f2a76135",
                             Name = "User",
                             NormalizedName = "USER"
                         });
@@ -292,6 +292,9 @@ namespace News.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<bool>("ContainsBadWords")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -326,6 +329,10 @@ namespace News.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ArticleId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ArticleTitle")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -346,6 +353,39 @@ namespace News.Infrastructure.Migrations
                     b.HasIndex("ApplicationUserId");
 
                     b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("News.Core.Entities.Survey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("ApplicationUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ApplicationUserId1")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("IsLoadingSpeedSatisfactory")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NavigationEaseRating")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SourceDiscovery")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("VisitFrequency")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ApplicationUserId1");
+
+                    b.ToTable("Surveys");
                 });
 
             modelBuilder.Entity("News.Core.Entities.UserFavoriteArticle", b =>
@@ -462,6 +502,15 @@ namespace News.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("News.Core.Entities.Survey", b =>
+                {
+                    b.HasOne("News.Core.Entities.ApplicationUser", "ApplicationUser")
+                        .WithMany("Surveys")
+                        .HasForeignKey("ApplicationUserId1");
+
+                    b.Navigation("ApplicationUser");
+                });
+
             modelBuilder.Entity("News.Core.Entities.UserFavoriteArticle", b =>
                 {
                     b.HasOne("News.Core.Entities.ApplicationUser", "User")
@@ -476,6 +525,8 @@ namespace News.Infrastructure.Migrations
             modelBuilder.Entity("News.Core.Entities.ApplicationUser", b =>
                 {
                     b.Navigation("Notifications");
+
+                    b.Navigation("Surveys");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,6 +11,7 @@ namespace News.Core.Entities
         //public Article Article { get; set; }  
         public string UserId { get; set; } = string.Empty;
         public ApplicationUser User { get; set; }
+        public bool ContainsBadWords { get; set; } 
         //public NewsArticle Article { get; set; }
 
     }

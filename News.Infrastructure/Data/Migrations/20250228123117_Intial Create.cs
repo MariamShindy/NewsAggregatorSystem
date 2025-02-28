@@ -5,10 +5,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace News.Infrastructure.Migrations
+namespace News.Infrastructure.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class IntialCreation : Migration
+    public partial class IntialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -183,7 +183,8 @@ namespace News.Infrastructure.Migrations
                     Content = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ArticleId = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    ContainsBadWords = table.Column<bool>(type: "bit", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -194,6 +195,54 @@ namespace News.Infrastructure.Migrations
                         principalTable: "AspNetUsers",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Notifications",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    ApplicationUserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Category = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ArticleTitle = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ArticleDescription = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    ArticleUrl = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    ArticleId = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Notifications", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Notifications_AspNetUsers_ApplicationUserId",
+                        column: x => x.ApplicationUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Surveys",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    SourceDiscovery = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VisitFrequency = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    IsLoadingSpeedSatisfactory = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    NavigationEaseRating = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    ApplicationUserId = table.Column<int>(type: "int", nullable: false),
+                    ApplicationUserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Surveys", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Surveys_AspNetUsers_ApplicationUserId1",
+                        column: x => x.ApplicationUserId1,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -246,8 +295,8 @@ namespace News.Infrastructure.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "3c4508d4-9466-49d7-b9e3-88184d3b21e8", null, "User", "USER" },
-                    { "d0c4f9cd-5eb0-4b52-9d3c-3b3e24bdddd7", null, "Admin", "ADMIN" }
+                    { "552fc914-8b2a-4eb2-8c71-dcd4f2a76135", null, "User", "USER" },
+                    { "d5207dd3-a4b6-4075-9c7d-b9f9f60232c8", null, "Admin", "ADMIN" }
                 });
 
             migrationBuilder.CreateIndex(
@@ -300,6 +349,16 @@ namespace News.Infrastructure.Migrations
                 column: "UserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Notifications_ApplicationUserId",
+                table: "Notifications",
+                column: "ApplicationUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Surveys_ApplicationUserId1",
+                table: "Surveys",
+                column: "ApplicationUserId1");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_UserFavoriteArticles_UserId",
                 table: "UserFavoriteArticles",
                 column: "UserId");
@@ -328,6 +387,12 @@ namespace News.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Comments");
+
+            migrationBuilder.DropTable(
+                name: "Notifications");
+
+            migrationBuilder.DropTable(
+                name: "Surveys");
 
             migrationBuilder.DropTable(
                 name: "UserFavoriteArticles");
