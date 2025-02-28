@@ -15,5 +15,6 @@ namespace News.Core.Dtos
         public string UserName { get; set; } = string.Empty;
         public bool IsLocked { get; set; }
         public string ProfilePicUrl { get; set; } = string.Empty;
+        public bool ContainsBadWord { get; set; }
     }
 }

@@ -11,6 +11,7 @@ namespace News.Core.Contracts
 		Task DeleteAsync(int id);
         Task<IEnumerable<Comment>> GetCommentsByUserIdAsync(string userId);
 		Task<IEnumerable<Comment>> GetCommentsByArticleIdAsync(string articleId);
-
+		//Task<string> FilterBadWordsAsync(string comment);
+		Task<(string FilteredComment, bool ContainsBadWords)> FilterBadWordsAsync(string comment);
     }
 }

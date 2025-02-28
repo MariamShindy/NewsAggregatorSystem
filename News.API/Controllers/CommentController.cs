@@ -31,7 +31,6 @@ namespace News.API.Controllers
                 User = user,
                 ArticleId = newsId,
                 CreatedAt = DateTime.UtcNow,
-               
             };
             await _commentService.AddAsync(comment);
             return Ok(new { result = "Comment added" });
@@ -80,7 +79,8 @@ namespace News.API.Controllers
                 UserId = c.UserId,
                 UserName = c.User.UserName,
                 IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
-                ProfilePicUrl = c.User.ProfilePicUrl
+                ProfilePicUrl = c.User.ProfilePicUrl,
+                ContainsBadWord = c.ContainsBadWords
             });
             return Ok(formattedComments);
         }
@@ -102,8 +102,9 @@ namespace News.API.Controllers
                 UserId = comment.UserId,
                 UserName = comment.User.UserName,
                 IsLocked = comment.User.LockoutEnd.HasValue && comment.User.LockoutEnd > DateTimeOffset.UtcNow,
-                ProfilePicUrl = comment.User.ProfilePicUrl
-
+                ProfilePicUrl = comment.User.ProfilePicUrl,
+                ContainsBadWord = comment.ContainsBadWords
+                
             };
             return Ok(formattedComment);
         }
@@ -125,7 +126,8 @@ namespace News.API.Controllers
                 UserId = c.UserId,
                 UserName = c.User.UserName,
                 IsLocked = c.User.LockoutEnd.HasValue && c.User.LockoutEnd > DateTimeOffset.UtcNow,
-                ProfilePicUrl = c.User.ProfilePicUrl
+                ProfilePicUrl = c.User.ProfilePicUrl,
+                ContainsBadWord = c.ContainsBadWords
             });
 
             return Ok(formattedComments);
@@ -148,10 +150,24 @@ namespace News.API.Controllers
                 UserId = c.UserId,
                 UserName = c.User?.UserName??"N/A",
                 IsLocked = c.User?.LockoutEnd.HasValue ?? false && c.User.LockoutEnd > DateTimeOffset.UtcNow,
-                ProfilePicUrl = c.User?.ProfilePicUrl ?? string.Empty
+                ProfilePicUrl = c.User?.ProfilePicUrl ?? string.Empty,
+                ContainsBadWord = c.ContainsBadWords
             });
 
             return Ok(formattedComments);
+        }
+
+        //POST : api/comment/moderate
+        [HttpPost("moderate")]
+        public async Task<IActionResult> ModerateComment([FromBody] CommentRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Comment))
+            {
+                return BadRequest("Comment cannot be empty.");
+            }
+
+            var filteredComment = await _commentService.FilterBadWordsAsync(request.Comment);
+            return Ok(new { Original = request.Comment, Moderated = filteredComment });
         }
     }
 }
