@@ -18,8 +18,6 @@
             {
                 return BadRequest(ex.Message);
             }
-        }
-        //GET : api/Speech/voice-search
-       
+        }       
     }
 }

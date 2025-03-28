@@ -8,7 +8,7 @@
         IUserService _userService,IFavoriteService _favoriteService ,
         INewsService _newsService , ISocialMediaService _socialMediaService) : ControllerBase
 	{
-        // GET: api/use/me
+        // GET: api/user/me
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
@@ -19,11 +19,11 @@
 
         // PUT: api/user/me
         [HttpPut("me")]
-        public async Task<IActionResult> EditUserInfo(/*[FromBody]*/ [FromForm] EditUserDto model)
+        public async Task<IActionResult> EditUserInfo( [FromForm] EditUserDto model)
         {
             var result = await _userService.UpdateUserAsync(model); 
             if (result.Succeeded)
-                return Ok(new { result = "User updated successfully" }); //not updated profile pic
+                return Ok(new { result = "User updated successfully" }); 
 
             return BadRequest(result.Errors);
         }
@@ -183,57 +183,5 @@
             }
             return Ok(notifications);
         }
-
-        #region Favorite before caching
-        //// POST: api/user/favorites/{newsId}
-        //[HttpPost("favorites/{newsId}")]
-        //public async Task<IActionResult> AddToFavorites(string newsId)
-        //{
-
-        //    var user = await _userService.GetCurrentUser();
-        //    var articleExists = await _newsService.CheckArticleExists(newsId);
-        //    if (!articleExists)
-        //        return NotFound(new { message = "Article not found" });
-
-        //    var alreadyFavorited = await _favoriteService.IsArticleFavorited(user.Id, newsId);
-        //    if (alreadyFavorited)
-        //        return BadRequest(new { message = "Article already in favorites" });
-
-        //    var favorite = new UserFavoriteArticle
-        //    {
-        //        UserId = user.Id,
-        //        ArticleId = newsId,
-        //        AddedAt = DateTime.UtcNow
-        //    };
-
-        //    await _favoriteService.Add(favorite);
-        //    return Ok(new { result = "Article added to favorites" });
-        //}
-
-        //// DELETE: api/user/favorites/{favoriteId}
-        //[HttpDelete("favorites/{favoriteId}")]
-        //public async Task<IActionResult> RemoveFromFavorites(int favoriteId)
-        //{
-        //    var user = await _userService.GetCurrentUser();
-        //    var favorite = await _favoriteService.GetFavoriteById(favoriteId);
-        //    if (favorite == null)
-        //        return NotFound(new { message = "Favorite not found" });
-        //    if (favorite.UserId != user.Id)
-        //        return Forbid();
-        //    await _favoriteService.Remove(favoriteId);
-        //    return Ok(new { result = "Article removed from favorites" });
-        //}
-
-        //// GET : api/user/favorites
-        //[HttpGet("favorites")]
-        //public async Task<IActionResult> GetUserFavorites()
-        //{
-        //    var user = await _userService.GetCurrentUser();
-        //    var favorites = await _favoriteService.GetFavoritesByUser(user.Id);
-        //    var favoriteDtos = _mapper.Map<List<FavoriteArticleDto>>(favorites);
-        //    return Ok(favoriteDtos);
-        //} 
-        #endregion
-
     }
 }

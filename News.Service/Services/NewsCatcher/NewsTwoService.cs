@@ -70,49 +70,6 @@
 
         #endregion
 
-
-        //Reading from the json file
-        //public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
-        //{
-        //    try
-        //    {
-        //        string baseDirectory = AppDomain.CurrentDomain.BaseDirectory;
-        //        string filePath = Path.Combine(baseDirectory, "DataSeeding", "NewsData.json");
-
-        //        var jsonData = await File.ReadAllTextAsync(filePath);
-
-        //        var articles = JsonConvert.DeserializeObject<List<NewsArticle>>(jsonData);
-
-        //        if (articles != null)
-        //        {
-
-        //            foreach (var article in articles)
-        //            {
-        //                if (article.Authors is IEnumerable<string> authorList)
-        //                {
-        //                    article.Authors = authorList.ToList();
-        //                }
-        //                else
-        //                {
-        //                    article.Authors = new List<string>();
-        //                }
-        //            }
-
-        //            var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
-        //            var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
-
-        //            Console.WriteLine($"Number of articles fetched ==> {balancedArticles.Count}");
-        //            return balancedArticles;
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Error reading JSON file: {ex.Message}");
-        //    }
-
-        //    return new List<NewsArticle>();
-        //}
-
         //Reading from json file with pagination
         public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         {
@@ -169,7 +126,6 @@
 
         public async Task<List<string>> GetCategoriesAsync()
         {
-            //var newsResponse = await GetAllNewsAsync();
             var categories = _categories;
             await AddCategoriesToDatabaseAsync(categories);
             return categories ?? [];
@@ -350,7 +306,7 @@
         {
             if (!string.IsNullOrEmpty(content))
             {
-                string cleanedContent = Regex.Replace(content.Trim(), @"(\n\s*)+", "\n"); // Remove extra newlines
+                string cleanedContent = Regex.Replace(content.Trim(), @"(\n\s*)+", "\n");
 
                 var paragraph = new Paragraph()
                     .Add(new Text($"{title}: ").SetBold())

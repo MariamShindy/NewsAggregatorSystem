@@ -16,7 +16,6 @@ namespace News.API.Controllers
             var article = await _newsService.GetNewsByIdAsync(newsId);
             if (article == null)
                 return NoContent(); 
-                //return NotFound(new {result = "Article not found"});
             var user = await _userService.GetCurrentUserAsync();
             var comment = new Comment
             {
@@ -37,7 +36,6 @@ namespace News.API.Controllers
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
                 return NoContent();
-                //return NotFound("Comment not found.");
             if (comment.UserId != user.Id)
                 return Forbid("You are not authorized to edit this comment.");
 
@@ -54,7 +52,6 @@ namespace News.API.Controllers
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
                 return NoContent();
-                //return NotFound();
 
             await _commentService.DeleteAsync(id);
             return Ok(new { result = "Comment deleted" });
@@ -86,7 +83,6 @@ namespace News.API.Controllers
             var comment = await _commentService.GetByIdAsync(id);
             if (comment == null)
                 return NoContent();
-               // return NotFound();
 
             var formattedComment = new CommentDto
             {
@@ -110,7 +106,6 @@ namespace News.API.Controllers
             var comments = await _commentService.GetCommentsByUserIdAsync(userId);
             if (comments == null || !comments.Any())
                 return NoContent();
-                //return NotFound("No comments found for this user.");
 
             var formattedComments = comments.Select(c => new CommentDto
             {
@@ -134,7 +129,6 @@ namespace News.API.Controllers
             var comments = await _commentService.GetCommentsByArticleIdAsync(articleId);
             if (comments == null || !comments.Any())
                 return NoContent();
-               //return NotFound("No comments found for this article.");
 
             var formattedComments = comments.Select(c => new CommentDto
             {

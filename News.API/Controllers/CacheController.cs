@@ -13,7 +13,6 @@
 
             if (cachedKeys == null || !cachedKeys.Any())
                 return NoContent();
-                //return NotFound("No cached articles found.");
 
             var cachedArticles = new List<object>();
             foreach (var key in cachedKeys)

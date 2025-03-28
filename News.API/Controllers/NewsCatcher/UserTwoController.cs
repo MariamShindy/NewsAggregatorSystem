@@ -19,7 +19,7 @@
 
         // PUT: api/userTwo/me
         [HttpPut("me")]
-        public async Task<IActionResult> EditUserInfo(/*[FromBody]*/ [FromForm] EditUserDto model)
+        public async Task<IActionResult> EditUserInfo([FromForm] EditUserDto model)
         {
             var result = await _userService.UpdateUserAsync(model);
             if (result.Succeeded)
@@ -79,7 +79,6 @@
             var articleExists = await _newsService.GetNewsByIdAsync(newsId);
             if (articleExists is null)
                 return NoContent();
-            //return NotFound(new { message = "Article not found" });
 
             var alreadyFavorited = await _favoriteService.IsArticleFavoritedAsync(user.Id, newsId);
             if (alreadyFavorited)
@@ -137,7 +136,6 @@
             catch (ArgumentException ex)
             {
                 return NoContent();
-                //return NotFound(ex.Message);
             }
         }
 
@@ -183,7 +181,6 @@
             var notifications = await _userService.GetUserNotificationsAsync(user.Id);
             if (!notifications.Any())
                 return NoContent();
-                //return NotFound("No notifications found");
             return Ok(notifications);
         }
     }
