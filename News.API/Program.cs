@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.FileProviders;
-using News.API.Extensions;
-using News.Service.Services;
-using System.Text.Json.Serialization;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddAuthServices(builder.Configuration);

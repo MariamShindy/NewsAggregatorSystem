@@ -1,22 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Net.Http.Headers;
-using News.Core.Contracts;
-using News.Core.Entities;
-using Newtonsoft.Json;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using AutoMapper;
-using iText.IO.Image;
-using iText.Kernel.Pdf;
-using iText.Layout.Element;
-using iText.Layout.Properties;
-using News.Core.Entities.NewsCatcher;
-using iText.Layout;
-using iText.Kernel.Pdf.Canvas.Draw;
-using iText.Kernel.Colors;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class NewsService(HttpClient _httpClient, IMapper _mapper, 
         IUnitOfWork _unitOfWork,IConfiguration _configuration, 

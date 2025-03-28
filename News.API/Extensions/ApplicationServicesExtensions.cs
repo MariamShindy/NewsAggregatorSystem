@@ -1,25 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Mvc.Routing;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Contracts;
-using News.Core.Settings;
-using News.Infrastructure.Repositories.UnitOfWork;
-using News.Infrastructure.Repositories;
-using News.Service.Helpers.EmailSettings;
-using News.Service.Helpers.ImageUploader;
-using News.Service.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.IdentityModel.Tokens;
-using News.Core.Entities;
-using News.Infrastructure.Data;
-using System.Text;
-using Microsoft.EntityFrameworkCore;
-using News.Service.Services.NewsCatcher;
-using News.Core.Contracts.NewsCatcher;
-using GTranslate.Translators;
-
-namespace News.API.Extensions
+﻿namespace News.API.Extensions
 {
     public static class ApplicationServicesExtensions
     {

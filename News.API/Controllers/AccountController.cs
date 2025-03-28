@@ -1,11 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-using News.Core.Dtos;
-using News.Core.Entities;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [ApiController]
 	[Route("api/[controller]")]

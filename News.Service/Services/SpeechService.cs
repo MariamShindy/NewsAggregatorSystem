@@ -1,6 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using System.Speech.Synthesis;
+﻿using System.Speech.Synthesis;
 
 namespace News.Service.Services
 {

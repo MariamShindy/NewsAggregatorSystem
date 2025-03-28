@@ -1,9 +1,4 @@
-﻿using News.Core.Contracts;
-using News.Core.Contracts.UnitOfWork;
-using News.Infrastructure.Data;
-using System.Collections;
-
-namespace News.Infrastructure.Repositories.UnitOfWork
+﻿namespace News.Infrastructure.Repositories.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {

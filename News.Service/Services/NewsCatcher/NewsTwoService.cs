@@ -1,24 +1,4 @@
-﻿using AutoMapper;
-using iText.IO.Image;
-using iText.Kernel.Colors;
-using iText.Kernel.Pdf;
-using iText.Kernel.Pdf.Action;
-using iText.Kernel.Pdf.Canvas.Draw;
-using iText.Layout;
-using iText.Layout.Element;
-using iText.Layout.Properties;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts.NewsCatcher;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using News.Core.Dtos.NewsCatcher;
-using News.Core.Entities;
-using News.Core.Entities.NewsCatcher;
-using Newtonsoft.Json;
-using System.Text.RegularExpressions;
-
-namespace News.Service.Services.NewsCatcher
+﻿namespace News.Service.Services.NewsCatcher
 {
     public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
         IUnitOfWork _unitOfWork, IConfiguration _configuration) : INewsTwoService

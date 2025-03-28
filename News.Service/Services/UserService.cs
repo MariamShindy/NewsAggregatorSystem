@@ -1,17 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using News.Core.Entities;
-using News.Service.Helpers.EmailSettings;
-using News.Service.Helpers.ImageUploader;
-using System.Security.Claims;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class UserService(IHttpContextAccessor _httpContextAccessor,
         IMapper _mapper, ImageUploader _imageUploader, IUnitOfWork _unitOfWork,

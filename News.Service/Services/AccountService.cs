@@ -1,17 +1,4 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
-using News.Core.Contracts;
-using News.Core.Entities;
-using News.Service.Helpers.EmailSettings;
-using News.Service.Helpers.ImageUploader;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class AccountService(ILogger<AccountService> _logger , IMemoryCache _memoryCache , ImageUploader _imageUploader, 
         UserManager<ApplicationUser> _userManager, IConfiguration _configuration,

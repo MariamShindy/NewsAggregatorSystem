@@ -1,13 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Entities;
-using System.Text.Json;
-using System.Text.RegularExpressions;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class CommentService(ILogger<CommentService> _logger,
         IUnitOfWork _unitOfWork, HttpClient _httpClient , IConfiguration _configuration) : ICommentService

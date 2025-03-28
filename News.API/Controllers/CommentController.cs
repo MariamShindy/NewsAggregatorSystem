@@ -1,11 +1,5 @@
-﻿using iText.StyledXmlParser.Jsoup.Nodes;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-using News.Core.Contracts.NewsCatcher;
-using News.Core.Dtos;
-using News.Core.Entities;
-using Comment = News.Core.Entities.Comment;
+﻿
+using Comment = News.Core.Entities.Comments.Comment;
 
 namespace News.API.Controllers
 {

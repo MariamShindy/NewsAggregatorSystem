@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

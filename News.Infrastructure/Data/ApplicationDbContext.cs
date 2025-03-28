@@ -1,11 +1,6 @@
-﻿using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
-using News.Core.Entities;
-
-namespace News.Infrastructure.Data
+﻿namespace News.Infrastructure.Data
 {
-	public class ApplicationDbContext :IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext :IdentityDbContext<ApplicationUser>
 	{
         public ApplicationDbContext()
         {

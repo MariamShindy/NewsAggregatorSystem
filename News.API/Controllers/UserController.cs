@@ -1,12 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-using News.Core.Dtos;
-using News.Core.Entities;
-using News.Service.Services;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [Authorize/*(Roles ="User")*/]
 	[Route("api/[controller]")]
