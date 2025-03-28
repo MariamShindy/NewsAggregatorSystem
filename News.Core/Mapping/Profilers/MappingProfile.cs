@@ -13,15 +13,6 @@
             CreateMap<Article, NewsArticle>().ReverseMap();
             CreateMap<NewsArticleDto, NewsArticle>().ReverseMap();
             CreateMap<Survey,SurveyDto>().ReverseMap();
-
-
-            //CreateMap<Comment,AddCommentDto>().ReverseMap();
-            //CreateMap<UpdateCommentDto, Comment>()
-            //    .ForMember(dest => dest.Content , opt => opt.MapFrom(src => src.Content))
-            //    .ForMember(dest => dest.CreatedAt, opt => opt.MapFrom(src => DateTime.UtcNow)) 
-            //    .ForMember(dest => dest.UserId, opt => opt.Ignore()) 
-            //    .ForMember(dest => dest.User, opt => opt.Ignore())  
-            //    .ForMember(dest => dest.ArticleId, opt => opt.Ignore());
         }
     }
 }

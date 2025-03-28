@@ -38,6 +38,5 @@
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<Survey> Surveys { get; set; }
 
-
     }
 }

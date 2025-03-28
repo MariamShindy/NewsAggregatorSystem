@@ -13,7 +13,6 @@
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return NoContent();
-            //return NotFound();
             user.LockoutEnd = DateTimeOffset.MaxValue;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -28,7 +27,6 @@
             var user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return NoContent();
-            //return NotFound();
             user.LockoutEnd = null;
             var result = await _userManager.UpdateAsync(user);
             if (result.Succeeded)
@@ -61,7 +59,6 @@
                     var result = await _newsService.DeleteCategoryAsync(id);
                     if (!result)
                         return NoContent();
-                        //return NotFound("Category not found.");
                     return Ok("Category deleted successfully.");
                 }
                 catch (Exception)
@@ -78,7 +75,6 @@
                     var result = await _newsService.UpdateCategoryAsync(id, categoryDto);
                     if (!result)
                         return NoContent();
-                        //return NotFound("Category not found or update failed.");
                     return Ok("Category updated successfully.");
                 }
                 catch (Exception)
