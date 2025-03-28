@@ -1,7 +1,4 @@
-﻿using News.Core.Contracts;
-using News.Core.Contracts.NewsCatcher;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class SocialMediaService(INewsTwoService _newsService) : ISocialMediaService
     {

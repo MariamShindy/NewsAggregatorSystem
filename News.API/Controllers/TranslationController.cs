@@ -1,10 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-using News.Core.Entities;
-using Newtonsoft.Json;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]

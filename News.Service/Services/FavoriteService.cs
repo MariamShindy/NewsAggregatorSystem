@@ -1,11 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using News.Core.Entities;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class FavoriteService(ILogger<FavoriteService> _logger,
         INewsService _newsService, IMemoryCache _cache,

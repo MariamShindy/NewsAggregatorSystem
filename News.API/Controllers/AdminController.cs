@@ -1,11 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts;
-using News.Core.Dtos;
-using News.Core.Entities;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [Authorize /*(Roles ="Admin")*/]
     [Route("api/[controller]")]

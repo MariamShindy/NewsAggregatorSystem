@@ -1,7 +1,4 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-
-namespace News.Service.Helpers.ImageUploader
+﻿namespace News.Service.Helpers.ImageUploader
 {
     public class ImageUploader(IWebHostEnvironment _environment)
     {

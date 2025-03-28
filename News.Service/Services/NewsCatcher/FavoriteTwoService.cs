@@ -1,14 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using News.Core.Contracts.NewsCatcher;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using News.Core.Dtos.NewsCatcher;
-using News.Core.Entities;
-using News.Core.Entities.NewsCatcher;
-
-namespace News.Service.Services.NewsCatcher
+﻿namespace News.Service.Services.NewsCatcher
 {
     public class FavoriteTwoService(ILogger<FavoriteTwoService> _logger,
         INewsTwoService _newsService, IMemoryCache _cache,

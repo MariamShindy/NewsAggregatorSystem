@@ -1,14 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using News.Core.Contracts.NewsCatcher;
-using News.Core.Contracts.UnitOfWork;
-using News.Core.Dtos;
-using News.Core.Entities;
-using News.Service.Helpers.EmailSettings;
-
-namespace News.Service.Services.NewsCatcher
+﻿namespace News.Service.Services.NewsCatcher
 {
     public class NotificationTwoService(ILogger<NotificationTwoService> _logger, IMailSettings _mailSettings,
         IUserService _userService, INewsTwoService _newsService, IMapper _mapper, 

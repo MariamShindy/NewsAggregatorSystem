@@ -1,9 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-using News.Core.Contracts;
-using News.Infrastructure.Data;
-using System.Linq.Expressions;
-
-namespace News.Infrastructure.Repositories
+﻿namespace News.Infrastructure.Repositories
 {
     public class GenericRepository<T> (ApplicationDbContext _dbContext) : IGenericRepository<T> where T : class
     {

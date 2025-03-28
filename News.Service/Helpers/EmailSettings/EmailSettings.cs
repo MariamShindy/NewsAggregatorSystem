@@ -1,11 +1,4 @@
-﻿using MailKit.Net.Smtp;
-using Microsoft.Extensions.Options;
-using MimeKit;
-using News.Core.Settings;
-using News.Core.Entities;
-using News.Core.Dtos;
-using Microsoft.AspNetCore.Identity;
-namespace News.Service.Helpers.EmailSettings
+﻿namespace News.Service.Helpers.EmailSettings
 {
     public class EmailSettings(IOptions<MailSettings> _options) : IMailSettings
     {

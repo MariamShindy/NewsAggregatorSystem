@@ -1,9 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using News.Core.Contracts.NewsCatcher;
-
-namespace News.API.Controllers.NewsCatcher
+﻿namespace News.API.Controllers.NewsCatcher
 {
     [Route("api/[controller]")]
     [ApiController]

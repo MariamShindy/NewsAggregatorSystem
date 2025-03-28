@@ -1,10 +1,4 @@
-﻿using AutoMapper;
-using News.Core.Dtos;
-using News.Core.Dtos.NewsCatcher;
-using News.Core.Entities;
-using News.Core.Entities.NewsCatcher;
-
-namespace News.Core.Profilers
+﻿namespace News.Core.Profilers
 {
     public class MappingProfile : Profile
     {

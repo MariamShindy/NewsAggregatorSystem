@@ -1,7 +1,4 @@
-﻿using GTranslate.Translators;
-using News.Core.Contracts;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class TranslationService(AggregateTranslator _translator) : ITranslationService
     {

@@ -1,10 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using News.Core.Contracts;
-using static System.Formats.Asn1.AsnWriter;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class ArticleNotificationService  : IHostedService, IDisposable
     {
