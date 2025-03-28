@@ -183,5 +183,20 @@
                 return NoContent();
             return Ok(notifications);
         }
+        // POST: api/userTwo/request-deletion
+        [HttpPost("request-deletion")]
+        public async Task<IActionResult> RequestAccountDeletion()
+        {
+            var user = await _userService.GetCurrentUserAsync();
+            if (user == null)
+                return Unauthorized();
+
+            var result = await _userService.RequestAccountDeletionAsync(user.Id);
+            if (result.Succeeded)
+                return Ok(new { result = "Account deletion requested. Your account will be deleted after 14 days unless you cancel." });
+
+            return BadRequest(result.Errors);
+        }
+
     }
 }

@@ -10,5 +10,7 @@ namespace News.Core.Entities.Identity
         public ICollection<Category> Categories { get; set; } = new List<Category>();
         public ICollection<Notification> Notifications { get; set; } = new List<Notification>();
         public ICollection<Survey> Surveys { get; set; } = new List<Survey>();
+        public DateTime? DeletionRequestedAt { get; set; }
+        public bool IsPendingDeletion { get; set; }
     }
 }

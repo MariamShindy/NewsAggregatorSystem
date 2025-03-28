@@ -13,5 +13,7 @@
         Task<IEnumerable<CategoryDto>> GetUserPreferredCategoriesAsync(string userId);
         Task<IEnumerable<NotificationDto>> GetUserNotificationsAsync(string userId);
         Task<IEnumerable<SurveyResponseDto>> GetAllSurvyesAsync();
+        Task<IdentityResult> RequestAccountDeletionAsync(string userId);
+
     }
 }
