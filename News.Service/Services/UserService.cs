@@ -248,6 +248,18 @@
 
             return _mapper.Map<IEnumerable<NotificationDto>>(notifications);
         }
+        public async Task<IdentityResult> RequestAccountDeletionAsync(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+                return IdentityResult.Failed(new IdentityError { Description = "User not found" });
+
+            user.IsPendingDeletion = true;
+            user.DeletionRequestedAt = DateTime.UtcNow;
+
+            return await _userManager.UpdateAsync(user);
+        }
+
         private string BuildFeedbackEmailBody(FeedbackDto feedbackDto)
         {
             var Body = $@"

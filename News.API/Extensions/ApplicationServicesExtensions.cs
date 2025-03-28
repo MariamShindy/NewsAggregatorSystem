@@ -1,4 +1,6 @@
-﻿namespace News.API.Extensions
+﻿using News.Service.Services.BackgroundServices;
+
+namespace News.API.Extensions
 {
     public static class ApplicationServicesExtensions
     {
@@ -15,6 +17,7 @@
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISocialMediaService, SocialMediaService>();
             //services.AddScoped<INotificationService, NotificationService>();
+            services.AddHostedService<AccountDeletionService>();
             services.AddScoped<INotificationService, NotificationTwoService>();
             services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped<ISpeechService, SpeechService>();
@@ -26,7 +29,7 @@
             services.AddSingleton<IUrlHelperFactory, UrlHelperFactory>();
             services.AddMemoryCache();
             services.Configure<MailSettings>(configuration.GetSection("MailSettings"));
-            services.AddSingleton<IHostedService, ArticleNotificationService>(); 
+            services.AddSingleton<IHostedService, ArticleNotificationService>();
             services.AddSingleton(new MapperConfiguration(cfg =>
             {
                 cfg.AddProfile(new News.Core.Profilers.MappingProfile());

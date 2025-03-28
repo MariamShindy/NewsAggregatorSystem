@@ -17,16 +17,34 @@
             return Ok(new { Status = "Success", Message = message, Token = token });
         }
 
+        //// POST : api/account/login
+        //[HttpPost("login")]
+        //public async Task<IActionResult> Login([FromBody] LoginDto model)
+        //{
+        //    var loginModel = _mapper.Map<LoginModel>(model);
+        //    var (isSuccess, token,message) = await _accountService.LoginUserAsync(loginModel);
+        //    if (!isSuccess)
+        //        return Unauthorized(new { Message = message });
+        //    return Ok(new { Token = token });
+        //}
+
         // POST : api/account/login
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
             var loginModel = _mapper.Map<LoginModel>(model);
-            var (isSuccess, token,message) = await _accountService.LoginUserAsync(loginModel);
+            var (isSuccess, token, message, isDeletionCancelled) = await _accountService.LoginUserAsync(loginModel);
+
             if (!isSuccess)
                 return Unauthorized(new { Message = message });
-            return Ok(new { Token = token });
+
+            return Ok(new
+            {
+                Token = token,
+                Message = isDeletionCancelled ? "Login successful. Deletion request canceled." : message
+            });
         }
+
 
         // POST : api/account/logout
         [HttpPost("logout")]

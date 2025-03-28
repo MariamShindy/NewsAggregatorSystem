@@ -10,5 +10,7 @@
         public string ProfilePicUrl { get; set; } = string.Empty;
         public string PasswordHash { get; set; } = string.Empty;
         public bool IsLockedOut { get; set; }
+        public DateTime? DeletionRequestedAt { get; set; }
+        public bool IsPendingDeletion { get; set; }
     }
 }

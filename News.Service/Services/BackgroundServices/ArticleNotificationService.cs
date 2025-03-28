@@ -1,20 +1,20 @@
-﻿namespace News.Service.Services
+﻿namespace News.Service.Services.BackgroundServices
 {
-    public class ArticleNotificationService  : IHostedService, IDisposable
+    public class ArticleNotificationService : IHostedService, IDisposable
     {
         private readonly ILogger<ArticleNotificationService> _logger;
-        private readonly IServiceProvider _serviceProvider;  
+        private readonly IServiceProvider _serviceProvider;
         private Timer _timer;
 
         public ArticleNotificationService(ILogger<ArticleNotificationService> logger, IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _serviceProvider = serviceProvider;  
+            _serviceProvider = serviceProvider;
         }
         public Task StartAsync(CancellationToken cancellationToken)
         {
             _logger.LogInformation("ArticleNotificationService starting...");
-            _timer = new Timer(ExecuteTask, null, TimeSpan.Zero, TimeSpan.FromHours(3)); 
+            _timer = new Timer(ExecuteTask, null, TimeSpan.Zero, TimeSpan.FromHours(3));
             return Task.CompletedTask;
         }
 
