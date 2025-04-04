@@ -10,7 +10,7 @@ builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddApplicationsService(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-
+builder.WebHost.UseUrls("https://localhost:7291", "http://localhost:5069");
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
