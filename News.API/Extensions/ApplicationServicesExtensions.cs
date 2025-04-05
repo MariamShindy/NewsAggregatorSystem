@@ -16,6 +16,12 @@ namespace News.API.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISocialMediaService, SocialMediaService>();
+            services.AddScoped<SummarizationService>();
+            services.AddHttpClient<SummarizationService>();
+            services.AddScoped<SearchService>();
+            services.AddHttpClient<SearchService>();
+            services.AddScoped<RecommendationService>();
+            services.AddHttpClient<RecommendationService>();
             //services.AddScoped<INotificationService, NotificationService>();
             services.AddHostedService<AccountDeletionService>();
             services.AddScoped<INotificationService, NotificationTwoService>();
