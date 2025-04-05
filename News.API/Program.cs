@@ -11,6 +11,20 @@ builder.Services.AddApplicationsService(builder.Configuration);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.WebHost.UseUrls("https://localhost:7291", "http://localhost:5069");
+
+var MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: MyAllowSpecificOrigins,
+        policy =>
+        {
+            policy.WithOrigins("https://localhost:4300") // Allow frontend
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
@@ -33,7 +47,11 @@ app.UseExceptionHandler(errorApp =>
         }
     });
 });
-
+app.Use(async (context, next) =>
+{
+    context.Request.EnableBuffering();
+    await next();
+});
 app.UseHttpsRedirection();
 app.UseRouting();
 app.UseStaticFiles();
@@ -43,9 +61,10 @@ app.UseStaticFiles(new StaticFileOptions
         Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads")),
     RequestPath = "/uploads"
 });
+app.UseCors(MyAllowSpecificOrigins);
+//app.UseCors("MyPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
-app.UseCors("MyPolicy");
 app.UseEndpoints(endpoints =>
 {
 	endpoints.MapControllers(); 
