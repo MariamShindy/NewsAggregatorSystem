@@ -1,10 +1,8 @@
 ﻿namespace News.API.Controllers
 {
     [Authorize /*(Roles ="Admin")*/]
-    [Route("api/[controller]")]
-    [ApiController]
     public class AdminController(UserManager<ApplicationUser> _userManager,
-        INewsService _newsService, IUserService _userService) : ControllerBase
+        INewsService _newsService, IUserService _userService) : ApiController
     {
         // POST : api/admin/lock-user/{id}
         [HttpPost("lock-user/{id}")]

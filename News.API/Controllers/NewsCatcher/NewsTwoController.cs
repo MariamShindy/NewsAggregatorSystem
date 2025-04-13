@@ -1,9 +1,8 @@
 ﻿namespace News.API.Controllers.NewsCatcher
 {
-    [Route("api/[controller]")]
-    [ApiController]
+  
     [Authorize/*(Roles = "User")*/]
-    public class NewsTwoController(INewsTwoService _newsService) : ControllerBase
+    public class NewsTwoController(INewsTwoService _newsService) : ApiController
     {
         //GET : api/newsTwo/all?pageNumber=1&pageSize=35
         [HttpGet("all")]

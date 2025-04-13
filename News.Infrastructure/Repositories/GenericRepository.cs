@@ -15,22 +15,22 @@
 
             return await query.AsNoTracking().ToListAsync();
         }
-        public async Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate)
+        public async Task<IEnumerable<T>> FindAsync(Func<T, bool> predicate) //should be sync
         {
             return  _dbContext.Set<T>().Where(predicate).AsEnumerable();
         }
-        public async Task<T?> GetByIdAsync(int id)
+        public async Task<T?> GetByIdAsync(int id)//should be sync
         {
             return await _dbContext.Set<T>().FindAsync(id);
         }
 
         public async Task AddAsync(T entity)
-        =>  _dbContext.Set<T>().Add(entity);
+        => await  _dbContext.Set<T>().AddAsync(entity);
 
-        public async Task UpdateAsync(T entity)
+        public async Task UpdateAsync(T entity)//should be sync
         => _dbContext.Set<T>().Update(entity);
 
-        public async Task DeleteAsync(T entity)
+        public async Task DeleteAsync(T entity)//should be sync
         => _dbContext.Set<T>().Remove(entity);
 
         public async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate)

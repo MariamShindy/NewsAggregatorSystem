@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class SearchService
     {
@@ -20,7 +13,7 @@ namespace News.Service.Services
         public async Task<SearchResponse> SearchArticlesAsync(string query, int page = 1)
         {
             var payload = new { query, page };
-            var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(_flaskApiUrl, jsonContent);
             if (!response.IsSuccessStatusCode)
@@ -29,7 +22,7 @@ namespace News.Service.Services
             }
 
             var result = await response.Content.ReadAsStringAsync();
-            var searchResponse = JsonSerializer.Deserialize<SearchResponse>(result, new JsonSerializerOptions
+            var searchResponse = System.Text.Json.JsonSerializer.Deserialize<SearchResponse>(result, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             });

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class SummarizationService
     {
@@ -22,7 +15,7 @@ namespace News.Service.Services
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text should not be empty", nameof(text));
 
-            var jsonContent = new StringContent(JsonSerializer.Serialize(new { text }), Encoding.UTF8, "application/json");
+            var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(new { text }), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(_flaskApiUrl, jsonContent);
             if (!response.IsSuccessStatusCode)
@@ -31,7 +24,7 @@ namespace News.Service.Services
             }
 
             var result = await response.Content.ReadAsStringAsync();
-            var summaryResponse = JsonSerializer.Deserialize<SummarizationResponse>(result);
+            var summaryResponse = System.Text.Json.JsonSerializer.Deserialize<SummarizationResponse>(result);
             return summaryResponse?.Summary ?? "Error in summarization";
         }
     }

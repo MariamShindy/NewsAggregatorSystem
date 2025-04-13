@@ -1,13 +1,11 @@
 ﻿namespace News.API.Controllers
 {
     [Authorize/*(Roles ="User")*/]
-	[Route("api/[controller]")]
-	[ApiController]
     [ApiExplorerSettings(IgnoreApi = true)]
     public class UserController(IMapper _mapper,
         IUserService _userService,IFavoriteService _favoriteService ,
-        INewsService _newsService , ISocialMediaService _socialMediaService) : ControllerBase
-	{
+        INewsService _newsService , ISocialMediaService _socialMediaService) : ApiController
+    {
         // GET: api/user/me
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()

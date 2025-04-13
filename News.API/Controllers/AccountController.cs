@@ -1,11 +1,9 @@
 ﻿namespace News.API.Controllers
 {
-    [ApiController]
-	[Route("api/[controller]")]
 	public class AccountController(IMapper _mapper,
         SignInManager<ApplicationUser> _signInManager, 
-        IAccountService _accountService) : ControllerBase
-	{
+        IAccountService _accountService) : ApiController
+    {
         // POST : api/account/register
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromForm] RegisterDto model)
@@ -16,17 +14,6 @@
                 return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = message });
             return Ok(new { Status = "Success", Message = message, Token = token });
         }
-
-        //// POST : api/account/login
-        //[HttpPost("login")]
-        //public async Task<IActionResult> Login([FromBody] LoginDto model)
-        //{
-        //    var loginModel = _mapper.Map<LoginModel>(model);
-        //    var (isSuccess, token,message) = await _accountService.LoginUserAsync(loginModel);
-        //    if (!isSuccess)
-        //        return Unauthorized(new { Message = message });
-        //    return Ok(new { Token = token });
-        //}
 
         // POST : api/account/login
         [HttpPost("login")]
@@ -44,7 +31,6 @@
                 Message = isDeletionCancelled ? "Login successful. Deletion request canceled." : message
             });
         }
-
 
         // POST : api/account/logout
         [HttpPost("logout")]
