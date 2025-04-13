@@ -1,16 +1,8 @@
 ﻿namespace News.API.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TranslationController : ControllerBase
+    public class TranslationController(ITranslationService _translationService) : ApiController
     {
-        private readonly ITranslationService _translationService;
-
-        public TranslationController(ITranslationService translationService)
-        {
-            _translationService = translationService;
-        }
         [HttpPost("translate")]
         public async Task<IActionResult> Translate([FromBody] TranslateRequest request)
         {

@@ -1,11 +1,8 @@
 ﻿namespace News.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize/*(Roles ="User")*/]
     [ApiExplorerSettings(IgnoreApi = true)]
-
-    public class NewsController (INewsService _newsService) : ControllerBase
+    public class NewsController (INewsService _newsService) : ApiController
     {
         // GET: api/news/all
         [HttpGet("all")]

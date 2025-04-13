@@ -1,13 +1,4 @@
-﻿using News.Core.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class RecommendationService
     {
@@ -21,7 +12,7 @@ namespace News.Service.Services
 
         public async Task<List<RecommendationResult>> GetRecommendedArticlesAsync(string topic)
         {
-            var requestContent = new StringContent(JsonSerializer.Serialize(new { topic }), Encoding.UTF8, "application/json");
+            var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(new { topic }), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(_flaskApiUrl, requestContent);
 
@@ -34,7 +25,7 @@ namespace News.Service.Services
 
             try
             {
-                var recommendations = JsonSerializer.Deserialize<RecommendationResponse>(result, new JsonSerializerOptions
+                var recommendations = System.Text.Json.JsonSerializer.Deserialize<RecommendationResponse>(result, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 });

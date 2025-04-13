@@ -1,9 +1,7 @@
 ﻿namespace News.API.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SpeechController(ISpeechService _textToSpeechService) : ControllerBase
+    public class SpeechController(ISpeechService _textToSpeechService) : ApiController
     {
         ////GET : api/Speech/text-to-speech
         //[HttpPost("text-to-speech")]
@@ -18,7 +16,9 @@
         //    {
         //        return BadRequest(ex.Message);
         //    }
-        //}       
+        //}
+
+        //GET : api/Speech/text-to-speech
         [HttpPost("text-to-speech")]
         public IActionResult Speak([FromBody] TextToSpeechRequest request)
         {
