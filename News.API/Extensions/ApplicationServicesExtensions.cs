@@ -8,7 +8,7 @@ namespace News.API.Extensions
         {
             services.AddSingleton<ImageUploader>();
             services.AddControllers();
-            services.AddSingleton<AggregateTranslator>();
+            //services.AddSingleton<AggregateTranslator>();
             services.AddScoped<IFavoriteService, FavoriteService>();
             services.AddScoped<IFavoriteTwoService, FavoriteTwoService>();
             services.AddScoped<ICommentService, CommentService>();
@@ -17,17 +17,18 @@ namespace News.API.Extensions
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISocialMediaService, SocialMediaService>();
             services.AddScoped<SummarizationService>();
-            services.AddHttpClient<SummarizationService>();
+            services.AddHttpClient<SummarizationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
             services.AddScoped<SearchService>();
-            services.AddHttpClient<SearchService>();
+            services.AddHttpClient<SearchService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
             services.AddScoped<RecommendationService>();
-            services.AddHttpClient<RecommendationService>();
+            services.AddHttpClient<RecommendationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddHttpClient<SentimentService>();
             //services.AddScoped<INotificationService, NotificationService>();
             services.AddHostedService<AccountDeletionService>();
             services.AddScoped<INotificationService, NotificationTwoService>();
             services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped<ISpeechService, SpeechService>();
-            services.AddScoped<ITranslationService, TranslationService>();
+            services.AddScoped<TranslationService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddTransient<IMailSettings, EmailSettings>();

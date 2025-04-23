@@ -5,28 +5,35 @@
     [ApiController]
     public class TranslationController : ControllerBase
     {
-        private readonly ITranslationService _translationService;
+        private readonly TranslationService _translationService;
 
-        public TranslationController(ITranslationService translationService)
+        public TranslationController(TranslationService translationService)
         {
             _translationService = translationService;
         }
         [HttpPost("translate")]
         public async Task<IActionResult> Translate([FromBody] TranslateRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.Language))
-                return BadRequest("Text and target language are required.");
+            if (string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.SourceLang) || string.IsNullOrWhiteSpace(request.TargetLang))
+                return BadRequest("Missing required fields.");
 
-            var translatedText = await _translationService.TranslateText(request.Text, request.Language);
-                try
-                {
-                    return Ok(new { translation = translatedText });
-                }
-                catch (JsonReaderException ex)
-                {
-                    return BadRequest($"Invalid JSON response: {ex.Message}");
-                }
+            try
+            {
+                var result = await _translationService.TranslateTextAsync(request);
+                return Ok(result);
+            }
+            catch (HttpRequestException ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
+    }
+
+    public class TranslationRequest
+    {
+        public string Text { get; set; }
+        public string SourceLang { get; set; }
+        public string TargetLang { get; set; }
     }
 }
