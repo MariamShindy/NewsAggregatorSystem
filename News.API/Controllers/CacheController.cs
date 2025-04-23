@@ -1,8 +1,6 @@
 ﻿namespace News.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class CacheController(IMemoryCache _cache) : ControllerBase
+    public class CacheController(IMemoryCache _cache) : ApiController
     {
         // GET: api/cache/chaced-articles
         [HttpGet("cached-articles")]

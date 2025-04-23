@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using News.Service.Services;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

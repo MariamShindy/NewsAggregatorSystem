@@ -1,12 +1,9 @@
 ﻿namespace News.API.Controllers.NewsCatcher
 {
-    [Route("api/[controller]")]
-    [ApiController]
     [Authorize]
-
     public class UserTwoController(IUserService _userService , IMapper _mapper ,
         INewsTwoService _newsService ,IFavoriteTwoService _favoriteService
-        , ISocialMediaService _socialMediaService ): ControllerBase
+        , ISocialMediaService _socialMediaService ): ApiController
     {
         // GET: api/userTwo/me
         [HttpGet("me")]

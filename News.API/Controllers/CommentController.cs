@@ -1,13 +1,10 @@
-﻿
-using Comment = News.Core.Entities.Comments.Comment;
+﻿using Comment = News.Core.Entities.Comments.Comment;
 
 namespace News.API.Controllers
 {
     [Authorize/*(Roles = "Admin,User")*/]
-    [Route("api/[controller]")]
-    [ApiController]
     public class CommentController(ICommentService _commentService,
-        IUserService _userService ,INewsTwoService _newsService) : ControllerBase
+        IUserService _userService ,INewsTwoService _newsService) : ApiController
     {
         // POST: api/comment/{newsId}/comments
         [HttpPost("{newsId}/comments")]
