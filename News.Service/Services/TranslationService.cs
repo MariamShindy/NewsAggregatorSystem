@@ -1,9 +1,4 @@
-﻿using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class TranslationService 
     {
@@ -39,18 +34,6 @@ namespace News.Service.Services
 
             return new TranslationResponse { Translation = translation };
         }
-    }
-
-    public class TranslationResponse
-    {
-        public string Translation { get; set; }
-    }
-
-    public class TranslationRequest
-    {
-        public string Text { get; set; }
-        public string SourceLang { get; set; }
-        public string TargetLang { get; set; }
     }
 }
 

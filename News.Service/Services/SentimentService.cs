@@ -24,12 +24,4 @@ namespace News.Service.Services
         }
     }
 
-    public class ArticleSentiment
-    {
-        public string Title { get; set; }
-        public string Summary { get; set; }
-        public string PublishedDate { get; set; }
-        public string Sentiment { get; set; }
-    }
-
 }

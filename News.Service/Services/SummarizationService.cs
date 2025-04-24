@@ -28,9 +28,4 @@
             return summaryResponse?.Summary ?? "Error in summarization";
         }
     }
-
-    public class SummarizationResponse
-    {
-        public string? Summary { get; set; }
-    }
 }

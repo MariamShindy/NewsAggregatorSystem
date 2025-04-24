@@ -1,14 +1,4 @@
-﻿using News.Core.Dtos;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using JsonSerializer = System.Text.Json.JsonSerializer;
-
-namespace News.Service.Services
+﻿namespace News.Service.Services
 {
     public class RecommendationService
     {
@@ -48,20 +38,5 @@ namespace News.Service.Services
             }
         }
     }
-    public class RecommendationResponse
-    {
-        public List<RecommendationResult> Recommendations { get; set; } = new();
-    }
 
-    public class RecommendationResult
-    {
-        public string Title { get; set; }
-        public string Summary { get; set; }
-    }
-    //public class RecommendationResponse
-    //{
-    //    [JsonPropertyName("recommendations")]
-    //    //public ArticleResult[] Recommendations { get; set; } = {};
-    //    public List<ArticleDto>? Recommendations { get; set; }
-    //}
 }

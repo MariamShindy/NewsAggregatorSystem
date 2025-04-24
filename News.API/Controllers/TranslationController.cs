@@ -1,18 +1,14 @@
-﻿namespace News.API.Controllers
+﻿using News.Core.Dtos.NewsCatcher;
+
+namespace News.API.Controllers
 {
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class TranslationController : ControllerBase
+    public class TranslationController(TranslationService _translationService) : ControllerBase
     {
-        private readonly TranslationService _translationService;
-
-        public TranslationController(TranslationService translationService)
-        {
-            _translationService = translationService;
-        }
         [HttpPost("translate")]
-        public async Task<IActionResult> Translate([FromBody] TranslateRequest request)
+        public async Task<IActionResult> Translate([FromBody] TranslationRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.SourceLang) || string.IsNullOrWhiteSpace(request.TargetLang))
                 return BadRequest("Missing required fields.");
@@ -28,12 +24,5 @@
             }
         }
 
-    }
-
-    public class TranslationRequest
-    {
-        public string Text { get; set; }
-        public string SourceLang { get; set; }
-        public string TargetLang { get; set; }
     }
 }

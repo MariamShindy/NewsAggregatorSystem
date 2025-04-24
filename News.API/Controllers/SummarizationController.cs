@@ -1,16 +1,11 @@
-﻿namespace News.API.Controllers
+﻿using News.Core.Dtos.NewsCatcher;
+
+namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SummarizationController : ControllerBase
+    public class SummarizationController(SummarizationService _summarizationService) : ControllerBase
     {
-        private readonly SummarizationService _summarizationService;
-
-        public SummarizationController(SummarizationService summarizationService)
-        {
-            _summarizationService = summarizationService;
-        }
-
         [HttpPost("summarize")]
         public async Task<IActionResult> Summarize([FromBody] SummarizationRequest request)
         {
@@ -29,10 +24,5 @@
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-    }
-
-    public class SummarizationRequest
-    {
-        public string? Text { get; set; }
     }
 }

@@ -29,17 +29,5 @@
             return searchResponse;
         }
     }
-
-    public class SearchResponse
-    {
-        public ArticleResult[] Results { get; set; }
-    }
-
-    public class ArticleResult
-    {
-        public string Title { get; set; }
-        public string Abstract { get; set; }
-        //public double SimilarityScore { get; set; }
-    }
 }
 

@@ -1,15 +1,11 @@
-﻿namespace News.API.Controllers
+﻿using News.Core.Dtos.NewsCatcher;
+
+namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class RecommendationController : ControllerBase
+    public class RecommendationController(RecommendationService _recommendationService) : ControllerBase
     {
-        private readonly RecommendationService _recommendationService;
-
-        public RecommendationController(RecommendationService recommendationService)
-        {
-            _recommendationService = recommendationService;
-        }
 
         [HttpPost("getRecommendations")]
         public async Task<IActionResult> GetRecommendations([FromBody] RecommendationRequest request)
@@ -31,8 +27,4 @@
         }
     }
 
-    public class RecommendationRequest
-    {
-        public string Topic { get; set; }
-    }
 }

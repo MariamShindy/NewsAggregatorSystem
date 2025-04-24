@@ -1,19 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
-namespace News.API.Controllers
+﻿namespace News.API.Controllers
 {
     [ApiController]
     [Route("api/sentiment-news")]
-    public class SentimentController : ControllerBase
+    public class SentimentController(SentimentService _newsService) : ControllerBase
     {
-        private readonly SentimentService _newsService;
-
-        public SentimentController(SentimentService newsService)
-        {
-            _newsService = newsService;
-        }
-
         [HttpGet("{sentiment}")]
         public async Task<IActionResult> GetSentimentNews(string sentiment)
         {

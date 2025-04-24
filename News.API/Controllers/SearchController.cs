@@ -1,20 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using News.Service.Services;
+﻿using News.Core.Dtos.NewsCatcher;
 
 namespace News.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class SearchController : ControllerBase
+    public class SearchController(SearchService _searchService) : ControllerBase
     {
-        private readonly SearchService _searchService;
-
-        public SearchController(SearchService searchService)
-        {
-            _searchService = searchService;
-        }
-
         [HttpPost("searchResults")]
         public async Task<IActionResult> SearchArticles([FromBody] SearchRequest request)
         {
@@ -22,7 +13,6 @@ namespace News.API.Controllers
             {
                 return BadRequest(new { error = "No query provided" });
             }
-
             try
             {
                 var response = await _searchService.SearchArticlesAsync(request.Query, request.Page);
@@ -33,11 +23,5 @@ namespace News.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-    }
-
-    public class SearchRequest
-    {
-        public string Query { get; set; }
-        public int Page { get; set; } = 1;
     }
 }
