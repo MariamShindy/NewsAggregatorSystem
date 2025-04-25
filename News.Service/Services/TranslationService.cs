@@ -19,6 +19,7 @@
             });
 
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
+            _httpClient.Timeout = TimeSpan.FromMinutes(20); 
 
             var response = await _httpClient.PostAsync("http://localhost:8000/translate", content);
 
