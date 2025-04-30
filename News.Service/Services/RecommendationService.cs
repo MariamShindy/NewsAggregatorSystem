@@ -1,16 +1,10 @@
 ﻿namespace News.Service.Services
 {
-    public class RecommendationService
+    public class RecommendationService(HttpClient _httpClient , IConfiguration configuration) : IRecommendationService
     {
-        private readonly HttpClient _httpClient;
-        private readonly string _flaskApiUrl = "http://127.0.0.1:8000/recommend";
+        private readonly string _flaskApiUrl = $"{configuration["FlaskApi:BaseUrl"]}/recommend";
 
-        public RecommendationService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-
-        public async Task<List<RecommendationResult>> GetRecommendedArticlesAsync(string topic)
+		public async Task<List<RecommendationResult>> GetRecommendedArticlesAsync(string topic)
         {
             var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(new { topic }), Encoding.UTF8, "application/json");
 

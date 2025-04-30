@@ -3,11 +3,10 @@
 namespace News.API.Controllers
 {
     [Authorize]
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TranslationController(TranslationService _translationService) : ControllerBase
+    public class TranslationController(TranslationService _translationService) : ApiController
     {
-        [HttpPost("translate")]
+		// POST: api/translation/translate
+		[HttpPost("translate")]
         public async Task<IActionResult> Translate([FromBody] TranslationRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text) || string.IsNullOrWhiteSpace(request.SourceLang) || string.IsNullOrWhiteSpace(request.TargetLang))
@@ -23,6 +22,5 @@ namespace News.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
     }
 }

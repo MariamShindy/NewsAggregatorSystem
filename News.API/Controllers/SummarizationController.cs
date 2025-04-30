@@ -2,18 +2,15 @@
 
 namespace News.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SummarizationController(SummarizationService _summarizationService) : ControllerBase
+	[Authorize]
+	public class SummarizationController(ISummarizationService _summarizationService) : ApiController
     {
-        [HttpPost("summarize")]
+		// POST: api/summarization/summarize
+		[HttpPost("summarize")]
         public async Task<IActionResult> Summarize([FromBody] SummarizationRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Text))
-            {
                 return BadRequest(new { error = "No text provided" });
-            }
-
             try
             {
                 var summary = await _summarizationService.SummarizeTextAsync(request.Text);

@@ -2,19 +2,15 @@
 
 namespace News.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class RecommendationController(RecommendationService _recommendationService) : ControllerBase
+	[Authorize]
+	public class RecommendationController(IRecommendationService _recommendationService) : ApiController
     {
-
-        [HttpPost("getRecommendations")]
+		// POST: api/recommendation/getRecommendations
+		[HttpPost("getRecommendations")]
         public async Task<IActionResult> GetRecommendations([FromBody] RecommendationRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Topic))
-            {
                 return BadRequest(new { error = "Topic is required" });
-            }
-
             try
             {
                 var recommendations = await _recommendationService.GetRecommendedArticlesAsync(request.Topic);
@@ -26,5 +22,4 @@ namespace News.API.Controllers
             }
         }
     }
-
 }

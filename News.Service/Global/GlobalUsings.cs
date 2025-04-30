@@ -47,3 +47,4 @@ global using GTranslate.Translators;
 global using News.Core.Entities.Feedback;
 global using News.Core.Dtos.Identity;
 global using News.Core.Dtos.Feedback;
+global using System.Net.Http.Json;

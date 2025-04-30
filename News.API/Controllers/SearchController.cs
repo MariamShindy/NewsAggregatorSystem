@@ -2,17 +2,15 @@
 
 namespace News.API.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class SearchController(SearchService _searchService) : ControllerBase
+    [Authorize]
+    public class SearchController(ISearchService _searchService) : ApiController
     {
-        [HttpPost("searchResults")]
+		// POST: api/search/searchResults
+		[HttpPost("searchResults")]
         public async Task<IActionResult> SearchArticles([FromBody] SearchRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.Query))
-            {
                 return BadRequest(new { error = "No query provided" });
-            }
             try
             {
                 var response = await _searchService.SearchArticlesAsync(request.Query, request.Page);

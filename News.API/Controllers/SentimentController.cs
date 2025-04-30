@@ -2,9 +2,11 @@
 {
     [ApiController]
     [Route("api/sentiment-news")]
-    public class SentimentController(SentimentService _newsService) : ControllerBase
+	[Authorize]
+	public class SentimentController(ISentimentService _newsService) : ControllerBase
     {
-        [HttpGet("{sentiment}")]
+		// GET: api/sentiment/{sentiment}
+		[HttpGet("{sentiment}")]
         public async Task<IActionResult> GetSentimentNews(string sentiment)
         {
             sentiment = sentiment.ToLower();

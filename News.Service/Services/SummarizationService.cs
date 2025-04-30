@@ -1,16 +1,10 @@
 ﻿namespace News.Service.Services
 {
-    public class SummarizationService
-    {
-        private readonly HttpClient _httpClient;
-        private readonly string _flaskApiUrl = "http://127.0.0.1:8000/summarize";
+    public class SummarizationService(HttpClient _httpClient , IConfiguration _configuration) : ISummarizationService
+	{
+        private readonly string _flaskApiUrl = $"{_configuration["FlaskApi:BaseUrl"]}/summarize";
 
-        public SummarizationService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-
-        public async Task<string> SummarizeTextAsync(string text)
+		public async Task<string> SummarizeTextAsync(string text)
         {
             if (string.IsNullOrWhiteSpace(text))
                 throw new ArgumentException("Text should not be empty", nameof(text));
