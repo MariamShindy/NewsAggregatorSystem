@@ -1,14 +1,7 @@
 ﻿namespace News.Service.Services
 {
-    public class TranslationService 
-    {
-        private readonly HttpClient _httpClient;
-
-        public TranslationService(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-
+    public class TranslationService (HttpClient _httpClient , IConfiguration _configuration) : ITranslationService
+	{
         public async Task<TranslationResponse> TranslateTextAsync(TranslationRequest request)
         {
             var payload = System.Text.Json.JsonSerializer.Serialize(new
@@ -19,9 +12,10 @@
             });
 
             var content = new StringContent(payload, Encoding.UTF8, "application/json");
-            _httpClient.Timeout = TimeSpan.FromMinutes(20); 
+            _httpClient.Timeout = TimeSpan.FromMinutes(20);
+			var flaskApiUrl = _configuration["FlaskApi:BaseUrl"];
 
-            var response = await _httpClient.PostAsync("http://localhost:8000/translate", content);
+			var response = await _httpClient.PostAsync($"{flaskApiUrl}/translate", content);
 
             if (!response.IsSuccessStatusCode)
             {

@@ -32,3 +32,5 @@ global using News.Core.Entities.Comments;
 global using News.Core.Entities.TextToSpeech;
 global using News.Core.Entities.Translation;
 global using Newtonsoft.Json;
+global using News.Service.Services.BackgroundServices;
+ 

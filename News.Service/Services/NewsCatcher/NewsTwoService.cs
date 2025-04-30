@@ -1,4 +1,6 @@
-﻿namespace News.Service.Services.NewsCatcher
+﻿using Newtonsoft.Json.Linq;
+
+namespace News.Service.Services.NewsCatcher
 {
     public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
         IUnitOfWork _unitOfWork, IConfiguration _configuration) : INewsTwoService
@@ -15,7 +17,7 @@
             "newsandmedia"
         };
 
-        #region Reading from API
+        #region Reading from API without pagination
         //public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         //{
         //    //var requestUrl = $"{_baseUrl}?q={Uri.EscapeDataString("Google")}&lang={language}&sort_by=relevancy";
@@ -70,7 +72,67 @@
 
         #endregion
 
-        //Reading from json file with pagination
+        #region Reading from API with pagination
+        //public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
+        //{
+        //	int apiPageSize = 400; 
+        //	string from = "6 days ago", to = "5 days ago";
+        //	var formattedFrom = Uri.EscapeDataString(from);
+        //	var formattedTo = Uri.EscapeDataString(to);
+        //	var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+        //	var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={apiPageSize}";
+        //	_httpClient.DefaultRequestHeaders.Clear();
+        //	_httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
+        //	_httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+        //	try
+        //	{
+        //		var response = await _httpClient.GetStringAsync(requestUrl);
+        //		var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
+
+        //		if (newsResponse?.Articles != null)
+        //		{
+        //			var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
+        //			var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+
+        //			foreach (var article in balancedArticles)
+        //			{
+        //				if (article.Authors is JArray jArray)
+        //					article.Authors = jArray.ToObject<List<string>>();
+        //				else if (article.Authors is string s && !string.IsNullOrWhiteSpace(s))
+        //					article.Authors = new List<string> { s };
+        //				else
+        //					article.Authors = new List<string>() { "Unknown authors"};
+        //                      if (string.IsNullOrEmpty(article.Author))
+        //                          article.Author = "Unknown author";
+        //			}
+
+        //			if (pageSize is null || pageNumber == 0)
+        //			{
+        //				_logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
+        //				return balancedArticles;
+        //			}
+
+        //			var paginatedArticles = balancedArticles
+        //				.Skip((pageNumber - 1) * pageSize.Value)
+        //				.Take(pageSize.Value)
+        //				.ToList();
+
+        //			_logger.LogInformation($"Number of articles fetched after pagination ==> {paginatedArticles.Count}");
+        //			return paginatedArticles;
+        //		}
+        //	}
+        //	catch (HttpRequestException e)
+        //	{
+        //		_logger.LogError($"Request failed: {e.Message}");
+        //	}
+
+        //	return new List<NewsArticle>();
+        //}
+
+        #endregion
+
+        #region Reading from json file with pagination
         public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         {
             try
@@ -86,20 +148,16 @@
                     foreach (var article in articles)
                     {
                         if (article.Authors is IEnumerable<string> authorList)
-                        {
                             article.Authors = authorList.ToList();
-                        }
                         else
-                        {
                             article.Authors = new List<string>();
-                        }
                     }
 
                     var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
                     var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
 
                     // If pageSize is null,  return all articles
-                    if (pageSize is null || pageNumber == 0 )
+                    if (pageSize is null || pageNumber == 0)
                     {
                         _logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
                         return balancedArticles;
@@ -111,7 +169,7 @@
                         .Take(pageSize.Value)
                         .ToList();
 
-                   _logger.LogInformation($"Number of articles fetched ==> {paginatedArticles.Count}");
+                    _logger.LogInformation($"Number of articles fetched ==> {paginatedArticles.Count}");
                     return paginatedArticles;
                 }
             }
@@ -123,6 +181,7 @@
             return new List<NewsArticle>();
         }
 
+        #endregion
 
         public async Task<List<string>> GetCategoriesAsync()
         {

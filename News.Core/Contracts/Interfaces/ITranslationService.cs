@@ -2,6 +2,8 @@
 {
     public interface ITranslationService
     {
-        Task<object> TranslateText(string text, string targetLanguage);
-    }
+		//Task<object> TranslateText(string text, string targetLanguage);
+		Task<TranslationResponse> TranslateTextAsync(TranslationRequest request);
+
+	}
 }

@@ -1,6 +1,4 @@
-﻿using News.Service.Services.BackgroundServices;
-
-namespace News.API.Extensions
+﻿namespace News.API.Extensions
 {
     public static class ApplicationServicesExtensions
     {
@@ -16,19 +14,19 @@ namespace News.API.Extensions
             services.AddScoped<IAccountService, AccountService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISocialMediaService, SocialMediaService>();
-            services.AddScoped<SummarizationService>();
-            services.AddHttpClient<SummarizationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
-            services.AddScoped<SearchService>();
-            services.AddHttpClient<SearchService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
-            services.AddScoped<RecommendationService>();
-            services.AddHttpClient<RecommendationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
-            services.AddHttpClient<SentimentService>();
+            services.AddScoped<ISummarizationService, SummarizationService>();
+            services.AddHttpClient<ISummarizationService,SummarizationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddScoped<ISearchService,SearchService>();
+            services.AddHttpClient<ISearchService,SearchService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddScoped<IRecommendationService,RecommendationService>();
+            services.AddHttpClient<IRecommendationService,RecommendationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddHttpClient<ISentimentService, SentimentService>();
             //services.AddScoped<INotificationService, NotificationService>();
             services.AddHostedService<AccountDeletionService>();
             services.AddScoped<INotificationService, NotificationTwoService>();
             services.AddScoped<INewsTwoService, NewsTwoService>();
             services.AddScoped<ISpeechService, SpeechService>();
-            services.AddScoped<TranslationService>();
+            services.AddScoped<ITranslationService,TranslationService>();
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
             services.AddTransient<IMailSettings, EmailSettings>();
