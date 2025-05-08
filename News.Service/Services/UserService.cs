@@ -272,7 +272,7 @@
                     color: #333333;
                 }}
                 h2 {{
-                    color: #007BFF;
+                    color: #0066cc;
                 }}
                 .container {{
                     border: 1px solid #dddddd;
@@ -297,7 +297,7 @@
         </head>
         <body>
             <div class='container'>
-                <h2>Contact Us Form</h2>
+                <h2>📰 Contact Us Form</h2>
                 <div class='content'>
                     <p><strong>Subject:</strong> {feedbackDto.Subject}</p>
                     <p><strong>Name:</strong> {feedbackDto.FullName}</p>
@@ -306,7 +306,7 @@
                     <p>{feedbackDto.Message}</p>
                 </div>
                 <div class='footer'>
-                    <p>This email was sent via the NewsAggregator Contact Us form.</p>
+                    <p>This email was sent via the NewsAggregator contact us form.</p>
                 </div>
             </div>
         </body>
@@ -326,7 +326,7 @@
                     color: #333333;
                 }}
                 h2 {{
-                    color: #007BFF;
+                    color: #0066cc;
                 }}
                 .container {{
                     border: 1px solid #dddddd;
@@ -351,7 +351,7 @@
         </head>
         <body>
             <div class='container'>
-                <h2>Survey Form</h2>
+                <h2>📰 Survey Form</h2>
                 <div class='content'>
                     <p><strong>How did you find out about our news website?</strong><br>{surveyDto.SourceDiscovery}</p>
                     <p><strong>How often do you visit news websites?</strong><br>{surveyDto.VisitFrequency}</p>
@@ -359,7 +359,7 @@
                     <p><strong>How easy is it to navigate our website?</strong><br>{surveyDto.NavigationEaseRating}</p>
                 </div>
                 <div class='footer'>
-                    <p>This email was sent via the NewsAggregator Survey Form.</p>
+                    <p>This email was sent via the NewsAggregator survey form.</p>
                 </div>
             </div>
         </body>

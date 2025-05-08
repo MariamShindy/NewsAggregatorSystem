@@ -3,7 +3,7 @@
 namespace News.API.Controllers
 {
     [Authorize]
-    public class TranslationController(TranslationService _translationService) : ApiController
+    public class TranslationController(ITranslationService _translationService) : ApiController
     {
 		// POST: api/translation/translate
 		[HttpPost("translate")]

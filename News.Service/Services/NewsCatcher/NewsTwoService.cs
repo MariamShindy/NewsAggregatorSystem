@@ -75,59 +75,59 @@ namespace News.Service.Services.NewsCatcher
         #region Reading from API with pagination
         //public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         //{
-        //	int apiPageSize = 400; 
-        //	string from = "6 days ago", to = "5 days ago";
-        //	var formattedFrom = Uri.EscapeDataString(from);
-        //	var formattedTo = Uri.EscapeDataString(to);
-        //	var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
-        //	var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={apiPageSize}";
-        //	_httpClient.DefaultRequestHeaders.Clear();
-        //	_httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
-        //	_httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+        //    int apiPageSize = 400;
+        //    string from = "6 days ago", to = "5 days ago";
+        //    var formattedFrom = Uri.EscapeDataString(from);
+        //    var formattedTo = Uri.EscapeDataString(to);
+        //    var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+        //    var requestUrl = $"{_baseUrl}?q={query}&from={formattedFrom}&to={formattedTo}&page_size={apiPageSize}";
+        //    _httpClient.DefaultRequestHeaders.Clear();
+        //    _httpClient.DefaultRequestHeaders.Add("x-api-key", _apiKey);
+        //    _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
 
-        //	try
-        //	{
-        //		var response = await _httpClient.GetStringAsync(requestUrl);
-        //		var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
+        //    try
+        //    {
+        //        var response = await _httpClient.GetStringAsync(requestUrl);
+        //        var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
 
-        //		if (newsResponse?.Articles != null)
-        //		{
-        //			var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
-        //			var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
+        //        if (newsResponse?.Articles != null)
+        //        {
+        //            var groupedArticles = newsResponse.Articles.GroupBy(a => a.Topic).ToList();
+        //            var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
 
-        //			foreach (var article in balancedArticles)
-        //			{
-        //				if (article.Authors is JArray jArray)
-        //					article.Authors = jArray.ToObject<List<string>>();
-        //				else if (article.Authors is string s && !string.IsNullOrWhiteSpace(s))
-        //					article.Authors = new List<string> { s };
-        //				else
-        //					article.Authors = new List<string>() { "Unknown authors"};
-        //                      if (string.IsNullOrEmpty(article.Author))
-        //                          article.Author = "Unknown author";
-        //			}
+        //            foreach (var article in balancedArticles)
+        //            {
+        //                if (article.Authors is JArray jArray)
+        //                    article.Authors = jArray.ToObject<List<string>>();
+        //                else if (article.Authors is string s && !string.IsNullOrWhiteSpace(s))
+        //                    article.Authors = new List<string> { s };
+        //                else
+        //                    article.Authors = new List<string>() { "Unknown authors" };
+        //                if (string.IsNullOrEmpty(article.Author))
+        //                    article.Author = "Unknown author";
+        //            }
 
-        //			if (pageSize is null || pageNumber == 0)
-        //			{
-        //				_logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
-        //				return balancedArticles;
-        //			}
+        //            if (pageSize is null || pageNumber == 0)
+        //            {
+        //                _logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
+        //                return balancedArticles;
+        //            }
 
-        //			var paginatedArticles = balancedArticles
-        //				.Skip((pageNumber - 1) * pageSize.Value)
-        //				.Take(pageSize.Value)
-        //				.ToList();
+        //            var paginatedArticles = balancedArticles
+        //                .Skip((pageNumber - 1) * pageSize.Value)
+        //                .Take(pageSize.Value)
+        //                .ToList();
 
-        //			_logger.LogInformation($"Number of articles fetched after pagination ==> {paginatedArticles.Count}");
-        //			return paginatedArticles;
-        //		}
-        //	}
-        //	catch (HttpRequestException e)
-        //	{
-        //		_logger.LogError($"Request failed: {e.Message}");
-        //	}
+        //            _logger.LogInformation($"Number of articles fetched after pagination ==> {paginatedArticles.Count}");
+        //            return paginatedArticles;
+        //        }
+        //    }
+        //    catch (HttpRequestException e)
+        //    {
+        //        _logger.LogError($"Request failed: {e.Message}");
+        //    }
 
-        //	return new List<NewsArticle>();
+        //    return new List<NewsArticle>();
         //}
 
         #endregion
@@ -147,6 +147,7 @@ namespace News.Service.Services.NewsCatcher
                 {
                     foreach (var article in articles)
                     {
+                        //_logger.LogInformation($"{article._Id}");
                         if (article.Authors is IEnumerable<string> authorList)
                             article.Authors = authorList.ToList();
                         else
@@ -330,14 +331,19 @@ namespace News.Service.Services.NewsCatcher
                         .Add(new Text("Authors: ").SetBold().SetFontSize(16))
                         .Add(new Text(string.Join(" , ", authors)).SetFontSize(16)));
             }
-
+          
             if (!string.IsNullOrEmpty(article.Topic))
             {
                 document.Add(new Paragraph()
                         .Add(new Text("Topic: ").SetBold().SetFontSize(16))
                         .Add(new Text(article.Topic).SetFontSize(16)));
             }
-
+            if (!string.IsNullOrEmpty(article.Country))
+            {
+                document.Add(new Paragraph()
+                        .Add(new Text("Country: ").SetBold().SetFontSize(16))
+                        .Add(new Text(article.Country).SetFontSize(16)));
+            }
             if (article.Published_Date != null)
             {
                 document.Add(new Paragraph()
@@ -357,8 +363,12 @@ namespace News.Service.Services.NewsCatcher
                 Link link = new Link("Read more", PdfAction.CreateURI(article.Link));
                 document.Add(new Paragraph(link.SetFontSize(12).SetUnderline().SetFontColor(ColorConstants.BLUE)));
             }
-
             document.Add(new Paragraph("\n"));
+            document.Add(new Paragraph($"Generated by News Aggregator System on {DateTime.Now:yyyy-MM-dd}")
+                .SetFontSize(10)
+                .SetFontColor(ColorConstants.GRAY)
+                .SetTextAlignment(TextAlignment.CENTER));
+
         }
 
         private void AddSection(Document document, string title, string content, float fontSize, bool italic = false)

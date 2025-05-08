@@ -40,13 +40,13 @@
 
         //GET : api/newsTwo/generate-pdf/{id}
         [HttpGet("generate-pdf/{id}")]
-        public IActionResult GeneratePdf(string id)
+        public async Task<IActionResult> GeneratePdf(string id)
         {
-            var article = _newsService.GetNewsByIdAsync(id); 
+            var article = await _newsService.GetNewsByIdAsync(id); 
             if (article == null)
-                return NoContent();
-            byte[] pdfBytes = _newsService.GenerateArticlePdf(article.Result); 
-            return File(pdfBytes, "application/pdf", $"{article.Result.Title}.pdf");
+                return NotFound($"Article with ID {id} not found.");
+            byte[] pdfBytes = _newsService.GenerateArticlePdf(article); 
+            return File(pdfBytes, "application/pdf", $"{article.Title}.pdf");
         }
     }
 }
