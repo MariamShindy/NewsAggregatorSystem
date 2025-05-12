@@ -21,6 +21,8 @@
         public bool Is_Opinion { get; set; }
         public string? Twitter_Account { get; set; }
         public string? Id { get; set; }
+        public bool Is_Headline { get; set; }
+        public int  Word_Count  { get; set; }
         public string? Topic => Nlp?.Theme ?? "Unknown topic";
     }
 }
