@@ -73,6 +73,55 @@ namespace News.Service.Services.NewsCatcher
         #endregion
 
         #region Reading from API with pagination
+        //v3
+        //public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 1, int? pageSize = null, string language = "en", string country = "us")
+        //{
+        //    int apiPageSize = 100; 
+        //    var currentDate = DateTime.UtcNow.Date; 
+        //    var to = currentDate.ToString("yyyy-MM-dd");
+        //    var from = currentDate.AddDays(-10).ToString("yyyy-MM-dd");
+        //    var countries = string.Join(",", new[] { country, "EG", "CA", "FR", "GB", "DE" });
+
+        //    Console.WriteLine("From: " + from);
+        //    Console.WriteLine("To: " + to);
+        //    var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+
+        //    var requestUrl = $"{_baseUrl}?q={query}&from_={from}&to_={to}&lang={language}&countries={countries}&page_size={apiPageSize}&page={pageNumber}";
+
+        //    _httpClient.DefaultRequestHeaders.Clear();
+        //    _httpClient.DefaultRequestHeaders.Add("x-api-token", _apiKey);
+        //    _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+        //    try
+        //    {
+        //        var response = await _httpClient.GetStringAsync(requestUrl);
+        //        var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
+
+        //        if (newsResponse?.Articles != null)
+        //        {
+        //            var articlesList = newsResponse.Articles.ToList();
+
+        //            foreach (var article in articlesList)
+        //            {  
+        //                if (string.IsNullOrEmpty(article.Author))
+        //                    article.Author = "Unknown author";
+        //                if (string.IsNullOrEmpty(article.Twitter_Account))
+        //                    article.Twitter_Account = "Unknown account";
+        //                if (article.Authors.Count == 0)
+        //                    article.Authors.Add("Unknown authors");
+        //            }
+        //            _logger.LogInformation($"Returning articles count ==> {articlesList.Count}");
+        //            return articlesList;
+        //        }
+        //    }
+        //    catch (HttpRequestException e)
+        //    {
+        //        _logger.LogError($"Request failed: {e.Message}");
+        //    }
+
+        //    return new List<NewsArticle>();
+        //}
+
         //public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         //{
         //    int apiPageSize = 400;
@@ -145,22 +194,13 @@ namespace News.Service.Services.NewsCatcher
 
                 if (articles != null)
                 {
-                    foreach (var article in articles)
-                    {
-                        //_logger.LogInformation($"{article._Id}");
-                        if (article.Authors is IEnumerable<string> authorList)
-                            article.Authors = authorList.ToList();
-                        else
-                            article.Authors = new List<string>();
-                    }
-
                     var groupedArticles = articles.GroupBy(a => a.Topic).ToList();
                     var balancedArticles = groupedArticles.SelectMany(g => g.Take(10)).ToList();
 
                     // If pageSize is null,  return all articles
                     if (pageSize is null || pageNumber == 0)
                     {
-                        _logger.LogInformation($"Returning all articles ==> {balancedArticles.Count}");
+                        _logger.LogInformation($"Returning all articles from json ==> {balancedArticles.Count}");
                         return balancedArticles;
                     }
 
@@ -170,7 +210,7 @@ namespace News.Service.Services.NewsCatcher
                         .Take(pageSize.Value)
                         .ToList();
 
-                    _logger.LogInformation($"Number of articles fetched ==> {paginatedArticles.Count}");
+                    _logger.LogInformation($"Number of articles fetched from json ==> {paginatedArticles.Count}");
                     return paginatedArticles;
                 }
             }
@@ -218,7 +258,7 @@ namespace News.Service.Services.NewsCatcher
         public async Task<NewsArticle> GetNewsByIdAsync(string id)
         {
             var newsResponse = await GetAllNewsAsync();
-            var article = newsResponse.FirstOrDefault(a => a._Id == id);
+            var article = newsResponse.FirstOrDefault(a => a.Id == id);
 
             return article;
         }
@@ -353,8 +393,8 @@ namespace News.Service.Services.NewsCatcher
 
             document.Add(new LineSeparator(new DottedLine()));
 
-            AddSection(document, "Excerpt", article.Excerpt, 12, true);
-            AddSection(document, "Summary", article.Summary, 12, true);
+            AddSection(document, "Description", article.Description, 12, true);
+            AddSection(document, "Content", article.Content, 12, true);
 
             document.Add(new LineSeparator(new DashedLine()));
 

@@ -7,19 +7,20 @@
         public DateTime? Published_Date { get; set; }
         public string? Published_Date_Precision { get; set; }
         public string? Link { get; set; }
-        public string? Clean_Url { get; set; }
-        public string? Excerpt { get; set; }
-        public string? Summary { get; set; }
+        public string? Domain_Url { get; set; }
+        public string? Full_Domain_Url { get; set; }
+        public NlpData? Nlp { get; set; } 
+        public string? Description { get; set; }
+        public string? Content { get; set; }
         public string? Rights { get; set; }
         public int Rank { get; set; }
-        public string? Topic { get; set; }
         public string? Country { get; set; }
         public string? Language { get; set; }
-		//public List<string> Authors { get; set; } = new List<string>();
-		public object Authors { get; set; } = new List<string>();
+		public List<string> Authors { get; set; } = new List<string>();
 		public string? Media { get; set; }
         public bool Is_Opinion { get; set; }
         public string? Twitter_Account { get; set; }
-        public string? _Id { get; set; }
+        public string? Id { get; set; }
+        public string? Topic => Nlp?.Theme ?? "Unknown topic";
     }
 }
