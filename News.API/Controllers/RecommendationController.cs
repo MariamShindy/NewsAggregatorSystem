@@ -9,11 +9,11 @@ namespace News.API.Controllers
 		[HttpPost("getRecommendations")]
         public async Task<IActionResult> GetRecommendations([FromBody] RecommendationRequest request)
         {
-            if (string.IsNullOrWhiteSpace(request.Topic))
-                return BadRequest(new { error = "Topic is required" });
+            if (request.Topics == null || request.Topics.Count == 0)
+                return BadRequest(new { error = "At least one topic is required" }); 
             try
             {
-                var recommendations = await _recommendationService.GetRecommendedArticlesAsync(request.Topic);
+                var recommendations = await _recommendationService.GetRecommendedArticlesAsync(request.Topics); 
                 return Ok(recommendations);
             }
             catch (Exception ex)

@@ -2,6 +2,6 @@
 {
     public class RecommendationRequest
     {
-        public string Topic { get; set; }
+        public List<string> Topics { get; set; }
     }
 }

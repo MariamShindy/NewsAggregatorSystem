@@ -5,10 +5,10 @@
         private readonly string _flaskApiUrl = "http://127.0.0.1:6000/recommend";
 
 
-        public async Task<List<NewsArticle>> GetRecommendedArticlesAsync(string topic)
+        public async Task<List<NewsArticle>> GetRecommendedArticlesAsync(List<string> topics)
         {
-            var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(new { topic }), Encoding.UTF8, "application/json");
-
+            var requestBody = new { topics = topics };
+            var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(_flaskApiUrl, requestContent);
 
             var result = await response.Content.ReadAsStringAsync();
