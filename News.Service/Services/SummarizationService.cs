@@ -2,7 +2,7 @@
 {
     public class SummarizationService(HttpClient _httpClient , IConfiguration _configuration) : ISummarizationService
 	{
-        private readonly string _flaskApiUrl = $"{_configuration["FlaskApi:BaseUrl"]}/summarize";
+        private readonly string _flaskApiUrl = "http://127.0.0.1:9000/summarize";
 
 		public async Task<string> SummarizeTextAsync(string text)
         {

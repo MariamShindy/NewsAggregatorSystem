@@ -2,9 +2,10 @@
 {
     public class RecommendationService(HttpClient _httpClient , IConfiguration configuration) : IRecommendationService
     {
-        private readonly string _flaskApiUrl = $"{configuration["FlaskApi:BaseUrl"]}/recommend";
+        private readonly string _flaskApiUrl = "http://127.0.0.1:6000/recommend";
 
-		public async Task<List<RecommendationResult>> GetRecommendedArticlesAsync(string topic)
+
+        public async Task<List<NewsArticle>> GetRecommendedArticlesAsync(string topic)
         {
             var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(new { topic }), Encoding.UTF8, "application/json");
 
@@ -24,7 +25,7 @@
                     PropertyNameCaseInsensitive = true
                 });
 
-                return recommendations?.Recommendations ?? new List<RecommendationResult>();
+                return recommendations?.Recommendations ?? new List<NewsArticle>();
             }
             catch (Exception ex)
             {

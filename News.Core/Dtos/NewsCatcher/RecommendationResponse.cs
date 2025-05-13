@@ -8,7 +8,7 @@ namespace News.Core.Dtos.NewsCatcher
 {
     public class RecommendationResponse
     {
-        public List<RecommendationResult> Recommendations { get; set; } = new();
+        public List<NewsArticle> Recommendations { get; set; } = new();
 
     }
 }

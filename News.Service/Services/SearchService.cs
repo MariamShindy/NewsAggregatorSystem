@@ -2,10 +2,10 @@
 {
     public class SearchService(HttpClient _httpClient , IConfiguration configuration) : ISearchService
     {
-        private readonly string _flaskApiUrl = $"{configuration["FlaskApi:BaseUrl"]}/search";
-		public async Task<SearchResponse> SearchArticlesAsync(string query, int page = 1)
+        private readonly string _flaskApiUrl = "http://127.0.0.1:5000/search";
+		public async Task<SearchResponse> SearchArticlesAsync(string query)
         {
-            var payload = new { query, page };
+            var payload = new { query };
             var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(_flaskApiUrl, jsonContent);

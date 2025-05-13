@@ -2,6 +2,6 @@
 {
     public class SearchResponse
     {
-        public ArticleResult[] Results { get; set; }
+        public NewsArticle[] Results { get; set; }
     }
 }

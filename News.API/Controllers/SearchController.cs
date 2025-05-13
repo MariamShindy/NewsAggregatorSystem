@@ -13,7 +13,7 @@ namespace News.API.Controllers
                 return BadRequest(new { error = "No query provided" });
             try
             {
-                var response = await _searchService.SearchArticlesAsync(request.Query, request.Page);
+                var response = await _searchService.SearchArticlesAsync(request.Query);
                 return Ok(response);
             }
             catch (Exception ex)

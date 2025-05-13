@@ -2,6 +2,6 @@
 {
 	public interface ISearchService
 	{
-		 Task<SearchResponse> SearchArticlesAsync(string query, int page = 1);
+		 Task<SearchResponse> SearchArticlesAsync(string query);
 	}
 }

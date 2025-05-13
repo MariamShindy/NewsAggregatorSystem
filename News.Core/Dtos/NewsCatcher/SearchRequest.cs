@@ -3,6 +3,6 @@
     public class SearchRequest
     {
         public string Query { get; set; }
-        public int Page { get; set; } = 1;
+        //public int Page { get; set; } = 1;
     }
 }

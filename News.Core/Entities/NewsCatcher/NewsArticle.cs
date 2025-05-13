@@ -4,7 +4,7 @@
     {
         public string? Title { get; set; }
         public string? Author { get; set; }
-        public DateTime? Published_Date { get; set; }
+        public string? Published_Date { get; set; }
         public string? Published_Date_Precision { get; set; }
         public string? Link { get; set; }
         public string? Domain_Url { get; set; }
