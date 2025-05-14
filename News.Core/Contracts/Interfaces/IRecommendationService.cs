@@ -2,6 +2,7 @@
 {
 	public interface IRecommendationService
 	{
-		Task<List<NewsArticle>> GetRecommendedArticlesAsync(List<string> topics);
-	}
+		Task<List<NewsArticle>> GetRecommendedArticlesAsync(List<string> topics, string userId);
+        Task<List<NewsArticle>> GetLatestRecommendationsAsync(string userId);
+    }
 }
