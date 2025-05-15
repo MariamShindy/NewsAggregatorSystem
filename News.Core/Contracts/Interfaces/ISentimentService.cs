@@ -2,6 +2,6 @@
 {
 	public interface ISentimentService
 	{
-		Task<List<NewsArticle>> GetNewsBySentimentAsync(string sentiment);
+		Task<List<NewsArticle>> GetNewsBySentimentAsync(string sentiment, int userId);
 	}
 }
