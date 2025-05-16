@@ -15,11 +15,11 @@
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ISocialMediaService, SocialMediaService>();
             services.AddScoped<ISummarizationService, SummarizationService>();
-            services.AddHttpClient<ISummarizationService,SummarizationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddHttpClient<ISummarizationService,SummarizationService>(client => { client.Timeout = TimeSpan.FromMinutes(20); });
             services.AddScoped<ISearchService,SearchService>();
-            services.AddHttpClient<ISearchService,SearchService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddHttpClient<ISearchService,SearchService>(client => { client.Timeout = TimeSpan.FromMinutes(20); });
             services.AddScoped<IRecommendationService,RecommendationService>();
-            services.AddHttpClient<IRecommendationService,RecommendationService>(client => { client.Timeout = TimeSpan.FromMinutes(10); });
+            services.AddHttpClient<IRecommendationService,RecommendationService>(client => { client.Timeout = TimeSpan.FromMinutes(20); });
             services.AddHttpClient<ISentimentService, SentimentService>();
             //services.AddScoped<INotificationService, NotificationService>();
             services.AddHostedService<AccountDeletionService>();
