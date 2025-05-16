@@ -3,7 +3,7 @@
     [ApiController]
     [Route("api/sentiment-news")]
 	[Authorize]
-	public class SentimentController(ISentimentService _newsService) : ControllerBase
+	public class SentimentController(ISentimentService _newsService,IUserService _userService) : ControllerBase
     {
 		// GET: api/sentiment/{sentiment}
 		[HttpGet("{sentiment}")]

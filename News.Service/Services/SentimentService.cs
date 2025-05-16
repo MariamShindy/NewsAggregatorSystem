@@ -2,7 +2,7 @@
 {
     public class SentimentService (HttpClient _httpClient , IConfiguration _configuration): ISentimentService
 	{
-        public async Task<List<NewsArticle>> GetNewsBySentimentAsync(string sentiment, int userId)
+        public async Task<List<NewsArticle>> GetNewsBySentimentAsync(string sentiment, string userId)
         {
 			var url = $"http://127.0.0.1:7000/articles?sentiment={sentiment}&user_id={userId}";
 			var response = await _httpClient.GetAsync(url);
@@ -15,3 +15,4 @@
         }
     }
 }
+
