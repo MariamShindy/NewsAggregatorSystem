@@ -7,16 +7,21 @@ namespace News.Service.Services.NewsCatcher
     {
         private readonly string _apiKey = _configuration["NewsCatcher:ApiKey"]!;
         private readonly string _baseUrl = _configuration["NewsCatcher:BaseUrl"]!;
+        //private readonly List<string> _categories = new List<string>()
+        //{
+        //    "gaming", "news", "sport", "tech",
+        //    "world","finance", "politics","business",
+        //    "economics", "entertainment", "beauty",
+        //    "travel","music","food","science","energy",
+        //    "stockmarketinformationandanalysis","newsandcareerportal",
+        //    "newsandmedia"
+        //};
+
         private readonly List<string> _categories = new List<string>()
         {
-            "gaming", "news", "sport", "tech",
-            "world","finance", "politics","business",
-            "economics", "entertainment", "beauty",
-            "travel","music","food","science","energy",
-            "stockmarketinformationandanalysis","newsandcareerportal",
-            "newsandmedia"
+            "Business","Economics","Entertainment","Finance","Health","Politics","Science","Sports","Tech",
+            "Crime","Financial Crime","Lifestyle","Automotive","Travel","Weather","General"
         };
-
         #region Reading from API without pagination
         //public async Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us")
         //{
