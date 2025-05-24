@@ -13,10 +13,10 @@
         }
 
         //GET : api/newsTwo/category/{category}
-        [HttpGet("category/{category}")]
-        public async Task<IActionResult> GetNewsByCategory(string category, [FromQuery] string language = "en", [FromQuery] string country = "us")
+        [HttpGet("category/{topic}")]
+        public async Task<IActionResult> GetNewsByCategory(string topic, [FromQuery] string language = "en", [FromQuery] string country = "us")
         {
-            var news = await _newsService.GetNewsByCategoryAsync(category, language, country);
+            var news = await _newsService.GetNewsByCategoryAsync(topic, language, country);
             return Ok(news);
         }
 
