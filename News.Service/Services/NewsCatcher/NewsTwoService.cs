@@ -312,12 +312,12 @@ namespace News.Service.Services.NewsCatcher
             await _unitOfWork.Repository<Category>().UpdateAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
         }
-        public async Task<IEnumerable<NewsArticleDto>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories)
+        public async Task<IEnumerable<NewsArticleDto>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories , string userId)
         {
             var categoryNames = preferredCategories.Select(c => c.Name).ToList();
             //var allArticles = await GetAllNewsAsync();
-            var user = await _userService.GetCurrentUserAsync();
-            var allArticles = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
+            //var user = await _userService.GetCurrentUserAsync();
+            var allArticles = await _recommendationService.GetLatestRecommendationsAsync(userId);
             var articles = allArticles.ToList()
                 .FindAll(a => categoryNames.Contains(a.Topic));
             var resArticles = _mapper.Map<IEnumerable<NewsArticleDto>>(articles);

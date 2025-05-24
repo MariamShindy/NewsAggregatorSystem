@@ -18,7 +18,7 @@
                     try
                     {
                         var preferredCategories = await _userService.GetUserPreferredCategoriesAsync(user.Id);
-                        var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories);
+                        var articlesByCategories = await _newsService.GetArticlesByCategoriesAsync(preferredCategories,user.Id);
                         var articleToSend = articlesByCategories.OrderBy(x => Guid.NewGuid()).FirstOrDefault();
 
                         if (articleToSend is not null)
