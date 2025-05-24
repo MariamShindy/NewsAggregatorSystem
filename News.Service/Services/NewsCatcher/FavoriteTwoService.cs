@@ -53,15 +53,11 @@
                         _logger.LogInformation($"Article {articleId} fetched and cached.");
                     }
                     else
-                    {
                         _logger.LogWarning($"Article {articleId} not found in external API.");
-                    }
                 }
 
                 if (article != null)
-                {
                     favoriteArticles.Add(article);
-                }
             }
 
             _logger.LogInformation($"Total favorite articles fetched for user {userId}: {favoriteArticles.Count}");

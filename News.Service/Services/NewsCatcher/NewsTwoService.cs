@@ -3,7 +3,8 @@
 namespace News.Service.Services.NewsCatcher
 {
     public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
-        IUnitOfWork _unitOfWork, IConfiguration _configuration) : INewsTwoService
+        IUnitOfWork _unitOfWork, IConfiguration _configuration ,IRecommendationService _recommendationService
+        , IUserService _userService) : INewsTwoService
     {
         private readonly string _apiKey = _configuration["NewsCatcher:ApiKey"]!;
         private readonly string _baseUrl = _configuration["NewsCatcher:BaseUrl"]!;
@@ -262,10 +263,11 @@ namespace News.Service.Services.NewsCatcher
 
         public async Task<NewsArticle> GetNewsByIdAsync(string id)
         {
-            var newsResponse = await GetAllNewsAsync();
+            //var newsResponse = await GetAllNewsAsync();
+            var user = await _userService.GetCurrentUserAsync();
+            var newsResponse = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
             var article = newsResponse.FirstOrDefault(a => a.Id == id);
-
-            return article;
+            return article!;
         }
 
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
@@ -313,7 +315,9 @@ namespace News.Service.Services.NewsCatcher
         public async Task<IEnumerable<NewsArticleDto>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories)
         {
             var categoryNames = preferredCategories.Select(c => c.Name).ToList();
-            var allArticles = await GetAllNewsAsync();
+            //var allArticles = await GetAllNewsAsync();
+            var user = await _userService.GetCurrentUserAsync();
+            var allArticles = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
             var articles = allArticles.ToList()
                 .FindAll(a => categoryNames.Contains(a.Topic));
             var resArticles = _mapper.Map<IEnumerable<NewsArticleDto>>(articles);
