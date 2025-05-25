@@ -1,8 +1,30 @@
-﻿namespace News.Service.Helpers.EmailSettings
+﻿using MailKit.Security;
+
+namespace News.Service.Helpers.EmailSettings
 {
     public class EmailSettings(IOptions<MailSettings> _options, IConfiguration _configuration, UserManager<ApplicationUser> _userManager) : IMailSettings
     {
         private readonly string frontBaseUrl = _configuration["FrontBaseUrl"]!;
+        //public async Task SendEmail(Email email)
+        //{
+        //    var mail = new MimeMessage
+        //    {
+        //        Sender = MailboxAddress.Parse(_options.Value.Email),
+        //        Subject = email.Subject
+        //    };
+        //    mail.To.Add(MailboxAddress.Parse(email.To));
+        //    mail.From.Add(new MailboxAddress(_options.Value.DisplayName, _options.Value.Email));
+        //    var builder = new BodyBuilder
+        //    {
+        //        HtmlBody = email.Body
+        //    };
+        //    mail.Body = builder.ToMessageBody();
+        //    using var smtp = new SmtpClient();
+        //    await smtp.ConnectAsync(_options.Value.Host, _options.Value.Port, MailKit.Security.SecureSocketOptions.StartTls);
+        //    await smtp.AuthenticateAsync(_options.Value.Email, _options.Value.Password);
+        //    smtp.Send(mail);
+        //    smtp.Disconnect(true);
+        //}
         public async Task SendEmail(Email email)
         {
             var mail = new MimeMessage
@@ -17,11 +39,22 @@
                 HtmlBody = email.Body
             };
             mail.Body = builder.ToMessageBody();
+
             using var smtp = new SmtpClient();
-            await smtp.ConnectAsync(_options.Value.Host, _options.Value.Port, MailKit.Security.SecureSocketOptions.StartTls);
-            await smtp.AuthenticateAsync(_options.Value.Email, _options.Value.Password);
-            smtp.Send(mail);
-            smtp.Disconnect(true);
+            smtp.ServerCertificateValidationCallback = (sender, certificate, chain, sslPolicyErrors) => true;
+            smtp.CheckCertificateRevocation = false;
+
+            try
+            {
+                await smtp.ConnectAsync(_options.Value.Host, _options.Value.Port, SecureSocketOptions.SslOnConnect);
+                await smtp.AuthenticateAsync(_options.Value.Email, _options.Value.Password);
+                await smtp.SendAsync(mail);
+                await smtp.DisconnectAsync(true);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to send email: {ex.Message}", ex);
+            }
         }
         public async Task SendNotificationEmail(NotificationDto notificationDto, string userEmail)
         {
