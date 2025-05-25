@@ -22,14 +22,14 @@ namespace News.API.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-
+        // GET: api/recommendation/get-latest?pageNumber=1&pageSize=30
         [HttpPost("get-latest")]
-        public async Task<IActionResult> GetLatestRecommendations()
+        public async Task<IActionResult> GetLatestRecommendations([FromQuery] int pageNumber = 0, [FromQuery] int? pageSize = null)
         {
             try
             {
                 var user = await _userService.GetCurrentUserAsync();
-                var recommendations = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
+                var recommendations = await _recommendationService.GetLatestRecommendationsAsync(user.Id, pageNumber, pageSize);
                 return Ok(recommendations);
             }
             catch (Exception ex)
