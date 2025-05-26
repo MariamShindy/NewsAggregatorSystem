@@ -3,7 +3,7 @@
     public interface INewsTwoService
     {
         //use the json file
-        Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 1, int? pageSize = null, string language = "en", string country = "us");
+        Task<List<NewsArticle>> GetAllNewsAsync(List<string> categories,int pageNumber = 1, int? pageSize = null, string language = "en", string country = "us");
         //Use tha api
         //Task<List<NewsArticle>> GetAllNewsAsync(string language = "en", string country = "us");
         Task<List<NewsArticle>> GetNewsByCategoryAsync(string category, string language = "en", string country = "us");

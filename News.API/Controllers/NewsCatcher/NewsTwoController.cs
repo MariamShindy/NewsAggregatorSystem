@@ -5,14 +5,14 @@
     public class NewsTwoController(INewsTwoService _newsService) : ApiController
     {
         //GET : api/newsTwo/all?pageNumber=1&pageSize=35
-        [HttpGet("all")]
-        public async Task<IActionResult> GetAllNews([FromQuery] int pageNumber = 0 , [FromQuery] int? pageSize = null, [FromQuery] string language = "en", [FromQuery] string country = "us")
-        {
-            var news = await _newsService.GetAllNewsAsync(pageNumber, pageSize, language, country);
-            return Ok(news);
-        }
+        //[HttpGet("all")]
+        //public async Task<IActionResult> GetAllNews([FromQuery] int pageNumber = 0 , [FromQuery] int? pageSize = null, [FromQuery] string language = "en", [FromQuery] string country = "us")
+        //{
+        //    var news = await _newsService.GetAllNewsAsync(new List<string>(),pageNumber, pageSize, language, country);
+        //    return Ok(news);
+        //}
 
-        //GET : api/newsTwo/category/{category}
+        //GET : api/newsTwo/category/{topic}
         [HttpGet("category/{topic}")]
         public async Task<IActionResult> GetNewsByCategory(string topic, [FromQuery] string language = "en", [FromQuery] string country = "us")
         {

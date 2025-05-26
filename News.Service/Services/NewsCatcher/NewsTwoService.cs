@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json.Linq;
+﻿using GTranslate;
+using Newtonsoft.Json.Linq;
+using System.Diagnostics.Metrics;
 
 namespace News.Service.Services.NewsCatcher
 {
@@ -80,17 +82,17 @@ namespace News.Service.Services.NewsCatcher
 
         #region Reading from API with pagination
         //v3
-        //public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 1, int? pageSize = null, string language = "en", string country = "us")
+        //public async Task<List<NewsArticle>> GetAllNewsAsync(List<string> categories, int pageNumber = 1, int? pageSize = null, string language = "en", string country = "us")
         //{
-        //    int apiPageSize = 100; 
-        //    var currentDate = DateTime.UtcNow.Date; 
+        //    int apiPageSize = 100;
+        //    var currentDate = DateTime.UtcNow.Date;
         //    var to = currentDate.ToString("yyyy-MM-dd");
         //    var from = currentDate.AddDays(-10).ToString("yyyy-MM-dd");
         //    var countries = string.Join(",", new[] { country, "EG", "CA", "FR", "GB", "DE" });
 
         //    Console.WriteLine("From: " + from);
         //    Console.WriteLine("To: " + to);
-        //    var query = string.Join(" OR ", _categories.Select(Uri.EscapeDataString));
+        //    var query = string.Join(" OR ", categories);
 
         //    var requestUrl = $"{_baseUrl}?q={query}&from_={from}&to_={to}&lang={language}&countries={countries}&page_size={apiPageSize}&page={pageNumber}";
 
@@ -108,7 +110,7 @@ namespace News.Service.Services.NewsCatcher
         //            var articlesList = newsResponse.Articles.ToList();
 
         //            foreach (var article in articlesList)
-        //            {  
+        //            {
         //                if (string.IsNullOrEmpty(article.Author))
         //                    article.Author = "Unknown author";
         //                if (string.IsNullOrEmpty(article.Twitter_Account))
@@ -188,7 +190,7 @@ namespace News.Service.Services.NewsCatcher
         #endregion
 
         #region Reading from json file with pagination
-        public async Task<List<NewsArticle>> GetAllNewsAsync(int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
+        public async Task<List<NewsArticle>> GetAllNewsAsync(List<string> categories,int pageNumber = 0, int? pageSize = null, string language = "en", string country = "us")
         {
             try
             {
@@ -215,9 +217,10 @@ namespace News.Service.Services.NewsCatcher
                         .Skip((pageNumber - 1) * pageSize.Value)
                         .Take(pageSize.Value)
                         .ToList();
-
+                    var articlesWithCategory = paginatedArticles
+                         .FindAll(a => categories.Contains(a.Topic));
                     _logger.LogInformation($"Number of articles fetched from json ==> {paginatedArticles.Count}");
-                    return paginatedArticles;
+                    return articlesWithCategory;
                 }
             }
             catch (Exception ex)
@@ -250,13 +253,63 @@ namespace News.Service.Services.NewsCatcher
                 }
             }
         }
+        private async Task<List<NewsArticle>> GetNewsByOneCategory(string category)
+        {
+            string language = "en";
+            int apiPageSize = 250;
+            int apiPageNum = 1;
+
+            var currentDate = DateTime.UtcNow.Date;
+            var to = currentDate.ToString("yyyy-MM-dd");
+            var from = currentDate.AddDays(-10).ToString("yyyy-MM-dd");
+            var countries = string.Join(",", new[] { "US", "EG", "CA", "FR", "GB", "DE" });
+
+            Console.WriteLine("From: " + from);
+            Console.WriteLine("To: " + to);
+            var query = category;
+
+            var requestUrl = $"{_baseUrl}?q={query}&from_={from}&to_={to}&lang={language}&countries={countries}&page_size={apiPageSize}&page={apiPageNum}";
+
+            _httpClient.DefaultRequestHeaders.Clear();
+            _httpClient.DefaultRequestHeaders.Add("x-api-token", _apiKey);
+            _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
+
+            try
+            {
+                var response = await _httpClient.GetStringAsync(requestUrl);
+                var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(response);
+
+                if (newsResponse?.Articles != null)
+                {
+                    var articlesList = newsResponse.Articles.ToList();
+
+                    foreach (var article in articlesList)
+                    {
+                        if (string.IsNullOrEmpty(article.Author))
+                            article.Author = "Unknown author";
+                        if (string.IsNullOrEmpty(article.Twitter_Account))
+                            article.Twitter_Account = "Unknown account";
+                        if (article.Authors.Count == 0)
+                            article.Authors.Add("Unknown authors");
+                    }
+                    _logger.LogInformation($"Returning articles count ==> {articlesList.Count}");
+                    return articlesList;
+                }
+            }
+            catch (HttpRequestException e)
+            {
+                _logger.LogError($"Request failed: {e.Message}");
+            }
+
+            return new List<NewsArticle>();
+        }
         public async Task<List<NewsArticle>> GetNewsByCategoryAsync(string category, string language = "en", string country = "us")
         {
-            var newsResponse = await GetAllNewsAsync();
-
+            //var newsResponse = await GetAllNewsAsync();
+            var newsResponse = await GetNewsByOneCategory(category);
             var filteredNews = newsResponse.Where(article =>
             article.Topic != null &&
-            article.Topic.Equals(category, StringComparison.OrdinalIgnoreCase))
+            article.Topic.Contains(category, StringComparison.OrdinalIgnoreCase))
             .ToList();
             return filteredNews ?? [];
         }
@@ -315,7 +368,7 @@ namespace News.Service.Services.NewsCatcher
         public async Task<IEnumerable<NewsArticleDto>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories)
         {
             var categoryNames = preferredCategories.Select(c => c.Name).ToList();
-            var allArticles = await GetAllNewsAsync();
+            var allArticles = await GetAllNewsAsync(categoryNames);
             var articles = allArticles.ToList()
                 .FindAll(a => categoryNames.Contains(a.Topic));
             var resArticles = _mapper.Map<IEnumerable<NewsArticleDto>>(articles);
