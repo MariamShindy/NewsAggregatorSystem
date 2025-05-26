@@ -41,7 +41,7 @@ namespace News.Service.Services
             }
         }
 
-        public async Task<List<NewsArticle>> GetLatestRecommendationsAsync(string userId)
+        public async Task<List<NewsArticle>> GetLatestRecommendationsAsync(string userId, int pageNumber = 0, int? pageSize = null)
         {
             var response = await _httpClient.GetAsync($"{_cachedRecommendationsUrl}?user_id={userId}");
 
@@ -59,7 +59,16 @@ namespace News.Service.Services
                     PropertyNameCaseInsensitive = true
                 });
 
-                return recommendations?.Recommendations ?? new List<NewsArticle>();
+                var allRecommendations = recommendations?.Recommendations ?? new List<NewsArticle>();
+
+                if (!pageSize.HasValue || pageNumber <= 0)
+                    return allRecommendations;
+
+                return allRecommendations
+                    .Skip((pageNumber - 1) * pageSize.Value)
+                    .Take(pageSize.Value)
+                    .ToList();
+
             }
             catch (Exception ex)
             {
