@@ -1,4 +1,5 @@
 ﻿using GTranslate;
+using News.Core.Entities.NewsCategory;
 using Newtonsoft.Json.Linq;
 using System.Diagnostics.Metrics;
 
@@ -314,13 +315,91 @@ namespace News.Service.Services.NewsCatcher
             return filteredNews ?? [];
         }
 
+        //public async Task<NewsArticle> GetNewsByIdAsync(string id)
+        //{
+        //    //var newsResponse = await GetAllNewsAsync();
+        //    var user = await _userService.GetCurrentUserAsync();
+        //    var newsResponse = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
+        //    var article = newsResponse.FirstOrDefault(a => a.Id == id);
+        //    return article!;
+        //}
         public async Task<NewsArticle> GetNewsByIdAsync(string id)
         {
-            //var newsResponse = await GetAllNewsAsync();
             var user = await _userService.GetCurrentUserAsync();
             var newsResponse = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
+
             var article = newsResponse.FirstOrDefault(a => a.Id == id);
-            return article!;
+
+            if (article == null)
+            {
+                // Fetch directly from the API if not found in recommendations
+                article = await GetNewsFromApiAsync(id);
+
+                if (article == null)
+                {
+                    throw new Exception($"Article with ID '{id}' not found.");
+                }
+            }
+
+            return article;
+        }
+
+        private async Task<NewsArticle?> GetNewsFromApiAsync(string id)
+        {
+            const string language = "en";
+            const int pageSize = 250;
+            const int pageNumber = 1;
+            string[] countries = { "US", "EG", "CA", "FR", "GB", "DE" };
+
+            var toDate = DateTime.UtcNow.Date;
+            var fromDate = toDate.AddDays(-10);
+
+            string requestUrl = $"{_baseUrl}?q={id}" +
+                                $"&from_={fromDate:yyyy-MM-dd}" +
+                                $"&to_={toDate:yyyy-MM-dd}" +
+                                $"&lang={language}" +
+                                $"&countries={string.Join(",", countries)}" +
+                                $"&page_size={pageSize}&page={pageNumber}";
+
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+            request.Headers.Add("x-api-token", _apiKey);
+            request.Headers.Add("Accept", "application/json");
+
+            try
+            {
+                var response = await _httpClient.SendAsync(request);
+                response.EnsureSuccessStatusCode();
+
+                var content = await response.Content.ReadAsStringAsync();
+                var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(content);
+
+                if (newsResponse?.Articles == null || !newsResponse.Articles.Any())
+                {
+                    _logger.LogWarning("No articles found for ID: {Id}", id);
+                    return null;
+                }
+
+                foreach (var article in newsResponse.Articles)
+                {
+                    article.Author ??= "Unknown author";
+                    article.Twitter_Account ??= "Unknown account";
+                    if (article.Authors == null || article.Authors.Count == 0)
+                        article.Authors = new List<string> { "Unknown authors" };
+                }
+
+                var matchedArticle = newsResponse.Articles.FirstOrDefault(a => a.Id == id);
+                if (matchedArticle == null)
+                {
+                    _logger.LogWarning("No exact match found for ID: {Id} in API results.", id);
+                }
+
+                return matchedArticle;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error fetching article from API for ID: {Id}", id);
+                return null;
+            }
         }
 
         public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
