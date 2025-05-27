@@ -24,7 +24,7 @@
             using (var scope = _serviceProvider.CreateScope())
             {
                 var notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
-                await notificationService.SendNotificationsAsync();
+                //await notificationService.SendNotificationsAsync();
                 if (scope.ServiceProvider is IAsyncDisposable asyncDisposable)
                 {
                     await asyncDisposable.DisposeAsync();

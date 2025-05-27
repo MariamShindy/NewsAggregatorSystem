@@ -11,16 +11,6 @@ namespace News.Service.Services.NewsCatcher
     {
         private readonly string _apiKey = _configuration["NewsCatcher:ApiKey"]!;
         private readonly string _baseUrl = _configuration["NewsCatcher:BaseUrl"]!;
-        //private readonly List<string> _categories = new List<string>()
-        //{
-        //    "gaming", "news", "sport", "tech",
-        //    "world","finance", "politics","business",
-        //    "economics", "entertainment", "beauty",
-        //    "travel","music","food","science","energy",
-        //    "stockmarketinformationandanalysis","newsandcareerportal",
-        //    "newsandmedia"
-        //};
-
         private readonly List<string> _categories = new List<string>()
         {
             "Business","Economics","Entertainment","Finance","Health","Politics","Science","Sports","Tech",
@@ -254,6 +244,21 @@ namespace News.Service.Services.NewsCatcher
                 }
             }
         }
+        private async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
+        {
+            _logger.LogInformation($"NewsService --> AddCategoryAsync called");
+
+            if (string.IsNullOrWhiteSpace(categoryDto.Name))
+                throw new ArgumentException("Category name cannot be null or empty.");
+
+            var category = new Category
+            {
+                Name = categoryDto.Name
+            };
+
+            await _unitOfWork.Repository<Category>().AddAsync(category);
+            return await _unitOfWork.CompleteAsync() > 0;
+        }
         private async Task<List<NewsArticle>> GetNewsByOneCategory(string category)
         {
             string language = "en";
@@ -327,44 +332,23 @@ namespace News.Service.Services.NewsCatcher
         {
             var user = await _userService.GetCurrentUserAsync();
             var newsResponse = await _recommendationService.GetLatestRecommendationsAsync(user.Id);
-
             var article = newsResponse.FirstOrDefault(a => a.Id == id);
-
             if (article == null)
             {
-                // Fetch directly from the API if not found in recommendations
-                article = await GetNewsFromApiAsync(id);
-
+                article = await GetNewsFromApiByIdAsync(id);
                 if (article == null)
                 {
                     throw new Exception($"Article with ID '{id}' not found.");
                 }
             }
-
             return article;
         }
-
-        private async Task<NewsArticle?> GetNewsFromApiAsync(string id)
+        private async Task<NewsArticle?> GetNewsFromApiByIdAsync(string id)
         {
-            const string language = "en";
-            const int pageSize = 250;
-            const int pageNumber = 1;
-            string[] countries = { "US", "EG", "CA", "FR", "GB", "DE" };
-
-            var toDate = DateTime.UtcNow.Date;
-            var fromDate = toDate.AddDays(-10);
-
-            string requestUrl = $"{_baseUrl}?q={id}" +
-                                $"&from_={fromDate:yyyy-MM-dd}" +
-                                $"&to_={toDate:yyyy-MM-dd}" +
-                                $"&lang={language}" +
-                                $"&countries={string.Join(",", countries)}" +
-                                $"&page_size={pageSize}&page={pageNumber}";
-
+            string requestUrl = $"{_baseUrl}_by_link?ids={id}";
             var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
             request.Headers.Add("x-api-token", _apiKey);
             request.Headers.Add("Accept", "application/json");
-
             try
             {
                 var response = await _httpClient.SendAsync(request);
@@ -375,25 +359,17 @@ namespace News.Service.Services.NewsCatcher
 
                 if (newsResponse?.Articles == null || !newsResponse.Articles.Any())
                 {
-                    _logger.LogWarning("No articles found for ID: {Id}", id);
+                    _logger.LogWarning("No article found for ID: {Id}", id);
                     return null;
                 }
 
-                foreach (var article in newsResponse.Articles)
-                {
-                    article.Author ??= "Unknown author";
-                    article.Twitter_Account ??= "Unknown account";
-                    if (article.Authors == null || article.Authors.Count == 0)
-                        article.Authors = new List<string> { "Unknown authors" };
-                }
+                var article = newsResponse.Articles.First();
+                article.Author ??= "Unknown author";
+                article.Twitter_Account ??= "Unknown account";
+                if (article.Authors == null || article.Authors.Count == 0)
+                    article.Authors = new List<string> { "Unknown authors" };
 
-                var matchedArticle = newsResponse.Articles.FirstOrDefault(a => a.Id == id);
-                if (matchedArticle == null)
-                {
-                    _logger.LogWarning("No exact match found for ID: {Id} in API results.", id);
-                }
-
-                return matchedArticle;
+                return article;
             }
             catch (Exception ex)
             {
@@ -402,21 +378,67 @@ namespace News.Service.Services.NewsCatcher
             }
         }
 
-        public async Task<bool> AddCategoryAsync(AddOrUpdateCategoryDto categoryDto)
-        {
-            _logger.LogInformation($"NewsService --> AddCategoryAsync called");
+        //private async Task<NewsArticle?> GetNewsFromApiAsync(string id)
+        //{
+        //    const string language = "en";
+        //    const int pageSize = 250;
+        //    const int pageNumber = 1;
+        //    string[] countries = { "US", "EG", "CA", "FR", "GB", "DE" };
 
-            if (string.IsNullOrWhiteSpace(categoryDto.Name))
-                throw new ArgumentException("Category name cannot be null or empty.");
+        //    var toDate = DateTime.UtcNow.Date;
+        //    var fromDate = toDate.AddDays(-10);
 
-            var category = new Category
-            {
-                Name = categoryDto.Name
-            };
+        //    string requestUrl = $"{_baseUrl}?q={id}" +
+        //                        $"&from_={fromDate:yyyy-MM-dd}" +
+        //                        $"&to_={toDate:yyyy-MM-dd}" +
+        //                        $"&lang={language}" +
+        //                        $"&countries={string.Join(",", countries)}" +
+        //                        $"&page_size={pageSize}&page={pageNumber}";
 
-            await _unitOfWork.Repository<Category>().AddAsync(category);
-            return await _unitOfWork.CompleteAsync() > 0;
-        }
+        //    var request = new HttpRequestMessage(HttpMethod.Get, requestUrl);
+        //    request.Headers.Add("x-api-token", _apiKey);
+        //    request.Headers.Add("Accept", "application/json");
+
+        //    try
+        //    {
+        //        var response = await _httpClient.SendAsync(request);
+        //        response.EnsureSuccessStatusCode();
+
+        //        var content = await response.Content.ReadAsStringAsync();
+        //        var newsResponse = JsonConvert.DeserializeObject<NewsApiResponse>(content);
+
+        //        if (newsResponse?.Articles == null || !newsResponse.Articles.Any())
+        //        {
+        //            _logger.LogWarning("No articles found for ID: {Id}", id);
+        //            return null;
+        //        }
+
+        //        foreach (var article in newsResponse.Articles)
+        //        {
+        //            article.Author ??= "Unknown author";
+        //            article.Twitter_Account ??= "Unknown account";
+        //            if (article.Authors == null || article.Authors.Count == 0)
+        //                article.Authors = new List<string> { "Unknown authors" };
+        //        }
+
+        //        var matchedArticle = newsResponse.Articles.FirstOrDefault(a => a.Id == id);
+        //        if (matchedArticle == null)
+        //        {
+        //            _logger.LogWarning("No exact match found for ID: {Id} in API results.", id);
+        //        }
+
+        //        return matchedArticle;
+        //    }
+
+        //    catch (Exception ex)
+        //    {
+        //        _logger.LogError(ex, "Error fetching article from API for ID: {Id}", id);
+        //        return null;
+        //    }
+        //}
+
+       
+        #region Unused methods
         public async Task<bool> DeleteCategoryAsync(int id)
         {
             _logger.LogInformation($"NewsService --> DeleteCategoryAsync called with id : {id}");
@@ -443,7 +465,8 @@ namespace News.Service.Services.NewsCatcher
 
             await _unitOfWork.Repository<Category>().UpdateAsync(category);
             return await _unitOfWork.CompleteAsync() > 0;
-        }
+        } 
+        #endregion
         public async Task<IEnumerable<NewsArticleDto>> GetArticlesByCategoriesAsync(IEnumerable<CategoryDto> preferredCategories)
         {
             var categoryNames = preferredCategories.Select(c => c.Name).ToList();
@@ -470,7 +493,6 @@ namespace News.Service.Services.NewsCatcher
                         document.Close();
                     }
                 }
-
                 return memoryStream.ToArray();
             }
         }
