@@ -33,17 +33,9 @@ namespace News.Service.Services
             }
 
             if (availableVoices.Any())
-            {
                 synth.SelectVoice(availableVoices.First().VoiceInfo.Name);
-            }
-            //else if (language == "ar-SA")
-            //{
-            //    synth.SelectVoiceByHints(VoiceGender.Female, VoiceAge.Adult, 0, new CultureInfo("ar-SA"));
-            //}
             else
-            {
                 throw new InvalidOperationException($"No installed voices found for language: {language}");
-            }
         }
     
     }

@@ -27,11 +27,11 @@
                             {
                                 ApplicationUserId = user.Id,
                                 ArticleTitle = articleToSend.Title ?? "No title available",
-                                ArticleUrl = articleToSend.Clean_Url ?? "No url available",
+                                ArticleUrl = articleToSend.Domain_Url ?? "No url available",
                                 Category = articleToSend.Topic ?? "No topic available",
                                 CreatedAt = DateTime.UtcNow,
-                                ArticleDescription = articleToSend.Excerpt ?? "No excerpt available",
-                                ArticleId = articleToSend._Id ?? "No Id available"
+                                ArticleDescription = articleToSend.Description ?? "No excerpt available",
+                                ArticleId = articleToSend.Id ?? "No Id available"
                             };
 
                             var notification = _mapper.Map<Notification>(notificationDto);

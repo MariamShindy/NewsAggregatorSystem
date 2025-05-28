@@ -1,9 +1,11 @@
 ﻿namespace News.Service.Services
 {
-    public class SearchService(HttpClient _httpClient , IConfiguration configuration) : ISearchService
+    public class SearchService(HttpClient _httpClient , IConfiguration _configuration) : ISearchService
     {
-        private readonly string _flaskApiUrl = "http://127.0.0.1:5000/search";
-		public async Task<SearchResponse> SearchArticlesAsync(string query)
+        //private readonly string _flaskApiUrl = "http://127.0.0.1:5000/search";
+        private readonly string _flaskApiUrl = _configuration["FlaskApi:Search"]!;
+
+        public async Task<SearchResponse> SearchArticlesAsync(string query)
         {
             var payload = new { query };
             var jsonContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");

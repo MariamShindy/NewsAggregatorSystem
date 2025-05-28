@@ -13,7 +13,6 @@ global using News.Infrastructure.Data;
 global using System.Text;
 global using Microsoft.EntityFrameworkCore;
 global using News.Service.Services.NewsCatcher;
-global using GTranslate.Translators;
 global using News.Core.Entities.EmailSettings;
 global using News.Core.Entities.Identity;
 global using News.Core.Contracts.Interfaces;

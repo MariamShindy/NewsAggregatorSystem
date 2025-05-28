@@ -42,32 +42,6 @@
             var token = GenerateJwtToken(user);
             return (true, "User created successfully!" , token);
         }
-        //public async Task<(bool isSuccess, string token, string message)> LoginUserAsync(LoginModel model)
-        //{
-        //    _logger.LogInformation("AccountService --> LoginUser called");
-
-        //    var user = await _userManager.FindByNameAsync(model.UserName);
-
-        //    if (user == null)
-        //    {
-        //        _logger.LogWarning("AccountService --> LoginUser --> Account does not exist");
-        //        return (false, null, "Account does not exist.")!;
-        //    }
-        //    if (await _userManager.IsLockedOutAsync(user))
-        //    {
-        //        _logger.LogWarning("AccountService --> LoginUser --> Account locked");
-        //        return (false, null, "Account locked.")!;
-        //    }
-
-        //    if (await _userManager.CheckPasswordAsync(user, model.Password))
-        //    {
-        //        var token = GenerateJwtToken(user);
-        //        _logger.LogInformation("AccountService --> LoginUser succeeded");
-        //        return (true, token, "Login successful");
-        //    }
-        //    _logger.LogWarning("AccountService --> LoginUser --> Invalid credentials");
-        //    return (false, null, "Invalid credentials")!;
-        //}
         public async Task<(bool isSuccess, string token, string message, bool isDeletionCancelled)> LoginUserAsync(LoginModel model)
         {
             _logger.LogInformation("AccountService --> LoginUser called");

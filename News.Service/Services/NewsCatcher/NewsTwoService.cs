@@ -1,9 +1,4 @@
-﻿using GTranslate;
-using News.Core.Entities.NewsCategory;
-using Newtonsoft.Json.Linq;
-using System.Diagnostics.Metrics;
-
-namespace News.Service.Services.NewsCatcher
+﻿namespace News.Service.Services.NewsCatcher
 {
     public class NewsTwoService(HttpClient _httpClient, IMapper _mapper, ILogger<NewsTwoService> _logger,
         IUnitOfWork _unitOfWork, IConfiguration _configuration ,IRecommendationService _recommendationService

@@ -4,7 +4,8 @@
 	{
         public async Task<List<NewsArticle>> GetNewsBySentimentAsync(string sentiment, string userId)
         {
-			var url = $"http://127.0.0.1:7000/articles?sentiment={sentiment}&user_id={userId}";
+        string _flaskApiUrl = _configuration["FlaskApi:Sentiment"]!;
+        var url = $"{_flaskApiUrl}?sentiment={sentiment}&user_id={userId}";
 			var response = await _httpClient.GetAsync(url);
 
             if (!response.IsSuccessStatusCode)
